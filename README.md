@@ -1,10 +1,10 @@
-# sPiccioli
+# sPiccioli!
 Un'app per dividere le spese senza impazzire. Scegli tra fondo comune o calcolo dei debiti 1-a-1. Pareggia i conti e metti via gli spiccioli. Costruita in Vanilla JS e Supabase.
 
-# 🫙 sPiccioli
+# 🫙 sPiccioli!
 *Pari & Patta, senza litigare (o quasi).*
 
-**sPiccioli** è una Progressive Web App (PWA) progettata per rivoluzionare la gestione delle spese condivise tra partner, coinquilini e gruppi di amici. Lontana dai classici fogli di calcolo freddi e ansiogeni, sPiccioli unisce un'infrastruttura di calcolo solida a un'interfaccia reattiva, ironica e... apertamente giudicante.
+**sPiccioli!** è una Progressive Web App (PWA) progettata per rivoluzionare la gestione delle spese condivise tra partner, coinquilini e gruppi di amici. Lontana dai classici fogli di calcolo freddi e ansiogeni, sPiccioli unisce un'infrastruttura di calcolo solida a un'interfaccia reattiva, ironica e... apertamente giudicante.
 
 ## 🚀 Il Concetto: Due Anime, Una Sola App
 A differenza delle classiche app sul mercato, sPiccioli non ti obbliga a scegliere un solo stile di convivenza economica. Offre due motori contabili distinti:
