@@ -1,0 +1,107 @@
+/* ════════════════════════════════════════════════════════
+   sPiccioli! — cassa.css
+   Schermata DENTRO una cassa: header, saldi, nuova spesa, movimenti.
+   Usa le variabili --br-* definite in auth.css.
+   ════════════════════════════════════════════════════════ */
+
+/* ── HEADER CASSA ── */
+.cassa-header{
+  display:flex;align-items:center;gap:12px;
+  padding:16px 18px;padding-top:max(16px,env(safe-area-inset-top));
+  background:var(--br-bg2);border-bottom:1px solid var(--br-line);
+  position:sticky;top:0;z-index:50;
+}
+.btn-back{background:none;border:none;color:var(--br-cyan);font-size:1.6rem;font-weight:800;cursor:pointer;line-height:1;padding:0 4px;flex-shrink:0;}
+.cassa-htitoli{flex:1;min-width:0;display:flex;align-items:center;gap:8px;}
+.cassa-htitoli .ch-emoji{font-size:1.5rem;line-height:1;}
+.cassa-htitoli h1{font-size:1.15rem;font-weight:800;color:var(--br-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cassa-hazioni{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.btn-invita{background:rgba(255,255,255,.07);border:1px solid var(--br-line);border-radius:10px;color:var(--br-dim);font-family:'Baloo 2',cursive;font-size:.72rem;font-weight:700;padding:5px 10px;cursor:pointer;}
+.cassa-sync-wrap{display:flex;align-items:center;gap:5px;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--br-cyan);flex-shrink:0;}
+.sync-dot:not(.ok):not(.err){animation:syncPulse 1s ease-in-out infinite;}
+.sync-dot.ok{background:#6FCF5A;} .sync-dot.err{background:#E05A4A;}
+@keyframes syncPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+.cassa-sync-txt{font-size:.66rem;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;white-space:nowrap;}
+
+/* ── CORPO ── */
+.cassa-body{flex:1;width:100%;max-width:620px;margin:0 auto;padding:18px;display:flex;flex-direction:column;gap:18px;}
+.card{background:var(--br-card);border:1px solid var(--br-line);border-radius:18px;padding:16px;}
+.card-titolo{font-family:'Nunito',sans-serif;font-weight:700;color:var(--br-dim);font-size:.74rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+
+/* ── SALDI ── */
+#saldi-list{display:flex;flex-direction:column;gap:8px;}
+.saldo-membro{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--br-line);}
+.saldo-membro:last-child{border-bottom:none;}
+.sm-nome{font-size:1rem;font-weight:700;color:var(--br-text);}
+.sm-val{font-size:1.05rem;font-weight:800;display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;}
+.sm-val small{font-family:'Nunito',sans-serif;font-weight:600;font-size:.66rem;color:var(--br-dim);text-transform:uppercase;letter-spacing:.3px;}
+.sm-val.credito{color:#6FCF5A;} .sm-val.debito{color:#FF8A80;} .sm-val.pari{color:var(--br-dim);}
+.saldi-pari{text-align:center;color:#6FCF5A;font-weight:700;padding:14px;}
+
+/* ── BOTTONE NUOVA SPESA ── */
+.btn-nuova-spesa{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:54px;
+  border:none;border-radius:16px;background:linear-gradient(135deg,var(--br-cyan),#00b8d4);
+  color:#06232a;font-family:'Baloo 2',cursive;font-size:1.05rem;font-weight:800;cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,229,255,.22);transition:transform .12s;
+}
+.btn-nuova-spesa:active{transform:scale(.98);}
+
+/* ── MOVIMENTI ── */
+#movimenti-list{display:flex;flex-direction:column;gap:8px;}
+.mv-item{display:flex;align-items:center;gap:12px;background:var(--br-card);border:1px solid var(--br-line);border-radius:14px;padding:12px 14px;}
+.mv-item.mv-temp{opacity:.55;}
+.mv-main{flex:1;min-width:0;}
+.mv-desc{font-size:1rem;font-weight:700;color:var(--br-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mv-meta{font-size:.74rem;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;margin-top:2px;}
+.mv-imp{font-size:1.05rem;font-weight:800;color:var(--br-yellow);flex-shrink:0;}
+.mv-del{background:none;border:none;color:var(--br-dim);font-size:1.5rem;line-height:1;cursor:pointer;padding:0 2px;flex-shrink:0;}
+.mv-del:hover{color:#FF8A80;}
+.mv-empty{text-align:center;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;padding:26px 10px;line-height:1.6;}
+
+/* ── SKELETON ── */
+.sk{height:46px;border-radius:12px;background:linear-gradient(90deg,var(--br-card),#383838,var(--br-card));background-size:200% 100%;animation:skMove 1.2s infinite;margin-bottom:8px;}
+@keyframes skMove{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* ── nota divisione nel form ── */
+.mv-split-nota{font-size:.74rem;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;margin-top:4px;text-align:center;}
+
+/* ── S4: debiti diretti + settle ── */
+.riga-debito{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--br-line);}
+.riga-debito:last-child{border-bottom:none;}
+.rd-txt{flex:1;font-size:.92rem;color:var(--br-text);font-family:'Nunito',sans-serif;font-weight:600;line-height:1.4;}
+.rd-txt b{font-weight:800;}
+.btn-salda{flex-shrink:0;background:linear-gradient(135deg,var(--br-cyan),#00b8d4);color:#06232a;border:none;border-radius:10px;font-family:'Baloo 2',cursive;font-size:.82rem;font-weight:800;padding:7px 14px;cursor:pointer;}
+.btn-salda:active{transform:scale(.97);}
+.mv-settle .mv-desc{color:#6FCF5A;}
+.settle-frase{text-align:center;font-family:'Nunito',sans-serif;font-weight:700;color:var(--br-text);font-size:1.05rem;margin-bottom:16px;}
+.settle-frase b{color:var(--br-cyan);}
+
+/* ── S5a: metodi di divisione ── */
+.split-seg{display:flex;gap:6px;margin-bottom:10px;}
+.split-btn{flex:1;height:38px;border-radius:10px;border:1.5px solid var(--br-line);background:var(--br-card);color:var(--br-dim);font-family:'Baloo 2',cursive;font-size:.82rem;font-weight:700;cursor:pointer;padding:0;}
+.split-btn.attivo{border-color:var(--br-cyan);color:var(--br-cyan);background:rgba(0,229,255,.08);}
+.split-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.split-nome{flex:1;font-family:'Nunito',sans-serif;font-weight:700;font-size:.9rem;color:var(--br-text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.split-inp{width:90px;height:42px;border-radius:10px;border:1.5px solid var(--br-line);background:var(--br-bg);color:#fff;font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;text-align:right;padding:0 10px;outline:none;-webkit-appearance:none;}
+.split-inp:focus{border-color:var(--br-cyan);}
+.split-unit{width:42px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.82rem;color:var(--br-dim);}
+.split-info{font-family:'Nunito',sans-serif;font-weight:700;font-size:.8rem;color:var(--br-dim);text-align:center;margin-top:6px;min-height:18px;}
+.split-info.ok{color:#6FCF5A;} .split-info.warn{color:#FFB74D;}
+.mv-badge{display:inline-block;font-family:'Nunito',sans-serif;font-weight:800;font-size:.6rem;text-transform:uppercase;letter-spacing:.3px;color:var(--br-dim);border:1px solid var(--br-line);border-radius:8px;padding:1px 6px;margin-left:8px;vertical-align:middle;}
+
+/* ── S5a fix: dettaglio movimento ── */
+.mv-item{cursor:pointer;}
+.det-top{text-align:center;margin-bottom:18px;}
+.det-titolo{font-size:1.25rem;font-weight:800;color:var(--br-text);line-height:1.2;}
+.det-imp{font-size:1.6rem;font-weight:800;color:var(--br-yellow);margin-top:6px;}
+.det-data{font-size:.78rem;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;margin-top:2px;}
+.det-sez{margin-bottom:14px;}
+.det-sez-h{font-family:'Nunito',sans-serif;font-weight:700;color:var(--br-dim);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.det-riga{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--br-line);font-family:'Nunito',sans-serif;font-weight:600;font-size:.95rem;color:var(--br-text);}
+.det-riga:last-child{border-bottom:none;}
+.det-riga small{color:var(--br-dim);font-weight:600;font-size:.8rem;}
+
+/* fix specificità: gli input dello split non ereditano width:100% da .m-row input */
+.m-row .split-inp{width:90px;flex:none;}
