@@ -1,11 +1,8 @@
 // ════════════════════════════════════════════════════════
 //  sPiccioli! — api.js
-//  Layer dati della cassa attiva: caricamento, realtime,
-//  coda offline, mappa azioni → query Supabase.
-//  La UI (cassa.js) chiama post({action:...}) e renderCassa().
+//  Layer dati della cassa: caricamento, realtime, coda, azioni.
 // ════════════════════════════════════════════════════════
 
-// ── INDICATORE DI SYNC (header cassa) ──
 function dotC(cls, txt){
   var d = document.getElementById("cassa-dot");
   var t = document.getElementById("cassa-sync");
@@ -13,7 +10,6 @@ function dotC(cls, txt){
   if(t) t.textContent = txt || "";
 }
 
-// ── APERTURA CASSA ──
 async function apriCassa(id){
   cassaCorrente = CASSE.find(function(c){ return c.id === id; });
   if(!cassaCorrente) return;
@@ -21,22 +17,22 @@ async function apriCassa(id){
   intestaCassa();
   skeletonsCassa();
   await caricaCassa();
+  switchCassaTab("conti");
   initRealtimeCassa();
   if(getCoda().length) flushCoda();
 }
 
-// ── CARICAMENTO DATI DELLA CASSA ──
 async function caricaCassa(){
   dotC("", "Carico…");
   try{
-    // Membri attivi
+    // TUTTI i membri: gli attivi servono ai calcoli, i rimossi a mostrare i nomi nello storico
     var rm = await sb.from("membri").select("*, profili(nome)")
-      .eq("cassa_id", cassaCorrente.id).eq("attivo", true)
+      .eq("cassa_id", cassaCorrente.id)
       .order("created_at", { ascending: true });
     if(rm.error) return gestisciErroreCassa(rm.error);
-    membriCorrente = rm.data || [];
+    membriTutti    = rm.data || [];
+    membriCorrente = membriTutti.filter(function(m){ return m.attivo; });
 
-    // Movimenti con paganti e quote annidati (una sola query)
     var rmov = await sb.from("movimenti")
       .select("*, movimento_paganti(*), movimento_quote(*)")
       .eq("cassa_id", cassaCorrente.id)
@@ -110,7 +106,6 @@ async function runAction(p){
   return "ok";
 }
 
-// ── POST (con fallback coda offline) ──
 async function post(payload){
   try{
     return await runAction(payload);
@@ -130,16 +125,9 @@ async function post(payload){
 
 // ── CODA OFFLINE ──
 var CODA_KEY = "spiccioli_coda";
-function getCoda(){
-  try{ return JSON.parse(localStorage.getItem(CODA_KEY) || "[]"); }
-  catch(e){ return []; }
-}
-function setCoda(arr){
-  try{ localStorage.setItem(CODA_KEY, JSON.stringify(arr)); }catch(e){}
-}
-function accodaOperazione(payload){
-  var coda = getCoda(); coda.push(payload); setCoda(coda); aggiornaBadgeCoda();
-}
+function getCoda(){ try{ return JSON.parse(localStorage.getItem(CODA_KEY) || "[]"); }catch(e){ return []; } }
+function setCoda(arr){ try{ localStorage.setItem(CODA_KEY, JSON.stringify(arr)); }catch(e){} }
+function accodaOperazione(payload){ var coda = getCoda(); coda.push(payload); setCoda(coda); aggiornaBadgeCoda(); }
 function aggiornaBadgeCoda(){
   var n = getCoda().length;
   var t = document.getElementById("cassa-sync");
@@ -150,13 +138,11 @@ async function flushCoda(){
   if(!coda.length) return;
   dotC("", "Invio in attesa…");
   while(coda.length){
-    try{
-      await runAction(coda[0]);
-      coda.shift(); setCoda(coda);
-    }catch(e){
-      if(errDiRete(e)){ aggiornaBadgeCoda(); return; }   // ancora offline
+    try{ await runAction(coda[0]); coda.shift(); setCoda(coda); }
+    catch(e){
+      if(errDiRete(e)){ aggiornaBadgeCoda(); return; }
       console.error("Operazione scartata:", coda[0].action, e);
-      coda.shift(); setCoda(coda);                        // errore "vero": scarta
+      coda.shift(); setCoda(coda);
     }
   }
   setCoda([]);

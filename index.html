@@ -26,50 +26,38 @@ if("serviceWorker" in navigator){
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════
-     SCHERMATA 1 — AUTENTICAZIONE
-══════════════════════════════════════════════════ -->
+<!-- SCHERMATA 1 — AUTENTICAZIONE -->
 <div id="auth-screen" class="screen attiva">
   <img src="./spiccioli.svg" class="auth-logo" alt="sPiccioli!">
   <div class="auth-title">sPiccioli!</div>
   <div class="auth-sub" id="auth-titolo">Bentornato!</div>
-
   <div class="auth-form">
     <div id="auth-nome-wrap" style="display:none;">
       <input class="br-inp" type="text" id="auth-nome" placeholder="Il tuo nome" autocomplete="name">
     </div>
     <input class="br-inp" type="email" id="auth-email" placeholder="Email" autocomplete="email" inputmode="email">
     <div class="inp-wrap">
-      <input class="br-inp" type="password" id="auth-pw" placeholder="Password" autocomplete="current-password"
-             onkeydown="if(event.key==='Enter')doAuth()">
+      <input class="br-inp" type="password" id="auth-pw" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()">
       <button class="pw-eye" onclick="authPwToggle()" tabindex="-1">&#x1F441;</button>
     </div>
     <button class="br-btn" id="auth-btn" onclick="doAuth()">Entra</button>
     <div class="auth-error" id="auth-error"></div>
     <div class="auth-loading" id="auth-loading"></div>
-    <div class="auth-toggle" id="auth-toggle-txt">
-      Non hai un account? <a onclick="toggleModoAuth()">Registrati</a>
-    </div>
+    <div class="auth-toggle" id="auth-toggle-txt">Non hai un account? <a onclick="toggleModoAuth()">Registrati</a></div>
+    <div class="auth-info-link"><a onclick="apriInfo()">Cos'è sPiccioli! ✨</a></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     SCHERMATA 2 — LE TUE CASSE
-══════════════════════════════════════════════════ -->
+<!-- SCHERMATA 2 — LE TUE CASSE -->
 <div id="casse-screen" class="screen">
   <div class="casse-top">
     <img src="./spiccioli.svg" alt="sPiccioli!">
-    <div class="ct-titoli">
-      <h1>Le tue casse</h1>
-      <p>Ciao, <span id="casse-nome-utente">…</span></p>
-    </div>
+    <div class="ct-titoli"><h1>Le tue casse</h1><p>Ciao, <span id="casse-nome-utente">…</span></p></div>
     <button class="btn-esci" onclick="logout()">Esci</button>
   </div>
-
   <div class="casse-body">
     <div class="casse-h">Casse di cui fai parte</div>
     <div id="casse-list"></div>
-
     <div class="casse-azioni">
       <button class="btn-azione btn-crea" onclick="openCreaCassa()">➕ Crea una cassa</button>
       <button class="btn-azione btn-unisci" onclick="openUnisci()">🔑 Unisciti con un codice</button>
@@ -77,9 +65,7 @@ if("serviceWorker" in navigator){
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     SCHERMATA 3 — DENTRO LA CASSA
-══════════════════════════════════════════════════ -->
+<!-- SCHERMATA 3 — DENTRO LA CASSA -->
 <div id="cassa-screen" class="screen">
   <div class="cassa-header">
     <button class="btn-back" onclick="tornaAlleCasse()">←</button>
@@ -89,64 +75,57 @@ if("serviceWorker" in navigator){
     </div>
     <div class="cassa-hazioni">
       <button class="btn-invita" onclick="invitaCassa()">🔑 Invita</button>
-      <div class="cassa-sync-wrap">
-        <span class="sync-dot" id="cassa-dot"></span>
-        <span class="cassa-sync-txt" id="cassa-sync">…</span>
-      </div>
+      <div class="cassa-sync-wrap"><span class="sync-dot" id="cassa-dot"></span><span class="cassa-sync-txt" id="cassa-sync">…</span></div>
     </div>
   </div>
 
   <div class="cassa-body">
-    <div class="card">
-      <div class="card-titolo" id="saldi-titolo">I conti</div>
-      <div id="saldi-list"></div>
+    <!-- TAB CONTI -->
+    <div class="cassa-tab attiva" data-tab="conti">
+      <div class="card">
+        <div class="card-titolo" id="saldi-titolo">I conti</div>
+        <div id="saldi-list"></div>
+      </div>
+      <div id="settle-extra"></div>
+      <button class="btn-nuova-spesa" onclick="apriNuovaSpesa()">➕ Nuova spesa</button>
+      <div>
+        <div class="card-titolo" style="margin-bottom:8px;">Movimenti</div>
+        <div id="movimenti-list"></div>
+      </div>
     </div>
-
-    <div id="settle-extra"></div>
-
-    <button class="btn-nuova-spesa" onclick="apriNuovaSpesa()">➕ Nuova spesa</button>
-
-    <div>
-      <div class="card-titolo" style="margin-bottom:8px;">Movimenti</div>
-      <div id="movimenti-list"></div>
+    <!-- TAB MEMBRI -->
+    <div class="cassa-tab" data-tab="membri">
+      <div id="membri-body"></div>
     </div>
   </div>
+
+  <nav class="cassa-nav">
+    <button data-tab="conti" class="attiva" onclick="switchCassaTab('conti')"><span class="nav-ico">💰</span><span>Conti</span></button>
+    <button data-tab="membri" onclick="switchCassaTab('membri')"><span class="nav-ico">👥</span><span>Membri</span></button>
+  </nav>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     MODALE — CREA CASSA
-══════════════════════════════════════════════════ -->
+<!-- MODALE — CREA CASSA -->
 <div class="modal-overlay" id="modal-crea" onclick="if(event.target===this)closeCreaCassa()">
   <div class="br-modal">
     <h2>Nuova cassa</h2>
     <p>Crea una cassa condivisa. Riceverai un codice da dare a chi vuoi far entrare.</p>
-    <div class="m-row">
-      <label>🏷️ Nome della cassa</label>
-      <input type="text" id="crea-nome" placeholder="es. Casa, Vacanza Grecia, Coinquilini">
-    </div>
-    <div class="m-row">
-      <label>⚖️ Modalità di calcolo</label>
+    <div class="m-row"><label>🏷️ Nome della cassa</label><input type="text" id="crea-nome" placeholder="es. Casa, Vacanza Grecia, Coinquilini"></div>
+    <div class="m-row"><label>⚖️ Modalità di calcolo</label>
       <select id="crea-modalita">
         <option value="comune">Cassa comune (bilancia tra membri)</option>
         <option value="diretti">Debiti diretti (chi deve a chi)</option>
       </select>
       <div class="hint">La cambierai con difficoltà dopo: scegli con calma.</div>
     </div>
-    <div class="m-row">
-      <label>🎨 Tema</label>
+    <div class="m-row"><label>🎨 Tema</label>
       <select id="crea-tema">
-        <option value="orsi">🐻 Orsi</option>
-        <option value="pesci">🐟 Pesci</option>
-        <option value="west">🤠 West</option>
-        <option value="alieni">👽 Alieni</option>
-        <option value="jungle">🦜 Jungle</option>
-        <option value="flamingo">🦩 Flamingo</option>
+        <option value="orsi">🐻 Orsi</option><option value="pesci">🐟 Pesci</option>
+        <option value="west">🤠 West</option><option value="alieni">👽 Alieni</option>
+        <option value="jungle">🦜 Jungle</option><option value="flamingo">🦩 Flamingo</option>
       </select>
     </div>
-    <div class="m-row">
-      <label>🙂 Il tuo nome in questa cassa</label>
-      <input type="text" id="crea-nome-membro" placeholder="Lascia vuoto per usare il tuo nome">
-    </div>
+    <div class="m-row"><label>🙂 Il tuo nome in questa cassa</label><input type="text" id="crea-nome-membro" placeholder="Lascia vuoto per usare il tuo nome"></div>
     <div class="modal-error" id="crea-error"></div>
     <div class="m-btns">
       <button class="m-annulla" onclick="closeCreaCassa()">Annulla</button>
@@ -155,22 +134,13 @@ if("serviceWorker" in navigator){
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     MODALE — UNISCITI CON CODICE
-══════════════════════════════════════════════════ -->
+<!-- MODALE — UNISCITI -->
 <div class="modal-overlay" id="modal-unisci" onclick="if(event.target===this)closeUnisci()">
   <div class="br-modal">
     <h2>Unisciti a una cassa</h2>
     <p>Inserisci il codice che ti ha dato chi gestisce la cassa.</p>
-    <div class="m-row">
-      <label>🔑 Codice cassa</label>
-      <input type="text" id="unisci-codice" class="m-codice" placeholder="ABC123" maxlength="6"
-             onkeydown="if(event.key==='Enter')confermaUnisci()">
-    </div>
-    <div class="m-row">
-      <label>🙂 Il tuo nome in questa cassa</label>
-      <input type="text" id="unisci-nome-membro" placeholder="Lascia vuoto per usare il tuo nome">
-    </div>
+    <div class="m-row"><label>🔑 Codice cassa</label><input type="text" id="unisci-codice" class="m-codice" placeholder="ABC123" maxlength="6" onkeydown="if(event.key==='Enter')confermaUnisci()"></div>
+    <div class="m-row"><label>🙂 Il tuo nome in questa cassa</label><input type="text" id="unisci-nome-membro" placeholder="Lascia vuoto per usare il tuo nome"></div>
     <div class="modal-error" id="unisci-error"></div>
     <div class="m-btns">
       <button class="m-annulla" onclick="closeUnisci()">Annulla</button>
@@ -183,20 +153,29 @@ if("serviceWorker" in navigator){
 <div class="modal-overlay" id="modal-spesa" onclick="if(event.target===this)chiudiNuovaSpesa()">
   <div class="br-modal">
     <h2>Nuova spesa</h2>
-    <div class="m-row">
-      <label>📝 Descrizione</label>
-      <input type="text" id="mv-desc" placeholder="es. Spesa, Cena, Biglietti">
+    <div class="m-row"><label>📝 Descrizione</label><input type="text" id="mv-desc" placeholder="es. Spesa, Cena, Biglietti"></div>
+    <div class="m-row"><label>💱 Valuta</label>
+      <select id="mv-valuta" onchange="aggiornaTasso()">
+        <option value="EUR">€ Euro</option><option value="GBP">£ Sterlina</option>
+        <option value="CHF">CHF Franco svizzero</option><option value="USD">$ Dollaro USA</option>
+      </select>
     </div>
-    <div class="m-row">
-      <label>💰 Importo (€)</label>
-      <input type="number" id="mv-imp" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal" oninput="recalcSplit()">
+    <div class="m-row"><label>💰 Importo (<span id="mv-imp-valuta">EUR</span>)</label>
+      <input type="number" id="mv-imp" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal" oninput="recalcImporto()"></div>
+    <div class="m-row" id="mv-tasso-row" style="display:none;">
+      <div class="split-info" id="mv-tasso-info"></div>
+      <div id="mv-tasso-manuale-wrap" style="display:none;margin-top:8px;">
+        <label id="mv-tasso-lbl"></label>
+        <input type="number" id="mv-tasso-manuale" min="0" step="0.0001" inputmode="decimal" placeholder="es. 1.17">
+      </div>
     </div>
-    <div class="m-row">
-      <label>🙂 Pagato da</label>
-      <select id="mv-pagante"></select>
+    <div class="m-row"><label>🙂 Pagato da
+        <label class="mini-toggle"><input type="checkbox" id="mv-multipagante" onchange="renderPaganteUI()"> più paganti</label>
+      </label>
+      <div id="pagante-single"><select id="mv-pagante"></select></div>
+      <div id="pagante-multi" style="display:none;"><div id="paganti-grid"></div><div class="split-info" id="paganti-info"></div></div>
     </div>
-    <div class="m-row">
-      <label>➗ Come si divide</label>
+    <div class="m-row"><label>➗ Come si divide</label>
       <div class="split-seg" id="split-seg">
         <button class="split-btn attivo" data-m="equo" onclick="setMetodoSplit('equo')">Equo</button>
         <button class="split-btn" data-m="esatto" onclick="setMetodoSplit('esatto')">Esatto</button>
@@ -206,10 +185,7 @@ if("serviceWorker" in navigator){
       <div id="split-grid"></div>
       <div class="split-info" id="split-info"></div>
     </div>
-    <div class="m-row">
-      <label>📅 Data</label>
-      <input type="date" id="mv-data">
-    </div>
+    <div class="m-row"><label>📅 Data</label><input type="date" id="mv-data"></div>
     <div class="modal-error" id="spesa-error"></div>
     <div class="m-btns">
       <button class="m-annulla" onclick="chiudiNuovaSpesa()">Annulla</button>
@@ -218,13 +194,12 @@ if("serviceWorker" in navigator){
   </div>
 </div>
 
-<!-- MODALE — RIMBORSO (settle-up) -->
+<!-- MODALE — RIMBORSO -->
 <div class="modal-overlay" id="modal-settle" onclick="if(event.target===this)chiudiSettle()">
   <div class="br-modal">
     <h2>Registra un rimborso</h2>
     <div class="settle-frase"><b id="settle-da">?</b> rimborsa <b id="settle-a">?</b></div>
-    <div class="m-row">
-      <label>💰 Importo (€)</label>
+    <div class="m-row"><label>💰 Importo (€)</label>
       <input type="number" id="settle-imp" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal">
       <div class="hint">Puoi anche saldare solo una parte: cambia l'importo.</div>
     </div>
@@ -236,13 +211,53 @@ if("serviceWorker" in navigator){
   </div>
 </div>
 
-<!-- MODALE — DETTAGLIO MOVIMENTO -->
+<!-- MODALE — DETTAGLIO -->
 <div class="modal-overlay" id="modal-dettaglio" onclick="if(event.target===this)chiudiDettaglio()">
   <div class="br-modal">
     <div id="dettaglio-body"></div>
-    <div class="m-btns" style="margin-top:16px;">
-      <button class="m-conferma" onclick="chiudiDettaglio()">Chiudi</button>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiDettaglio()">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- MODALE — RINOMINA MEMBRO -->
+<div class="modal-overlay" id="modal-rinomina" onclick="if(event.target===this)chiudiRinomina()">
+  <div class="br-modal">
+    <h2>Rinomina</h2>
+    <div class="m-row"><label>🙂 Nome</label><input type="text" id="rinomina-input" onkeydown="if(event.key==='Enter')confermaRinomina()"></div>
+    <div class="modal-error" id="rinomina-error"></div>
+    <div class="m-btns">
+      <button class="m-annulla" onclick="chiudiRinomina()">Annulla</button>
+      <button class="m-conferma" onclick="confermaRinomina()">Salva</button>
     </div>
+  </div>
+</div>
+
+<!-- MODALE — ELIMINA CASSA -->
+<div class="modal-overlay" id="modal-elimina" onclick="if(event.target===this)chiudiEliminaCassa()">
+  <div class="br-modal">
+    <h2>Elimina cassa</h2>
+    <div class="elimina-warn">Azione definitiva: spariscono tutti i movimenti, i saldi e i membri. Non si può annullare.</div>
+    <div class="m-row"><label>Scrivi <b id="elimina-nome-target"></b> per confermare</label>
+      <input type="text" id="elimina-input" oninput="controllaNomeElimina()"></div>
+    <div class="modal-error" id="elimina-error"></div>
+    <div class="m-btns">
+      <button class="m-annulla" onclick="chiudiEliminaCassa()">Annulla</button>
+      <button class="m-conferma m-elimina" id="elimina-btn" onclick="confermaEliminaCassa()" disabled>Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY — PRESENTAZIONE ("Cos'è sPiccioli!") -->
+<div id="info-overlay" class="info-overlay">
+  <button class="info-close" onclick="chiudiInfo()" aria-label="Chiudi">×</button>
+  <div class="info-content">
+    <img src="./spiccioli.svg" class="info-logo" alt="">
+    <div class="info-title">sPiccioli!</div>
+    <p class="info-manifesto">Al mondo d'oggi abbiamo controllo solo sulle piccole cose. Ma spesso da piccole cose nascono grandi amori, grandi litigi, problemi o situazioni fantastiche.</p>
+    <p class="info-manifesto">sPiccioli! ti aiuta a tenere da conto le piccole Spese, i <i>Piccioli</i> — che tu sia da solo, in due, o in un gruppo scellerato di persone.</p>
+    <p class="info-manifesto">L'importante è rimanere <b>Silly</b>, per dare il giusto peso alle cose piccole ma importanti.</p>
+    <div class="info-tagline">Resta Silly 🐷</div>
+    <button class="info-cta" onclick="chiudiInfo()">Ho capito!</button>
   </div>
 </div>
 

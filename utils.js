@@ -1,7 +1,6 @@
 // ════════════════════════════════════════════════════════
 //  sPiccioli! — utils.js
 //  Costanti, client Supabase, stato globale, helper, schermate.
-//  Caricato per PRIMO.
 // ════════════════════════════════════════════════════════
 
 // ── SUPABASE ──
@@ -10,11 +9,12 @@ var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── STATO GLOBALE ──────────────────────────────────────
-var profiloUtente = null;   // { id, email, nome }
-var CASSE = [];             // casse dell'utente
-var cassaCorrente = null;   // cassa aperta
-var membriCorrente = [];    // membri attivi della cassa aperta
-var S = { movimenti: [] };  // dati della cassa aperta
+var profiloUtente = null;
+var CASSE = [];
+var cassaCorrente = null;
+var membriTutti = [];       // tutti i membri (anche rimossi) — per i nomi nello storico
+var membriCorrente = [];    // membri ATTIVI — per saldi, form, conteggi
+var S = { movimenti: [] };
 
 // ── SCHERMATE ──────────────────────────────────────────
 var SCHERMATE = ["auth-screen", "casse-screen", "cassa-screen"];
@@ -39,23 +39,24 @@ function fmtLong(iso){
 function eur(n){
   return Math.abs(Math.round(n*100)/100).toFixed(2).replace(".",",")+"\u00a0\u20ac";
 }
+function importoCon(n, valuta){
+  var s = Math.abs(Math.round(n*100)/100).toFixed(2).replace(".",",");
+  var simb = { EUR:"\u20ac", GBP:"\u00a3", USD:"$", CHF:"CHF" };
+  return s + "\u00a0" + (simb[valuta] || valuta || "\u20ac");
+}
 function escapeHtml(s){
   return (s||"").replace(/[&<>"]/g, function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
   });
 }
 
-// ── HELPER SALDI (motore net-balance) ──────────────────
-// Il membro "mio" nella cassa attiva (per sapere chi crea i movimenti).
+// ── HELPER SALDI (net-balance, valuta base) ──
 function mioMembro(){
   return membriCorrente.find(function(m){ return m.user_id === (profiloUtente && profiloUtente.id); });
 }
-
-// Saldo netto di ogni membro: (quanto ha pagato) − (quanto gli compete).
-// >0 = in credito · <0 = in debito · 0 = in pari. La somma fa sempre 0.
 function calcolaSaldi(){
   var saldi = {};
-  membriCorrente.forEach(function(m){ saldi[m.id] = 0; });
+  membriCorrente.forEach(function(m){ saldi[m.id] = 0; });   // solo membri attivi
   (S.movimenti || []).forEach(function(mov){
     var t = parseFloat(mov.tasso_cambio) || 1;
     (mov.paganti || []).forEach(function(p){
@@ -68,8 +69,26 @@ function calcolaSaldi(){
   Object.keys(saldi).forEach(function(k){ saldi[k] = Math.round(saldi[k]*100)/100; });
   return saldi;
 }
-// Dai saldi netti ricava i pagamenti minimi per pareggiare:
-// [{da, a, importo}]. Lavora in centesimi per non avere errori di virgola.
+function dividiEquo(importo, n){
+  var cent  = Math.round(importo * 100);
+  var base  = Math.floor(cent / n);
+  var resto = cent - base * n;
+  var out = [];
+  for(var i=0; i<n; i++){ out.push((base + (i < resto ? 1 : 0)) / 100); }
+  return out;
+}
+function ripartisciCentesimi(totCent, pesi){
+  var somma = pesi.reduce(function(a,b){ return a+b; }, 0);
+  if(somma <= 0) return pesi.map(function(){ return 0; });
+  var grezzi = pesi.map(function(p){ return totCent * p / somma; });
+  var base   = grezzi.map(Math.floor);
+  var resto  = totCent - base.reduce(function(a,b){ return a+b; }, 0);
+  var ord = grezzi
+    .map(function(g, i){ return { i: i, frac: g - Math.floor(g) }; })
+    .sort(function(a,b){ return b.frac - a.frac; });
+  for(var k = 0; k < resto; k++){ base[ord[k].i]++; }
+  return base;
+}
 function simplificaDebiti(saldi){
   var cred = [], deb = [];
   membriCorrente.forEach(function(m){
@@ -88,31 +107,6 @@ function simplificaDebiti(saldi){
     if(cred[j].v === 0) j++;
   }
   return res;
-}
-// Divide un importo in n quote (ai centesimi) che sommano ESATTO.
-// Es. 100 in 3 → [33.34, 33.33, 33.33].
-function dividiEquo(importo, n){
-  var cent  = Math.round(importo * 100);
-  var base  = Math.floor(cent / n);
-  var resto = cent - base * n;          // centesimi da distribuire
-  var out = [];
-  for(var i=0; i<n; i++){ out.push((base + (i < resto ? 1 : 0)) / 100); }
-  return out;
-}
-
-// Ripartisce 'totCent' centesimi tra i 'pesi' dati, in modo proporzionale,
-// assegnando i centesimi di resto a chi ha la frazione più alta (somma esatta).
-function ripartisciCentesimi(totCent, pesi){
-  var somma = pesi.reduce(function(a,b){ return a+b; }, 0);
-  if(somma <= 0) return pesi.map(function(){ return 0; });
-  var grezzi = pesi.map(function(p){ return totCent * p / somma; });
-  var base   = grezzi.map(Math.floor);
-  var resto  = totCent - base.reduce(function(a,b){ return a+b; }, 0);
-  var ord = grezzi
-    .map(function(g, i){ return { i: i, frac: g - Math.floor(g) }; })
-    .sort(function(a,b){ return b.frac - a.frac; });
-  for(var k = 0; k < resto; k++){ base[ord[k].i]++; }
-  return base;
 }
 
 // ── PWA BANNER ──
