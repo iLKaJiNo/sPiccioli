@@ -224,13 +224,14 @@ function renderMembri(){
     var stato = Math.abs(s) < 0.005 ? '<span class="mb-pari">in pari</span>'
       : (s > 0 ? '<span class="mb-cred">+' + eur(s) + '</span>' : '<span class="mb-deb">−' + eur(Math.abs(s)) + '</span>');
     var ruolo = m.ruolo === "admin" ? '<span class="cassa-badge-admin">admin</span>' : '';
+    var tu    = m.id === mioId ? '<span class="cassa-badge-tu">tu</span>' : '';
     var puoiRinominare = true;  // app silly: chiunque puo rinominare chiunque
     var puoiRimuovere  = admin && m.id !== mioId && Math.abs(s) < 0.005;
     var az = '';
     if(puoiRinominare) az += '<button class="mb-btn" onclick="apriRinomina(\'' + m.id + '\')" title="Rinomina">✏️</button>';
     if(puoiRimuovere)  az += '<button class="mb-btn" onclick="rimuoviMembro(\'' + m.id + '\')" title="Rimuovi">🗑️</button>';
     return '<div class="mb-row"><div class="mb-info">'
-      + '<div class="mb-nome">' + escapeHtml(nomi[m.id]) + ' ' + ruolo + '</div>'
+      + '<div class="mb-nome">' + escapeHtml(nomi[m.id]) + ' ' + tu + ruolo + '</div>'
       + '<div class="mb-stato">' + stato + '</div></div>'
       + '<div class="mb-azioni">' + az + '</div></div>';
   }).join("");

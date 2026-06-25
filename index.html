@@ -45,6 +45,7 @@ if("serviceWorker" in navigator){
     <div class="auth-loading" id="auth-loading"></div>
     <div class="auth-toggle" id="auth-toggle-txt">Non hai un account? <a onclick="toggleModoAuth()">Registrati</a></div>
     <div class="auth-info-link"><a onclick="apriInfo()">Cos'è sPiccioli! ✨</a></div>
+    <button class="auth-install-btn" id="btn-install" onclick="installApp()" style="display:none;">📲 Installa l'app</button>
   </div>
 </div>
 
@@ -263,6 +264,7 @@ if("serviceWorker" in navigator){
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./utils.js"></script>
+<script src="./pwa.js"></script>
 <script src="./api.js"></script>
 <script src="./cassa.js"></script>
 <script src="./auth.js"></script>

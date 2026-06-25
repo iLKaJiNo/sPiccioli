@@ -108,12 +108,3 @@ function simplificaDebiti(saldi){
   }
   return res;
 }
-
-// ── PWA BANNER ──
-var deferredPrompt = null;
-window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); deferredPrompt = e; });
-function installApp(){
-  if(!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(function(){ deferredPrompt = null; });
-}
