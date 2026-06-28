@@ -17,7 +17,7 @@ var membriCorrente = [];    // membri ATTIVI — per saldi, form, conteggi
 var S = { movimenti: [] };
 
 // ── SCHERMATE ──────────────────────────────────────────
-var SCHERMATE = ["auth-screen", "casse-screen", "cassa-screen"];
+var SCHERMATE = ["auth-screen", "casse-screen", "cassa-screen", "solo-screen"];
 function mostraSchermata(id){
   SCHERMATE.forEach(function(s){
     var el = document.getElementById(s);

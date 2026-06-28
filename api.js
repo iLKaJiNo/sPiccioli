@@ -3,6 +3,8 @@
 //  Layer dati della cassa: caricamento, realtime, coda, azioni.
 // ════════════════════════════════════════════════════════
 
+var categorieCassa = [];
+
 function dotC(cls, txt){
   var d = document.getElementById("cassa-dot");
   var t = document.getElementById("cassa-sync");
@@ -45,6 +47,10 @@ async function caricaCassa(){
       m.quote   = m.movimento_quote   || [];
       return m;
     });
+
+    var rcat = await sb.from("categorie").select("*")
+      .eq("cassa_id", cassaCorrente.id).order("ordine").order("nome");
+    categorieCassa = rcat.data || [];
 
     dotC("ok", "Sincronizzata");
     aggiornaBadgeCoda();
@@ -93,7 +99,7 @@ async function runAction(p){
         p_cassa: p.cassa, p_tipo: p.tipo || "spesa", p_descrizione: p.descrizione,
         p_importo: p.importo, p_valuta: p.valuta || "EUR", p_tasso: p.tasso || 1,
         p_metodo: p.metodo || "equo", p_data: p.data, p_creato_da: p.creatoDa,
-        p_paganti: p.paganti, p_quote: p.quote
+        p_paganti: p.paganti, p_quote: p.quote, p_categoria: p.categoria || null
       });
       break;
     case "deleteMovimento":

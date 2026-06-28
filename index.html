@@ -57,6 +57,12 @@ if("serviceWorker" in navigator){
     <button class="btn-esci" onclick="logout()">Esci</button>
   </div>
   <div class="casse-body">
+    <div class="solo-card" onclick="apriSolo()">
+      <div class="solo-card-emoji">🐷</div>
+      <div class="cassa-info"><div class="cassa-nome">Il mio Solo</div>
+        <div class="cassa-meta">Il tuo bilancio personale</div></div>
+      <div class="cassa-freccia">›</div>
+    </div>
     <div class="casse-h">Casse di cui fai parte</div>
     <div id="casse-list"></div>
     <div class="casse-azioni">
@@ -106,18 +112,97 @@ if("serviceWorker" in navigator){
   </nav>
 </div>
 
+<!-- SCHERMATA 4 — IL MIO SOLO (registro personale) -->
+<div id="solo-screen" class="screen">
+  <div class="cassa-header">
+    <button class="btn-back" onclick="tornaDaSolo()">←</button>
+    <div class="cassa-htitoli">
+      <span class="ch-emoji">🐷</span>
+      <h1>Il mio Solo</h1>
+    </div>
+  </div>
+  <div class="solo-body">
+    <div class="card solo-saldo-card">
+      <div class="card-titolo">Saldo</div>
+      <div class="solo-saldo-val pos" id="solo-saldo">0,00&nbsp;€</div>
+      <div class="solo-saldo-nota">Entrate meno uscite</div>
+    </div>
+    <button class="btn-nuova-spesa" onclick="apriNuovaVoce()">➕ Nuova voce</button>
+    <div>
+      <div class="card-titolo" style="margin-bottom:8px;">Registro</div>
+      <div id="solo-lista"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE — NUOVA VOCE (Solo) -->
+<div class="modal-overlay" id="modal-voce" onclick="if(event.target===this)chiudiNuovaVoce()">
+  <div class="br-modal">
+    <h2>Nuova voce</h2>
+    <div class="m-row"><label>↕️ Tipo</label>
+      <div class="split-seg" id="voce-tipo-seg">
+        <button type="button" class="split-btn" data-t="entrata" onclick="setVoceTipo('entrata')">⬆️ Entrata</button>
+        <button type="button" class="split-btn" data-t="uscita" onclick="setVoceTipo('uscita')">⬇️ Uscita</button>
+      </div>
+    </div>
+    <div class="m-row"><label>💰 Importo (€)</label>
+      <input type="number" id="voce-imp" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal"></div>
+    <div class="m-row"><label>🏷️ Categoria</label>
+      <div style="display:flex;gap:8px;">
+        <select id="voce-categoria" style="flex:1;"></select>
+        <button type="button" class="mb-btn" onclick="apriSoloCat()" title="Gestisci categorie">✏️</button>
+      </div>
+    </div>
+    <div class="m-row"><label>📝 Nota <span class="m-opz">(opzionale)</span></label>
+      <input type="text" id="voce-nota" placeholder="es. Caffè, Stipendio"></div>
+    <div class="m-row"><label>📅 Data</label><input type="date" id="voce-data"></div>
+    <div class="modal-error" id="voce-error"></div>
+    <div class="m-btns">
+      <button class="m-annulla" onclick="chiudiNuovaVoce()">Annulla</button>
+      <button class="m-conferma" onclick="salvaVoce()">Aggiungi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE — CATEGORIE SOLO -->
+<div class="modal-overlay" id="modal-solo-cat" onclick="if(event.target===this)chiudiSoloCat()">
+  <div class="br-modal">
+    <h2>Categorie Solo</h2>
+    <p>Le categorie del tuo Solo sono solo tue. Sulla voce sono facoltative.</p>
+    <div id="solocat-lista" class="cat-lista"></div>
+    <div class="m-row"><label>➕ Aggiungi / modifica</label>
+      <div class="cat-form">
+        <input type="text" id="solocat-icona" class="cat-icona-inp" placeholder="🏷️" maxlength="4">
+        <input type="text" id="solocat-nome" class="cat-nome-inp" placeholder="Nome categoria" onkeydown="if(event.key==='Enter')aggiungiVoceCat()">
+        <button class="m-conferma cat-add" id="solocat-add-btn" onclick="aggiungiVoceCat()">Aggiungi</button>
+      </div>
+    </div>
+    <div class="modal-error" id="solocat-error"></div>
+    <div class="m-btns">
+      <button class="m-conferma" onclick="chiudiSoloCat()">Chiudi</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODALE — CREA CASSA -->
 <div class="modal-overlay" id="modal-crea" onclick="if(event.target===this)closeCreaCassa()">
   <div class="br-modal">
     <h2>Nuova cassa</h2>
     <p>Crea una cassa condivisa. Riceverai un codice da dare a chi vuoi far entrare.</p>
     <div class="m-row"><label>🏷️ Nome della cassa</label><input type="text" id="crea-nome" placeholder="es. Casa, Vacanza Grecia, Coinquilini"></div>
-    <div class="m-row"><label>⚖️ Modalità di calcolo</label>
+    <div class="m-row"><label>👥 Tipo di cassa</label>
+      <select id="crea-tipo" onchange="onCambioTipoCassa()">
+        <option value="coppia">💞 Coppia (max 2, household)</option>
+        <option value="gruppo">🎉 Gruppo (fino a ~20, alla Splitwise)</option>
+      </select>
+      <div class="hint">La coppia tiene archivio e spese fisse; il gruppo no.</div>
+    </div>
+    <div class="m-row" id="crea-modalita-row"><label>⚖️ Modalità di calcolo</label>
       <select id="crea-modalita">
         <option value="comune">Cassa comune (bilancia tra membri)</option>
         <option value="diretti">Debiti diretti (chi deve a chi)</option>
       </select>
-      <div class="hint">La cambierai con difficoltà dopo: scegli con calma.</div>
+      <div class="hint">Potrai cambiarla quando vuoi.</div>
     </div>
     <div class="m-row"><label>🎨 Tema</label>
       <select id="crea-tema">
@@ -155,6 +240,12 @@ if("serviceWorker" in navigator){
   <div class="br-modal">
     <h2>Nuova spesa</h2>
     <div class="m-row"><label>📝 Descrizione</label><input type="text" id="mv-desc" placeholder="es. Spesa, Cena, Biglietti"></div>
+    <div class="m-row"><label>🏷️ Categoria</label>
+      <div style="display:flex;gap:8px;">
+        <select id="mv-categoria" style="flex:1;"></select>
+        <button type="button" class="mb-btn" onclick="apriCategorie()" title="Gestisci categorie">✏️</button>
+      </div>
+    </div>
     <div class="m-row"><label>💱 Valuta</label>
       <select id="mv-valuta" onchange="aggiornaTasso()">
         <option value="EUR">€ Euro</option><option value="GBP">£ Sterlina</option>
@@ -191,6 +282,26 @@ if("serviceWorker" in navigator){
     <div class="m-btns">
       <button class="m-annulla" onclick="chiudiNuovaSpesa()">Annulla</button>
       <button class="m-conferma" onclick="salvaSpesa()">Aggiungi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE — CATEGORIE -->
+<div class="modal-overlay" id="modal-categorie" onclick="if(event.target===this)chiudiCategorie()">
+  <div class="br-modal">
+    <h2>Categorie</h2>
+    <p>Le categorie sono condivise con la cassa. La categoria sulla spesa è facoltativa.</p>
+    <div id="cat-lista" class="cat-lista"></div>
+    <div class="m-row"><label>➕ Aggiungi / modifica</label>
+      <div class="cat-form">
+        <input type="text" id="cat-icona" class="cat-icona-inp" placeholder="🏷️" maxlength="4">
+        <input type="text" id="cat-nome" class="cat-nome-inp" placeholder="Nome categoria" onkeydown="if(event.key==='Enter')aggiungiCategoria()">
+        <button class="m-conferma cat-add" id="cat-add-btn" onclick="aggiungiCategoria()">Aggiungi</button>
+      </div>
+    </div>
+    <div class="modal-error" id="cat-error"></div>
+    <div class="m-btns">
+      <button class="m-conferma" onclick="chiudiCategorie()">Chiudi</button>
     </div>
   </div>
 </div>
@@ -267,6 +378,7 @@ if("serviceWorker" in navigator){
 <script src="./pwa.js"></script>
 <script src="./api.js"></script>
 <script src="./cassa.js"></script>
+<script src="./solo.js"></script>
 <script src="./auth.js"></script>
 <script src="./app.js"></script>
 </body>

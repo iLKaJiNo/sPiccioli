@@ -106,12 +106,13 @@ function renderCasse(){
   }
   lista.innerHTML = CASSE.map(function(c){
     var modo  = c.modalita === "diretti" ? "Debiti diretti" : "Cassa comune";
+    var tipo  = c.tipo === "gruppo" ? "Gruppo" : "Coppia";
     var admin = c.ruolo === "admin" ? '<span class="cassa-badge-admin">admin</span>' : '';
     return '<div class="cassa-item" onclick="entraInCassa(\''+c.id+'\')">'
       +   '<div class="cassa-emoji">'+emojiTema(c.tema)+'</div>'
       +   '<div class="cassa-info">'
       +     '<div class="cassa-nome">'+escapeHtml(c.nome)+admin+'</div>'
-      +     '<div class="cassa-meta">'+modo+' · '+c.nMembri+(c.nMembri===1?' membro':' membri')+'</div>'
+      +     '<div class="cassa-meta">'+tipo+' · '+modo+' · '+c.nMembri+(c.nMembri===1?' membro':' membri')+'</div>'
       +   '</div>'
       +   '<div class="cassa-freccia">›</div>'
       + '</div>';
@@ -126,19 +127,28 @@ function emojiTema(t){
 function openCreaCassa(){
   document.getElementById("modal-crea").classList.add("attivo");
   creaErrore("");
+  onCambioTipoCassa();   // stato iniziale (default coppia → riga modalità visibile)
   setTimeout(function(){ document.getElementById("crea-nome").focus(); }, 100);
 }
 function closeCreaCassa(){ document.getElementById("modal-crea").classList.remove("attivo"); }
 function creaErrore(m){ document.getElementById("crea-error").textContent = m || ""; }
+function onCambioTipoCassa(){
+  var tipo = document.getElementById("crea-tipo").value;
+  // il gruppo è sempre a debiti diretti: nascondi la scelta di modalità
+  document.getElementById("crea-modalita-row").style.display = (tipo === "coppia") ? "block" : "none";
+}
 async function confermaCreaCassa(){
   var nome       = document.getElementById("crea-nome").value.trim();
-  var modalita   = document.getElementById("crea-modalita").value;
+  var tipo       = document.getElementById("crea-tipo").value;
+  var modalita   = (tipo === "coppia")
+     ? document.getElementById("crea-modalita").value
+     : "diretti";
   var tema       = document.getElementById("crea-tema").value;
   var nomeMembro = document.getElementById("crea-nome-membro").value.trim() || profiloUtente.nome;
   if(!nome){ creaErrore("Dai un nome alla cassa."); return; }
   var btn = document.getElementById("crea-btn"); btn.disabled = true; creaErrore("");
   var r = await sb.rpc("crea_cassa", {
-    p_nome: nome, p_modalita: modalita, p_valuta: "EUR", p_tema: tema, p_nome_membro: nomeMembro
+    p_nome: nome, p_modalita: modalita, p_valuta: "EUR", p_tema: tema, p_nome_membro: nomeMembro, p_tipo: tipo
   });
   btn.disabled = false;
   if(r.error){ creaErrore("Errore: " + r.error.message); return; }

@@ -106,6 +106,26 @@ body{
 .m-conferma{background:linear-gradient(135deg,var(--br-cyan),#00b8d4);color:#06232a;}
 .m-conferma:disabled{opacity:.5;}
 
+.m-opz{font-family:'Nunito',sans-serif;font-weight:600;font-size:.72rem;color:var(--br-dim);}
+
+/* ════════════ MODALITÀ SOLO ════════════ */
+/* Card d'ingresso nella schermata casse: bordo cyan tenue per distinguerla */
+.solo-card{display:flex;align-items:center;gap:14px;background:var(--br-card);border:1.5px solid rgba(0,229,255,.35);border-radius:18px;padding:14px 16px;cursor:pointer;margin-bottom:18px;transition:border-color .15s,transform .1s;}
+.solo-card:hover{border-color:var(--br-cyan);}
+.solo-card:active{transform:scale(.99);}
+.solo-card-emoji{font-size:1.8rem;line-height:1;flex-shrink:0;}
+
+/* Schermata Solo */
+.solo-body{flex:1;width:100%;max-width:620px;margin:0 auto;padding:18px;display:flex;flex-direction:column;gap:18px;}
+.solo-saldo-card{text-align:center;}
+.solo-saldo-val{font-size:2rem;font-weight:800;line-height:1.1;}
+.solo-saldo-val.pos{color:#6FCF5A;} .solo-saldo-val.neg{color:#FF8A80;}
+.solo-saldo-nota{font-family:'Nunito',sans-serif;font-weight:600;font-size:.76rem;color:var(--br-dim);margin-top:6px;}
+#solo-lista{display:flex;flex-direction:column;gap:8px;}
+/* importo della voce: verde se entrata, rosso se uscita (override del giallo .mv-imp) */
+.voce-entrata{color:#6FCF5A!important;} .voce-uscita{color:#FF8A80!important;}
+.voce-lock{font-size:1.1rem;line-height:1;flex-shrink:0;padding:0 4px;opacity:.8;}
+
 /* ── Presentazione ("Cos'è sPiccioli!") ── */
 .auth-info-link{text-align:center;margin-top:14px;}
 .auth-info-link a{color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;border-bottom:1px dashed var(--br-line);padding-bottom:2px;}

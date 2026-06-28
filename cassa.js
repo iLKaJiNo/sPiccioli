@@ -39,6 +39,13 @@ function nomiMembri(){
   return n;
 }
 
+// icona della categoria per nome; fallback morbido se la cat è stata eliminata
+function iconaCat(nome){
+  if(!nome) return "";
+  var c = (categorieCassa || []).find(function(x){ return x.nome === nome; });
+  return (c && c.icona) || "📌";
+}
+
 // ── RENDER PRINCIPALE ──
 function renderCassa(){
   renderSaldi();
@@ -152,9 +159,10 @@ function renderMovimenti(){
     var badge = (mov.metodo_split && mov.metodo_split !== "equo")
       ? '<span class="mv-badge">' + etichettaMetodo(mov.metodo_split) + '</span>' : '';
     var valBadge = (val !== (cassaCorrente.valuta_base||"EUR")) ? '<span class="mv-badge">' + val + '</span>' : '';
+    var ico = mov.categoria ? (iconaCat(mov.categoria) + " ") : "";
     return '<div class="mv-item' + (temp ? " mv-temp" : "") + '"' + apri + '>'
       +   '<div class="mv-main">'
-      +     '<div class="mv-desc">' + escapeHtml(mov.descrizione || "(senza descrizione)") + badge + valBadge + '</div>'
+      +     '<div class="mv-desc">' + ico + escapeHtml(mov.descrizione || "(senza descrizione)") + badge + valBadge + '</div>'
       +     '<div class="mv-meta">' + fmt(mov.data) + ' · pagato da ' + (pag || "—") + '</div>'
       +   '</div>'
       +   '<div class="mv-imp">' + importoCon(mov.importo, val) + '</div>' + del
@@ -245,6 +253,16 @@ function renderMembri(){
 
   if(admin){
     var set = '';
+    if(cassaCorrente.tipo === "coppia"){
+      set += '<div class="mb-toggle-row"><span>Modalità di calcolo'
+        + '<small>Bilancia o debiti diretti — cambiala quando vuoi</small></span></div>';
+      set += '<div class="split-seg" style="margin-bottom:14px;">'
+        + '<button class="split-btn ' + (cassaCorrente.modalita==="comune"?"attivo":"") + '" '
+        + 'onclick="switchModalita(\'comune\')">⚖️ Bilancia</button>'
+        + '<button class="split-btn ' + (cassaCorrente.modalita==="diretti"?"attivo":"") + '" '
+        + 'onclick="switchModalita(\'diretti\')">↔️ Debiti</button>'
+        + '</div>';
+    }
     if(cassaCorrente.modalita === "comune" && membriCorrente.length === 2){
       set += '<label class="mb-toggle-row"><span>Modalità grezza<small>Mostra il divario di spesa invece del saldo</small></span>'
         + '<input type="checkbox" ' + (cassaCorrente.grezza ? "checked" : "") + ' onchange="toggleGrezza(this.checked)"></label>';
@@ -305,6 +323,15 @@ async function toggleGrezza(on){
   renderCassa();
 }
 
+// ── SWITCH MODALITÀ (coppia: bilancia ⇄ debiti diretti) ──
+async function switchModalita(nuova){
+  if(nuova === cassaCorrente.modalita) return;
+  var r = await sb.from("casse").update({ modalita: nuova }).eq("id", cassaCorrente.id);
+  if(r.error){ alert("Errore: " + r.error.message); return; }
+  cassaCorrente.modalita = nuova;
+  renderCassa();
+}
+
 // ── ELIMINA CASSA (admin, conferma col nome) ──
 function apriEliminaCassa(){
   document.getElementById("elimina-nome-target").textContent = cassaCorrente.nome;
@@ -337,7 +364,22 @@ var tassoCorrente  = 1;
 function apriNuovaSpesa(){
   document.getElementById("modal-spesa").classList.add("attivo");
   resetFormSpesa();
+  popolaCategoriaSelect();
   setTimeout(function(){ document.getElementById("mv-desc").focus(); }, 100);
+}
+
+// riempie il select categoria del form spesa (categoria opzionale)
+function popolaCategoriaSelect(){
+  var sel = document.getElementById("mv-categoria");
+  if(!sel) return;
+  var prec = sel.value;
+  var html = '<option value="">— nessuna —</option>';
+  (categorieCassa || []).forEach(function(c){
+    html += '<option value="' + escapeHtml(c.nome) + '">' + escapeHtml((c.icona || "📌") + " " + c.nome) + '</option>';
+  });
+  sel.innerHTML = html;
+  // mantieni la scelta se la categoria esiste ancora
+  if(prec && (categorieCassa || []).some(function(c){ return c.nome === prec; })) sel.value = prec;
 }
 function chiudiNuovaSpesa(){ document.getElementById("modal-spesa").classList.remove("attivo"); }
 function resetFormSpesa(){
@@ -529,19 +571,20 @@ async function salvaSpesa(){
   var rq = calcolaQuote(imp);   if(rq.errore){ spesaErrore(rq.errore); return; }
   var paganti = rp.paganti, quote = rq.quote;
   var mio = mioMembro();
+  var cat = document.getElementById("mv-categoria").value;
 
   var payload = {
     action: "addMovimento", cassa: cassaCorrente.id, tipo: "spesa",
     descrizione: desc, importo: imp, valuta: valutaCorrente, tasso: tasso,
     metodo: metodoSplit, data: data, creatoDa: mio ? mio.id : paganti[0].membro_id,
-    paganti: paganti, quote: quote
+    paganti: paganti, quote: quote, categoria: cat
   };
 
   chiudiNuovaSpesa();
   var temp = {
     id: "temp-" + Date.now(), tipo: "spesa", descrizione: desc, importo: imp,
     valuta_mov: valutaCorrente, tasso_cambio: tasso, metodo_split: metodoSplit,
-    data: data, paganti: paganti, quote: quote
+    data: data, paganti: paganti, quote: quote, categoria: cat
   };
   S.movimenti.unshift(temp);
   renderCassa();
@@ -591,6 +634,98 @@ async function confermaSettle(){
     if(errDiRete(e)){}
     else{ S.movimenti = S.movimenti.filter(function(m){ return m.id !== temp.id; }); renderCassa(); alert("Rimborso non salvato."); }
   }
+}
+
+// ════════════════════════════════════════════════════════
+//  CATEGORIE — mini-modale di gestione (CRUD, aperto a ogni membro)
+// ════════════════════════════════════════════════════════
+var _catEditId = null;
+
+function apriCategorie(){
+  _catEditId = null;
+  renderCategorieModal();
+  document.getElementById("modal-categorie").classList.add("attivo");
+}
+function chiudiCategorie(){ document.getElementById("modal-categorie").classList.remove("attivo"); }
+
+function renderCategorieModal(){
+  var lista = document.getElementById("cat-lista");
+  var cats  = categorieCassa || [];
+  if(!cats.length){
+    lista.innerHTML = '<div class="cat-empty">Nessuna categoria.</div>'
+      + '<button class="mb-azione-btn" onclick="aggiungiSetComuni()">✨ Aggiungi set comuni</button>';
+  } else {
+    lista.innerHTML = cats.map(function(c){
+      return '<div class="cat-row">'
+        + '<span class="cat-ico">' + escapeHtml(c.icona || "📌") + '</span>'
+        + '<span class="cat-nome">' + escapeHtml(c.nome) + '</span>'
+        + '<button class="mb-btn" onclick="modificaCategoria(\'' + c.id + '\')" title="Modifica">✏️</button>'
+        + '<button class="mb-btn" onclick="eliminaCategoria(\'' + c.id + '\')" title="Elimina">🗑️</button>'
+        + '</div>';
+    }).join("");
+  }
+  catFormReset();
+}
+function catFormReset(){
+  _catEditId = null;
+  document.getElementById("cat-icona").value = "";
+  document.getElementById("cat-nome").value  = "";
+  document.getElementById("cat-add-btn").textContent = "Aggiungi";
+  catErrore("");
+}
+function catErrore(m){ document.getElementById("cat-error").textContent = m || ""; }
+
+async function aggiungiCategoria(){
+  var icona = document.getElementById("cat-icona").value.trim();
+  var nome  = document.getElementById("cat-nome").value.trim();
+  if(!nome){ catErrore("Scrivi un nome."); return; }
+  var r;
+  if(_catEditId){
+    r = await sb.from("categorie").update({ nome: nome, icona: icona || "📌" }).eq("id", _catEditId);
+  } else {
+    var ordine = (categorieCassa || []).length;
+    r = await sb.from("categorie").insert({ cassa_id: cassaCorrente.id, nome: nome, icona: icona || "📌", ordine: ordine });
+  }
+  if(r.error){ catErrore("Errore: " + r.error.message); return; }
+  await caricaCassa();
+  renderCategorieModal();
+  popolaCategoriaSelect();
+}
+function modificaCategoria(id){
+  var c = (categorieCassa || []).find(function(x){ return String(x.id) === String(id); });
+  if(!c) return;
+  _catEditId = id;
+  document.getElementById("cat-icona").value = c.icona || "";
+  document.getElementById("cat-nome").value  = c.nome || "";
+  document.getElementById("cat-add-btn").textContent = "Salva";
+  catErrore("");
+  document.getElementById("cat-nome").focus();
+}
+async function eliminaCategoria(id){
+  if(!confirm("Eliminare questa categoria?\nLe spese passate restano (mostreranno 📌).")) return;
+  var r = await sb.from("categorie").delete().eq("id", id);
+  if(r.error){ catErrore("Errore: " + r.error.message); return; }
+  await caricaCassa();
+  renderCategorieModal();
+  popolaCategoriaSelect();
+}
+async function aggiungiSetComuni(){
+  var set = [
+    { icona: "🛒", nome: "Spesa" },     { icona: "🍽️", nome: "Cibo fuori" },
+    { icona: "🏠", nome: "Casa" },      { icona: "💡", nome: "Bollette" },
+    { icona: "🚗", nome: "Trasporti" }, { icona: "🍻", nome: "Uscite" },
+    { icona: "🎁", nome: "Regali" },    { icona: "✈️", nome: "Viaggi" },
+    { icona: "💊", nome: "Salute" },    { icona: "🎬", nome: "Svago" }
+  ];
+  var base = (categorieCassa || []).length;
+  var rows = set.map(function(c, i){
+    return { cassa_id: cassaCorrente.id, nome: c.nome, icona: c.icona, ordine: base + i };
+  });
+  var r = await sb.from("categorie").insert(rows);
+  if(r.error){ catErrore("Errore: " + r.error.message); return; }
+  await caricaCassa();
+  renderCategorieModal();
+  popolaCategoriaSelect();
 }
 
 // ── ELIMINA MOVIMENTO ──
