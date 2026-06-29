@@ -165,10 +165,11 @@ function renderMovimenti(){
       ? '<span class="mv-badge">' + etichettaMetodo(mov.metodo_split) + '</span>' : '';
     var valBadge = (val !== (cassaCorrente.valuta_base||"EUR")) ? '<span class="mv-badge">' + val + '</span>' : '';
     var ico = mov.categoria ? (iconaCat(mov.categoria) + " ") : "";
+    var ricorr = (mov.origine === "ricorrente") ? "🔁 " : "";
     return '<div class="mv-item' + (temp ? " mv-temp" : "") + '"' + apri + '>'
       +   '<div class="mv-main">'
       +     '<div class="mv-desc">' + ico + escapeHtml(mov.descrizione || "(senza descrizione)") + badge + valBadge + '</div>'
-      +     '<div class="mv-meta">' + fmt(mov.data) + ' · pagato da ' + (pag || "—") + '</div>'
+      +     '<div class="mv-meta">' + ricorr + fmt(mov.data) + ' · pagato da ' + (pag || "—") + '</div>'
       +   '</div>'
       +   '<div class="mv-imp">' + importoCon(mov.importo, val) + '</div>' + del
       + '</div>';

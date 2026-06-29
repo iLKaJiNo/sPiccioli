@@ -16,6 +16,13 @@ var _soloCatEditId = null;
 // ── NAVIGAZIONE ──
 async function apriSolo(){
   mostraSchermata("solo-screen");
+  if(navigator.onLine){
+    try{
+      var rmat = await sb.rpc("materializza_ricorrenti_solo");
+      var n = (rmat && rmat.data && rmat.data.emesse) || 0;
+      if(n > 0) toastInfo("🔁 " + n + (n===1 ? " voce ricorrente registrata" : " voci ricorrenti registrate"));
+    }catch(e){ /* non bloccare l'apertura del Solo */ }
+  }
   await caricaSolo();
   initRealtimeSolo();
 }
@@ -73,7 +80,8 @@ function renderSolo(){
     var ico     = v.categoria ? iconaSoloCat(v.categoria) : (entrata ? "💰" : "💸");
     var testo   = v.nota || v.categoria || (entrata ? "Entrata" : "Uscita");
     var sotto   = (v.nota && v.categoria) ? v.categoria : "";   // se la nota fa da titolo, la categoria va nel meta
-    var meta    = fmt(v.data) + (sotto ? " · " + escapeHtml(sotto) : "");
+    var ricorr  = (v.origine === "ricorrente") ? "🔁 " : "";
+    var meta    = ricorr + fmt(v.data) + (sotto ? " · " + escapeHtml(sotto) : "");
     var seg     = entrata ? "+ " : "− ";
     var cls     = entrata ? "voce-entrata" : "voce-uscita";
 

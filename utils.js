@@ -50,6 +50,23 @@ function escapeHtml(s){
   });
 }
 
+// toast informativo non-bloccante (auto-dismiss)
+function toastInfo(msg){
+  try{
+    var t = document.createElement("div");
+    t.className = "toast-info";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    // forza reflow poi mostra
+    void t.offsetHeight;
+    t.classList.add("show");
+    setTimeout(function(){
+      t.classList.remove("show");
+      setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 300);
+    }, 2600);
+  }catch(e){}
+}
+
 // ── HELPER SALDI (net-balance, valuta base) ──
 function mioMembro(){
   return membriCorrente.find(function(m){ return m.user_id === (profiloUtente && profiloUtente.id); });
