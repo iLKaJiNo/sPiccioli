@@ -41,6 +41,7 @@ async function caricaSolo(){
   soloCategorie = rc.data || [];
   var rch = await sb.from("solo_chiusure").select("*").order("seq", { ascending: false });
   soloChiusure = rch.data || [];
+  await caricaRicorrentiSolo();
   renderSolo();
 }
 
