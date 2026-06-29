@@ -157,3 +157,15 @@
 .cat-icona-inp{width:52px;flex:none;text-align:center;}
 .cat-nome-inp{flex:1;min-width:0;}
 .cat-add{flex-shrink:0;padding:0 16px;}
+
+/* ── S7c: archivio / chiusura mensile ── */
+.arch-sum{font-family:'Nunito',sans-serif;font-weight:700;font-size:.9rem;color:var(--br-text);margin-bottom:12px;line-height:1.5;}
+.btn-chiudi-mese{width:100%;height:50px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--br-cyan),#00b8d4);color:#06232a;font-family:'Baloo 2',cursive;font-weight:800;font-size:1rem;cursor:pointer;}
+.btn-chiudi-mese:active{transform:scale(.98);}
+.arch-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--br-line);cursor:pointer;}
+.arch-row:last-child{border-bottom:none;}
+.arch-main{flex:1;min-width:0;}
+.arch-titolo{font-weight:700;font-size:1rem;color:var(--br-text);}
+.arch-meta{font-family:'Nunito',sans-serif;font-weight:600;font-size:.78rem;color:var(--br-dim);margin-top:2px;}
+.btn-ripristina{flex-shrink:0;background:rgba(255,255,255,.06);border:1px solid var(--br-line);border-radius:10px;color:var(--br-cyan);font-family:'Baloo 2',cursive;font-weight:700;font-size:.8rem;padding:6px 12px;cursor:pointer;}
+.mv-lock{font-size:1.1rem;line-height:1;flex-shrink:0;padding:0 4px;opacity:.8;}

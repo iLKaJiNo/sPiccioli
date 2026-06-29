@@ -104,10 +104,15 @@ if("serviceWorker" in navigator){
     <div class="cassa-tab" data-tab="membri">
       <div id="membri-body"></div>
     </div>
+    <!-- TAB ARCHIVIO (solo coppia) -->
+    <div class="cassa-tab" data-tab="archivio">
+      <div id="archivio-body"></div>
+    </div>
   </div>
 
   <nav class="cassa-nav">
     <button data-tab="conti" class="attiva" onclick="switchCassaTab('conti')"><span class="nav-ico">💰</span><span>Conti</span></button>
+    <button data-tab="archivio" id="nav-archivio" style="display:none;" onclick="switchCassaTab('archivio')"><span class="nav-ico">📆</span><span>Archivio</span></button>
     <button data-tab="membri" onclick="switchCassaTab('membri')"><span class="nav-ico">👥</span><span>Membri</span></button>
   </nav>
 </div>
@@ -356,6 +361,26 @@ if("serviceWorker" in navigator){
       <button class="m-annulla" onclick="chiudiEliminaCassa()">Annulla</button>
       <button class="m-conferma m-elimina" id="elimina-btn" onclick="confermaEliminaCassa()" disabled>Elimina</button>
     </div>
+  </div>
+</div>
+
+<!-- MODALE — CHIUDI MESE (anteprima) -->
+<div class="modal-overlay" id="modal-chiudi-mese" onclick="if(event.target===this)chiudiModalChiudiMese()">
+  <div class="br-modal">
+    <h2>Chiudi il mese</h2>
+    <div id="chiudi-mese-body"></div>
+    <div class="m-btns" style="margin-top:8px;">
+      <button class="m-annulla" onclick="chiudiModalChiudiMese()">Annulla</button>
+      <button class="m-conferma" id="chiudi-mese-btn" onclick="confermaChiudiMese()">📆 Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE — DETTAGLIO CHIUSURA (sola lettura) -->
+<div class="modal-overlay" id="modal-dettaglio-chiusura" onclick="if(event.target===this)chiudiDettaglioChiusura()">
+  <div class="br-modal">
+    <div id="dettaglio-chiusura-body"></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiDettaglioChiusura()">Chiudi</button></div>
   </div>
 </div>
 

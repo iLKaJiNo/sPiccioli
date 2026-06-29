@@ -8,6 +8,7 @@
 function intestaCassa(){
   document.getElementById("cassa-emoji").textContent  = emojiTema(cassaCorrente.tema);
   document.getElementById("cassa-titolo").textContent = cassaCorrente.nome;
+  aggiornaNavArchivio();
 }
 function skeletonsCassa(){
   document.getElementById("saldi-list").innerHTML = '<div class="sk"></div><div class="sk"></div>';
@@ -24,6 +25,7 @@ function switchCassaTab(tab){
     b.classList.toggle("attiva", b.getAttribute("data-tab") === tab);
   });
   if(tab === "membri") renderMembri();
+  if(tab === "archivio") renderArchivio();
 }
 
 // nome con fallback: membro → profilo → "Senza nome". Cerca tra TUTTI i membri.
@@ -142,7 +144,10 @@ function renderMovimenti(){
   wrap.innerHTML = movs.map(function(mov){
     var temp = String(mov.id).indexOf("temp-") === 0;
     var val  = mov.valuta_mov || "EUR";
-    var del  = '<button class="mv-del" onclick="event.stopPropagation();eliminaMovimento(\'' + mov.id + '\')" title="Elimina">×</button>';
+    var isApertura = mov.origine === "apertura";
+    var del  = isApertura
+      ? '<span class="mv-lock" title="Saldo riportato dal mese precedente">🔒</span>'
+      : '<button class="mv-del" onclick="event.stopPropagation();eliminaMovimento(\'' + mov.id + '\')" title="Elimina">×</button>';
     var apri = temp ? "" : ' onclick="apriDettaglio(\'' + mov.id + '\')"';
 
     if(mov.tipo === "settle"){
@@ -156,7 +161,7 @@ function renderMovimenti(){
     }
 
     var pag = (mov.paganti || []).map(function(p){ return escapeHtml(nomi[p.membro_id] || "?"); }).join(", ");
-    var badge = (mov.metodo_split && mov.metodo_split !== "equo")
+    var badge = (!isApertura && mov.metodo_split && mov.metodo_split !== "equo")
       ? '<span class="mv-badge">' + etichettaMetodo(mov.metodo_split) + '</span>' : '';
     var valBadge = (val !== (cassaCorrente.valuta_base||"EUR")) ? '<span class="mv-badge">' + val + '</span>' : '';
     var ico = mov.categoria ? (iconaCat(mov.categoria) + " ") : "";
@@ -738,3 +743,167 @@ async function eliminaMovimento(id){
   try{ await post({ action: "deleteMovimento", id: id }); }
   catch(e){ if(!errDiRete(e)){ S.movimenti = backup; renderCassa(); alert("Eliminazione non riuscita."); } }
 }
+
+// ════════════════════════════════════════════════════════
+//  S7c — CICLO MENSILE (coppia): archivio + chiusura/ripristino
+// ════════════════════════════════════════════════════════
+function aggiornaNavArchivio(){
+  var b = document.getElementById("nav-archivio");
+  if(b) b.style.display = (cassaCorrente && cassaCorrente.tipo === "coppia") ? "" : "none";
+}
+
+// anteprima chiusura calcolata client-side, coerente col motore server
+function _anteprimaChiusura(){
+  var movs = (S.movimenti || []).filter(function(m){ return String(m.id).indexOf("temp-") !== 0; });
+  var nSpese = 0, nSettle = 0, totaleSpeso = 0, ponti = {};
+  movs.forEach(function(mov){
+    var t = parseFloat(mov.tasso_cambio) || 1;
+    if(mov.tipo === "settle"){ nSettle++; return; }
+    if(mov.origine === "apertura"){ return; } // il riporto non è spesa
+    nSpese++;
+    (mov.paganti || []).forEach(function(p){
+      var v = (parseFloat(p.importo)||0) * t;
+      ponti[p.membro_id] = (ponti[p.membro_id] || 0) + v;
+      totaleSpeso += v;
+    });
+  });
+  Object.keys(ponti).forEach(function(k){ ponti[k] = Math.round(ponti[k]*100)/100; });
+  totaleSpeso = Math.round(totaleSpeso*100)/100;
+  var saldi = calcolaSaldi(), creditore = null, debitore = null, residuo = 0;
+  membriCorrente.forEach(function(m){
+    var s = saldi[m.id] || 0;
+    if(s > 0.005){ creditore = m.id; residuo = Math.round(s*100)/100; }
+    else if(s < -0.005){ debitore = m.id; }
+  });
+  return { nSpese:nSpese, nSettle:nSettle, totaleSpeso:totaleSpeso,
+           ponti:ponti, creditore:creditore, debitore:debitore, residuo:residuo };
+}
+
+function renderArchivio(){
+  var wrap = document.getElementById("archivio-body");
+  if(!wrap) return;
+  var html = "";
+  var movsReali = (S.movimenti || []).filter(function(m){
+    return String(m.id).indexOf("temp-") !== 0 && m.origine !== "apertura";
+  });
+  // mese corrente
+  html += '<div class="card"><div class="card-titolo">Mese corrente</div>';
+  if(!movsReali.length){
+    html += '<div class="mv-empty" style="padding:16px 6px;">Nessun movimento da chiudere.</div>';
+  } else {
+    var ap = _anteprimaChiusura();
+    html += '<div class="arch-sum">' + ap.nSpese + (ap.nSpese===1?' spesa':' spese')
+         + (ap.nSettle ? ' · ' + ap.nSettle + (ap.nSettle===1?' rimborso':' rimborsi') : '')
+         + ' · totale <b>' + eur(ap.totaleSpeso) + '</b></div>';
+    html += '<button class="btn-chiudi-mese" onclick="apriChiudiMese()">📆 Chiudi il mese</button>';
+  }
+  html += '</div>';
+  // storico
+  var ch = chiusureCassa || [];
+  html += '<div class="card"><div class="card-titolo">Mesi archiviati</div>';
+  if(!ch.length){
+    html += '<div class="mv-empty" style="padding:16px 6px;">Ancora nessun mese chiuso.</div>';
+  } else {
+    html += ch.map(function(c, idx){
+      var ripr = (idx === 0)
+        ? '<button class="btn-ripristina" onclick="event.stopPropagation();confermaRipristino()">↩︎ Ripristina</button>' : '';
+      return '<div class="arch-row" onclick="apriDettaglioChiusura(\'' + c.id + '\')">'
+        + '<div class="arch-main"><div class="arch-titolo">Chiusura #' + c.seq + '</div>'
+        + '<div class="arch-meta">' + fmtLong(c.chiusa_il) + ' · ' + eur(c.totale_speso) + '</div></div>'
+        + ripr + '<div class="cassa-freccia">›</div></div>';
+    }).join("");
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+function apriChiudiMese(){
+  var ap = _anteprimaChiusura(), nomi = nomiMembri();
+  var html = '<p>Stai per chiudere il mese. Ecco cosa succederà:</p>';
+  html += '<div class="det-sez"><div class="det-sez-h">Speso da ciascuno (va nel suo Solo)</div>';
+  var keys = Object.keys(ap.ponti);
+  if(!keys.length){ html += '<div class="det-riga"><span>Nessuna spesa</span><span>—</span></div>'; }
+  keys.forEach(function(k){
+    html += '<div class="det-riga"><span>' + escapeHtml(nomi[k]||"?") + '</span><span>− ' + eur(ap.ponti[k]) + '</span></div>';
+  });
+  html += '</div>';
+  if(ap.creditore && ap.debitore && ap.residuo >= 0.01){
+    html += '<div class="det-sez"><div class="det-sez-h">Riportato al mese nuovo</div>'
+      + '<div class="det-riga"><span>' + escapeHtml(nomi[ap.debitore]||"?") + ' deve a '
+      + escapeHtml(nomi[ap.creditore]||"?") + '</span><span>' + eur(ap.residuo) + '</span></div></div>';
+  } else {
+    html += '<div class="det-sez"><div class="det-riga"><span>Siete in pari: niente da riportare 🎉</span></div></div>';
+  }
+  html += '<p style="margin-top:6px;">I movimenti vengono archiviati e la cassa riparte pulita. Potrai ripristinare l\'ultimo mese se serve.</p>';
+  document.getElementById("chiudi-mese-body").innerHTML = html;
+  document.getElementById("modal-chiudi-mese").classList.add("attivo");
+}
+function chiudiModalChiudiMese(){ document.getElementById("modal-chiudi-mese").classList.remove("attivo"); }
+
+async function confermaChiudiMese(){
+  if(!navigator.onLine){ alert("Serve una connessione per chiudere il mese."); return; }
+  var btn = document.getElementById("chiudi-mese-btn"); if(btn) btn.disabled = true;
+  var r = await sb.rpc("chiudi_mese_coppia", { p_cassa_id: cassaCorrente.id });
+  if(btn) btn.disabled = false;
+  if(r.error){ alert("Errore nella chiusura: " + r.error.message); return; }
+  chiudiModalChiudiMese();
+  await caricaCassa();
+  switchCassaTab("archivio");
+}
+
+async function confermaRipristino(){
+  if(!navigator.onLine){ alert("Serve una connessione per ripristinare."); return; }
+  if(!confirm("Ripristinare l'ultimo mese chiuso?\nI movimenti archiviati tornano nella cassa e quell'archivio viene rimosso.")) return;
+  var r = await sb.rpc("ripristina_mese_coppia", { p_cassa_id: cassaCorrente.id });
+  if(r.error){
+    var m = r.error.message || "";
+    if(m.indexOf("movimenti nel mese corrente") > -1){
+      alert("Ci sono movimenti nel mese corrente: eliminali prima di ripristinare (il ripristino li perderebbe).");
+    } else { alert("Errore nel ripristino: " + m); }
+    return;
+  }
+  var avvisi = (r.data && r.data.avvisi) || [];
+  await caricaCassa();
+  switchCassaTab("archivio");
+  if(avvisi.length){ alert("Ripristino completato, con avvisi:\n\n• " + avvisi.join("\n• ")); }
+}
+
+function apriDettaglioChiusura(id){
+  var c = (chiusureCassa || []).find(function(x){ return String(x.id) === String(id); });
+  if(!c) return;
+  var nomi = nomiMembri(), movs = c.movimenti || [];
+  var html = '<div class="det-top"><div class="det-titolo">Chiusura #' + c.seq + '</div>'
+    + '<div class="det-imp">' + eur(c.totale_speso) + '</div>'
+    + '<div class="det-data">' + fmtLong(c.chiusa_il) + '</div></div>';
+  // saldi finali
+  html += '<div class="det-sez"><div class="det-sez-h">Saldi a fine mese</div>';
+  var saldi = c.saldi || {}, kk = Object.keys(saldi);
+  if(!kk.length){ html += '<div class="det-riga"><span>—</span><span></span></div>'; }
+  kk.forEach(function(k){
+    var v = parseFloat(saldi[k]) || 0;
+    var seg = v > 0.005 ? "+ " : (v < -0.005 ? "− " : "");
+    html += '<div class="det-riga"><span>' + escapeHtml(nomi[k]||"?") + '</span><span>' + seg + eur(Math.abs(v)) + '</span></div>';
+  });
+  html += '</div>';
+  // depositato nei Solo
+  html += '<div class="det-sez"><div class="det-sez-h">Depositato nei Solo</div>';
+  var ponte = c.ponte || {}, pk = Object.keys(ponte);
+  if(!pk.length){ html += '<div class="det-riga"><span>—</span><span></span></div>'; }
+  pk.forEach(function(k){
+    var info = ponte[k];
+    var imp = (info && info.importo != null) ? info.importo : info;
+    html += '<div class="det-riga"><span>' + escapeHtml(nomi[k]||"?") + '</span><span>− ' + eur(parseFloat(imp)||0) + '</span></div>';
+  });
+  html += '</div>';
+  // movimenti archiviati
+  html += '<div class="det-sez"><div class="det-sez-h">Movimenti (' + movs.length + ')</div>';
+  movs.forEach(function(m){
+    var val = m.valuta_mov || "EUR";
+    var et = m.tipo === "settle" ? "💸 Rimborso" : escapeHtml(m.descrizione || "(senza descrizione)");
+    html += '<div class="det-riga"><span>' + et + ' <small>' + fmt(m.data) + '</small></span><span>' + importoCon(m.importo, val) + '</span></div>';
+  });
+  html += '</div>';
+  document.getElementById("dettaglio-chiusura-body").innerHTML = html;
+  document.getElementById("modal-dettaglio-chiusura").classList.add("attivo");
+}
+function chiudiDettaglioChiusura(){ document.getElementById("modal-dettaglio-chiusura").classList.remove("attivo"); }
