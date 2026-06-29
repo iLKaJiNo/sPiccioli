@@ -18,6 +18,8 @@ async function apriCassa(id){
   if(!cassaCorrente) return;
   mostraSchermata("cassa-screen");
   intestaCassa();
+  var _br = document.getElementById("btn-ricorrenti-cassa");
+  if(_br) _br.style.display = (cassaCorrente.tipo === "coppia") ? "block" : "none";
   if(cassaCorrente.tipo === "coppia" && navigator.onLine){
     try{
       var rmat = await sb.rpc("materializza_ricorrenti_cassa", { p_cassa_id: cassaCorrente.id });
@@ -68,6 +70,8 @@ async function caricaCassa(){
     } else {
       chiusureCassa = [];
     }
+
+    await caricaRicorrentiCassa();
 
     dotC("ok", "Sincronizzata");
     aggiornaBadgeCoda();

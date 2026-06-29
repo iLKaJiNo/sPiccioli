@@ -94,6 +94,8 @@ if("serviceWorker" in navigator){
         <div id="saldi-list"></div>
       </div>
       <div id="settle-extra"></div>
+      <div id="ric-banner-cassa"></div>
+      <button id="btn-ricorrenti-cassa" class="mb-azione-btn" style="display:none;margin-bottom:12px;" onclick="apriRicorrenti('cassa')">🔁 Fisse e previste</button>
       <button class="btn-nuova-spesa" onclick="apriNuovaSpesa()">➕ Nuova spesa</button>
       <div>
         <div class="card-titolo" style="margin-bottom:8px;">Movimenti</div>
@@ -125,9 +127,11 @@ if("serviceWorker" in navigator){
       <span class="ch-emoji">🐷</span>
       <h1>Il mio Solo</h1>
     </div>
+    <button class="btn-invita" onclick="apriRicorrenti('solo')" title="Fisse e previste">🔁 Fisse</button>
     <button class="btn-invita" onclick="apriArchivioSolo()" title="Archivio mesi">📆 Archivio</button>
   </div>
   <div class="solo-body">
+    <div id="ric-banner-solo"></div>
     <div class="card solo-saldo-card">
       <div class="card-titolo">Saldo</div>
       <div class="solo-saldo-val pos" id="solo-saldo">0,00&nbsp;€</div>
@@ -204,6 +208,71 @@ if("serviceWorker" in navigator){
   <div class="br-modal">
     <div id="dettaglio-chiusura-solo-body"></div>
     <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiDettaglioChiusuraSolo()">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- OVERLAY — RICORRENTI (lista) -->
+<div class="modal-overlay" id="ricorrenti-overlay" onclick="if(event.target===this)chiudiRicorrenti()">
+  <div class="br-modal">
+    <h2>🔁 Fisse e previste</h2>
+    <div id="ricorrenti-body"></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiRicorrenti()">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- MODALE — FORM RICORRENTE -->
+<div class="modal-overlay" id="modal-ricorrente" onclick="if(event.target===this)chiudiFormRicorrente()">
+  <div class="br-modal">
+    <h2 id="modal-ricorrente-titolo">Nuova fissa / prevista</h2>
+    <div class="m-row"><label>📝 Nome</label><input type="text" id="ric-nome" placeholder="es. Netflix, Affitto"></div>
+    <div class="m-row"><label>💰 Importo (EUR)</label><input type="number" id="ric-importo" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal"></div>
+    <div class="m-row"><label>🏷️ Categoria</label><select id="ric-categoria"></select></div>
+    <div class="m-row" id="ric-tipo-row"><label>Tipo</label>
+      <div class="split-seg" id="ric-tipo-seg">
+        <button class="split-btn" data-v="uscita" onclick="setRicTipo('uscita')">Uscita</button>
+        <button class="split-btn" data-v="entrata" onclick="setRicTipo('entrata')">Entrata</button>
+      </div>
+    </div>
+    <div class="m-row" id="ric-pagante-row"><label>🙂 Paga sempre</label><select id="ric-pagante"></select></div>
+    <div class="m-row"><label>Registrazione</label>
+      <div class="split-seg" id="ric-auto-seg">
+        <button class="split-btn" data-v="auto" onclick="setRicAuto(true)">⚡ Automatica</button>
+        <button class="split-btn" data-v="man" onclick="setRicAuto(false)">✋ Manuale</button>
+      </div>
+    </div>
+    <div class="m-row"><label>Frequenza</label>
+      <div class="split-seg" id="ric-ripeti-seg">
+        <button class="split-btn" data-v="si" onclick="setRicRipeti(true)">🔁 Ricorrente</button>
+        <button class="split-btn" data-v="no" onclick="setRicRipeti(false)">📌 Una-tantum</button>
+      </div>
+    </div>
+    <div id="ric-ricorrenza">
+      <div class="m-row"><label>Ogni</label>
+        <div style="display:flex;gap:8px;">
+          <input type="number" id="ric-ogni" min="1" step="1" value="1" style="width:80px;flex:none;">
+          <select id="ric-unita" style="flex:1;">
+            <option value="giorni">giorni</option><option value="settimane">settimane</option>
+            <option value="mesi" selected>mesi</option><option value="anni">anni</option>
+          </select>
+        </div>
+      </div>
+      <div class="m-row" id="ric-limite-wrap"><label>Fine</label>
+        <div class="split-seg" id="ric-limite-seg">
+          <button class="split-btn" data-v="nessuno" onclick="setRicLimite('nessuno')">Nessun limite</button>
+          <button class="split-btn" data-v="data" onclick="setRicLimite('data')">Fino a</button>
+          <button class="split-btn" data-v="volte" onclick="setRicLimite('volte')">N volte</button>
+        </div>
+        <div id="ric-fine-wrap" style="margin-top:8px;"><input type="date" id="ric-fine-data"></div>
+        <div id="ric-volte-wrap" style="margin-top:8px;"><input type="number" id="ric-volte" min="1" step="1" placeholder="quante volte"></div>
+      </div>
+    </div>
+    <div class="m-row"><label>📅 Prima scadenza</label><input type="date" id="ric-scadenza"></div>
+    <div class="modal-error" id="ric-form-error"></div>
+    <div class="m-btns">
+      <button class="m-annulla" onclick="chiudiFormRicorrente()">Annulla</button>
+      <button class="m-conferma" onclick="salvaRicorrente()">Salva</button>
+    </div>
+    <button class="mb-danger" id="ric-elimina-btn" style="display:none;margin-top:10px;" onclick="eliminaRicorrente()">🗑️ Elimina</button>
   </div>
 </div>
 
@@ -422,6 +491,7 @@ if("serviceWorker" in navigator){
 <script src="./api.js"></script>
 <script src="./cassa.js"></script>
 <script src="./solo.js"></script>
+<script src="./ricorrenti.js"></script>
 <script src="./auth.js"></script>
 <script src="./app.js"></script>
 </body>
