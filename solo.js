@@ -9,6 +9,7 @@
 // ── STATO ──
 var soloVoci      = [];
 var soloCategorie = [];
+var soloChiusure  = [];
 var _voceTipo     = "uscita";
 var _soloCatEditId = null;
 
@@ -31,6 +32,8 @@ async function caricaSolo(){
   soloVoci = rv.data || [];
   var rc = await sb.from("solo_categorie").select("*").order("ordine").order("nome");
   soloCategorie = rc.data || [];
+  var rch = await sb.from("solo_chiusure").select("*").order("seq", { ascending: false });
+  soloChiusure = rch.data || [];
   renderSolo();
 }
 
@@ -88,6 +91,9 @@ function renderSolo(){
       +   azione
       + '</div>';
   }).join("");
+
+  var _ov = document.getElementById("solo-archivio-overlay");
+  if(_ov && _ov.classList.contains("attivo")) renderArchivioSolo();
 }
 
 // ════════════════════════════════════════════════════════
@@ -248,6 +254,7 @@ function initRealtimeSolo(){
   _rtSolo = sb.channel("solo")
     .on("postgres_changes", { event: "*", schema: "public", table: "solo_voci" },      debounceSolo)
     .on("postgres_changes", { event: "*", schema: "public", table: "solo_categorie" }, debounceSolo)
+    .on("postgres_changes", { event: "*", schema: "public", table: "solo_chiusure" },  debounceSolo)
     .subscribe();
 }
 function debounceSolo(){
@@ -260,3 +267,113 @@ function debounceSolo(){
 function chiudiRealtimeSolo(){
   if(_rtSolo){ sb.removeChannel(_rtSolo); _rtSolo = null; }
 }
+
+// ════════════════════════════════════════════════════════
+//  S7c-2 — CICLO MENSILE SOLO: archivio + chiusura/ripristino
+// ════════════════════════════════════════════════════════
+function apriArchivioSolo(){
+  renderArchivioSolo();
+  document.getElementById("solo-archivio-overlay").classList.add("attivo");
+}
+function chiudiArchivioSolo(){ document.getElementById("solo-archivio-overlay").classList.remove("attivo"); }
+
+function _totaliSolo(){
+  var ent = 0, usc = 0;
+  (soloVoci || []).forEach(function(v){
+    var imp = parseFloat(v.importo) || 0;
+    if(v.tipo === "entrata") ent += imp; else usc += imp;
+  });
+  ent = Math.round(ent*100)/100; usc = Math.round(usc*100)/100;
+  return { ent:ent, usc:usc, saldo: Math.round((ent-usc)*100)/100, n:(soloVoci||[]).length };
+}
+
+function renderArchivioSolo(){
+  var wrap = document.getElementById("solo-archivio-body");
+  if(!wrap) return;
+  var html = "";
+  var t = _totaliSolo();
+  html += '<div class="det-sez"><div class="det-sez-h">Mese corrente</div>';
+  if(!t.n){
+    html += '<div class="mv-empty" style="padding:14px 6px;">Registro vuoto: niente da chiudere.</div>';
+  } else {
+    html += '<div class="det-riga"><span>Entrate</span><span class="voce-entrata">+ ' + eur(t.ent) + '</span></div>';
+    html += '<div class="det-riga"><span>Uscite</span><span class="voce-uscita">− ' + eur(t.usc) + '</span></div>';
+    html += '<div class="det-riga"><span>Saldo</span><span>' + (t.saldo<0?"− ":"") + eur(t.saldo) + '</span></div>';
+    html += '<button class="btn-chiudi-mese" style="margin-top:12px;" onclick="confermaChiudiMeseSolo()">📆 Chiudi il mese</button>';
+  }
+  html += '</div>';
+  var ch = soloChiusure || [];
+  html += '<div class="det-sez"><div class="det-sez-h">Mesi archiviati</div>';
+  if(!ch.length){
+    html += '<div class="mv-empty" style="padding:14px 6px;">Ancora nessun mese chiuso.</div>';
+  } else {
+    html += ch.map(function(c, idx){
+      var ripr = (idx === 0)
+        ? '<button class="btn-ripristina" onclick="event.stopPropagation();confermaRipristinoSolo()">↩︎ Ripristina</button>' : '';
+      var sd = parseFloat(c.saldo)||0;
+      return '<div class="arch-row" onclick="apriDettaglioChiusuraSolo(\'' + c.id + '\')">'
+        + '<div class="arch-main"><div class="arch-titolo">Chiusura #' + c.seq + '</div>'
+        + '<div class="arch-meta">' + fmtLong(c.chiusa_il) + ' · saldo ' + (sd<0?"−":"") + eur(sd) + '</div></div>'
+        + ripr + '<div class="cassa-freccia">›</div></div>';
+    }).join("");
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+async function confermaChiudiMeseSolo(){
+  if(!navigator.onLine){ alert("Serve una connessione per chiudere il mese."); return; }
+  var t = _totaliSolo();
+  if(!t.n){ alert("Registro vuoto: niente da chiudere."); return; }
+  var msg = "Chiudere il mese?\n\nEntrate: " + eur(t.ent) + "\nUscite: " + eur(t.usc)
+    + "\nSaldo: " + (t.saldo<0?"−":"") + eur(t.saldo)
+    + "\n\nLe " + t.n + " voci verranno archiviate e il registro riparte pulito. Potrai ripristinare l'ultimo mese.";
+  if(!confirm(msg)) return;
+  var r = await sb.rpc("chiudi_mese_solo");
+  if(r.error){ alert("Errore nella chiusura: " + r.error.message); return; }
+  await caricaSolo();
+  renderArchivioSolo();
+}
+
+async function confermaRipristinoSolo(){
+  if(!navigator.onLine){ alert("Serve una connessione per ripristinare."); return; }
+  if(!confirm("Ripristinare l'ultimo mese chiuso?\nLe voci archiviate tornano nel registro e quell'archivio viene rimosso.")) return;
+  var r = await sb.rpc("ripristina_mese_solo");
+  if(r.error){
+    var m = r.error.message || "";
+    if(m.indexOf("registro corrente ha") > -1){
+      alert("Il registro corrente non è vuoto: svuotalo prima di ripristinare (il ripristino lo sovrascriverebbe).");
+    } else { alert("Errore nel ripristino: " + m); }
+    return;
+  }
+  await caricaSolo();
+  renderArchivioSolo();
+}
+
+function apriDettaglioChiusuraSolo(id){
+  var c = (soloChiusure || []).find(function(x){ return String(x.id) === String(id); });
+  if(!c) return;
+  var voci = c.voci || [];
+  var html = '<div class="det-top"><div class="det-titolo">Chiusura #' + c.seq + '</div>'
+    + '<div class="det-data">' + fmtLong(c.chiusa_il) + '</div></div>';
+  html += '<div class="det-sez">';
+  html += '<div class="det-riga"><span>Entrate</span><span class="voce-entrata">+ ' + eur(parseFloat(c.tot_entrate)||0) + '</span></div>';
+  html += '<div class="det-riga"><span>Uscite</span><span class="voce-uscita">− ' + eur(parseFloat(c.tot_uscite)||0) + '</span></div>';
+  var sd = parseFloat(c.saldo)||0;
+  html += '<div class="det-riga"><span>Saldo</span><span>' + (sd<0?"− ":"") + eur(sd) + '</span></div>';
+  html += '</div>';
+  html += '<div class="det-sez"><div class="det-sez-h">Voci (' + voci.length + ')</div>';
+  voci.forEach(function(v){
+    var entrata = v.tipo === "entrata";
+    var ico = v.categoria ? iconaSoloCat(v.categoria) : (entrata ? "💰" : "💸");
+    var testo = v.nota || v.categoria || (entrata ? "Entrata" : "Uscita");
+    var seg = entrata ? "+ " : "− ";
+    var cls = entrata ? "voce-entrata" : "voce-uscita";
+    html += '<div class="det-riga"><span>' + ico + ' ' + escapeHtml(testo) + ' <small>' + fmt(v.data) + '</small></span>'
+      + '<span class="' + cls + '">' + seg + importoCon(parseFloat(v.importo)||0, "EUR") + '</span></div>';
+  });
+  html += '</div>';
+  document.getElementById("dettaglio-chiusura-solo-body").innerHTML = html;
+  document.getElementById("modal-dettaglio-chiusura-solo").classList.add("attivo");
+}
+function chiudiDettaglioChiusuraSolo(){ document.getElementById("modal-dettaglio-chiusura-solo").classList.remove("attivo"); }

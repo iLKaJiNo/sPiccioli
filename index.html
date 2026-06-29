@@ -125,6 +125,7 @@ if("serviceWorker" in navigator){
       <span class="ch-emoji">🐷</span>
       <h1>Il mio Solo</h1>
     </div>
+    <button class="btn-invita" onclick="apriArchivioSolo()" title="Archivio mesi">📆 Archivio</button>
   </div>
   <div class="solo-body">
     <div class="card solo-saldo-card">
@@ -186,6 +187,23 @@ if("serviceWorker" in navigator){
     <div class="m-btns">
       <button class="m-conferma" onclick="chiudiSoloCat()">Chiudi</button>
     </div>
+  </div>
+</div>
+
+<!-- OVERLAY — ARCHIVIO SOLO -->
+<div class="modal-overlay" id="solo-archivio-overlay" onclick="if(event.target===this)chiudiArchivioSolo()">
+  <div class="br-modal">
+    <h2>📆 Archivio Solo</h2>
+    <div id="solo-archivio-body"></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiArchivioSolo()">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- MODALE — DETTAGLIO CHIUSURA SOLO (sola lettura) -->
+<div class="modal-overlay" id="modal-dettaglio-chiusura-solo" onclick="if(event.target===this)chiudiDettaglioChiusuraSolo()">
+  <div class="br-modal">
+    <div id="dettaglio-chiusura-solo-body"></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiDettaglioChiusuraSolo()">Chiudi</button></div>
   </div>
 </div>
 
