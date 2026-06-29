@@ -753,7 +753,11 @@ function aggiornaNavArchivio(){
   if(b) b.style.display = (cassaCorrente && cassaCorrente.tipo === "coppia") ? "" : "none";
 }
 
-// anteprima chiusura calcolata client-side, coerente col motore server
+// ⚠️ ACCOPPIAMENTO: questo preview replica la logica di chiudi_mese_coppia
+// (SQL, server). È SOLO informativo — i numeri reali li calcola il server
+// alla chiusura. Se cambi il calcolo di ponte/saldi qui, allinea anche la
+// funzione SQL chiudi_mese_coppia (e viceversa), o il preview divergerà
+// dal risultato. Ponte = Σ pagato su tipo='spesa' ×tasso, per membro.
 function _anteprimaChiusura(){
   var movs = (S.movimenti || []).filter(function(m){ return String(m.id).indexOf("temp-") !== 0; });
   var nSpese = 0, nSettle = 0, totaleSpeso = 0, ponti = {};
