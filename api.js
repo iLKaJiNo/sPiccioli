@@ -18,6 +18,13 @@ async function apriCassa(id){
   if(!cassaCorrente) return;
   mostraSchermata("cassa-screen");
   intestaCassa();
+  if(cassaCorrente.tipo === "coppia" && navigator.onLine){
+    try{
+      var rmat = await sb.rpc("materializza_ricorrenti_cassa", { p_cassa_id: cassaCorrente.id });
+      var n = (rmat && rmat.data && rmat.data.emesse) || 0;
+      if(n > 0) toastInfo("🔁 " + n + (n===1 ? " spesa ricorrente registrata" : " spese ricorrenti registrate"));
+    }catch(e){ /* non bloccare l'apertura della cassa */ }
+  }
   skeletonsCassa();
   await caricaCassa();
   switchCassaTab("conti");

@@ -169,3 +169,14 @@
 .arch-meta{font-family:'Nunito',sans-serif;font-weight:600;font-size:.78rem;color:var(--br-dim);margin-top:2px;}
 .btn-ripristina{flex-shrink:0;background:rgba(255,255,255,.06);border:1px solid var(--br-line);border-radius:10px;color:var(--br-cyan);font-family:'Baloo 2',cursive;font-weight:700;font-size:.8rem;padding:6px 12px;cursor:pointer;}
 .mv-lock{font-size:1.1rem;line-height:1;flex-shrink:0;padding:0 4px;opacity:.8;}
+
+/* ── S7d: toast informativo on-access ── */
+.toast-info{
+  position:fixed; left:50%; bottom:88px; transform:translateX(-50%) translateY(12px);
+  background:var(--br-bg2); border:1px solid var(--br-line); color:var(--br-text);
+  font-family:'Nunito',sans-serif; font-weight:700; font-size:.86rem;
+  padding:11px 18px; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.4);
+  z-index:2000; opacity:0; transition:opacity .3s, transform .3s; max-width:86%; text-align:center;
+  pointer-events:none;
+}
+.toast-info.show{ opacity:1; transform:translateX(-50%) translateY(0); }
