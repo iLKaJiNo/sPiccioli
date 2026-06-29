@@ -100,12 +100,18 @@ function errDiRete(err){
 var _rtCassa = null, _rtTimer = null;
 function initRealtimeCassa(){
   chiudiRealtimeCassa();
-  _rtCassa = sb.channel("cassa-" + cassaCorrente.id)
-    .on("postgres_changes", { event: "*", schema: "public" }, function(){
-      clearTimeout(_rtTimer);
-      _rtTimer = setTimeout(function(){ if(cassaCorrente) caricaCassa(); }, 700);
-    })
-    .subscribe();
+  var rid = cassaCorrente.id;
+  var ricarica = function(){
+    clearTimeout(_rtTimer);
+    _rtTimer = setTimeout(function(){ if(cassaCorrente) caricaCassa(); }, 700);
+  };
+  var ch = sb.channel("cassa-" + rid);
+  ["movimenti","membri","categorie","chiusure_coppia","ricorrenti"].forEach(function(tab){
+    ch.on("postgres_changes",
+      { event: "*", schema: "public", table: tab, filter: "cassa_id=eq." + rid },
+      ricarica);
+  });
+  _rtCassa = ch.subscribe();
 }
 function chiudiRealtimeCassa(){
   if(_rtCassa){ sb.removeChannel(_rtCassa); _rtCassa = null; }
