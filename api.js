@@ -4,6 +4,7 @@
 // ════════════════════════════════════════════════════════
 
 var categorieCassa = [];
+var chiusureCassa = [];
 
 function dotC(cls, txt){
   var d = document.getElementById("cassa-dot");
@@ -51,6 +52,15 @@ async function caricaCassa(){
     var rcat = await sb.from("categorie").select("*")
       .eq("cassa_id", cassaCorrente.id).order("ordine").order("nome");
     categorieCassa = rcat.data || [];
+
+    if(cassaCorrente.tipo === "coppia"){
+      var rch = await sb.from("chiusure_coppia").select("*")
+        .eq("cassa_id", cassaCorrente.id)
+        .order("seq", { ascending: false });
+      chiusureCassa = rch.data || [];
+    } else {
+      chiusureCassa = [];
+    }
 
     dotC("ok", "Sincronizzata");
     aggiornaBadgeCoda();
