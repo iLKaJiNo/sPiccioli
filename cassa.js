@@ -61,6 +61,7 @@ function renderCassa(){
   renderMovimenti();
   var mt = document.querySelector('#cassa-screen .cassa-tab[data-tab="membri"]');
   if(mt && mt.classList.contains("attiva")) renderMembri();
+  sillyCheck();
 }
 
 // ── SALDI ──
@@ -147,6 +148,7 @@ function renderMovimenti(){
     return;
   }
   var nomi = nomiMembri();
+  var _trofeoId = sillyTrofeoMovId();
   wrap.innerHTML = movs.map(function(mov){
     var temp = String(mov.id).indexOf("temp-") === 0;
     var val  = mov.valuta_mov || "EUR";
@@ -172,9 +174,10 @@ function renderMovimenti(){
     var valBadge = (val !== (cassaCorrente.valuta_base||"EUR")) ? '<span class="mv-badge">' + val + '</span>' : '';
     var ico = mov.categoria ? (iconaCat(mov.categoria) + " ") : "";
     var ricorr = (mov.origine === "ricorrente") ? "🔁 " : "";
+    var _tro = (mov.id === _trofeoId) ? "🏆 " : "";
     return '<div class="mv-item' + (temp ? " mv-temp" : "") + '"' + apri + '>'
       +   '<div class="mv-main">'
-      +     '<div class="mv-desc">' + ico + escapeHtml(mov.descrizione || "(senza descrizione)") + badge + valBadge + '</div>'
+      +     '<div class="mv-desc">' + _tro + ico + escapeHtml(mov.descrizione || "(senza descrizione)") + badge + valBadge + '</div>'
       +     '<div class="mv-meta">' + ricorr + fmt(mov.data) + ' · pagato da ' + (pag || "—") + '</div>'
       +   '</div>'
       +   '<div class="mv-imp">' + importoCon(mov.importo, val) + '</div>' + del
@@ -286,6 +289,12 @@ function renderMembri(){
             + 'onclick="cambiaTema(\'' + t.k + '\')">' + t.e + ' ' + t.n + '</button>';
         }).join('')
       + '</div>';
+    set += '<label class="mb-toggle-row"><span>Silly mode<small>Reazioni e animazioni sceme</small></span>'
+      + '<input type="checkbox" ' + (cassaCorrente.silly?"checked":"") + ' onchange="toggleSilly(this.checked)"></label>';
+    if(cassaCorrente.silly){
+      set += '<div class="mb-toggle-row"><span>Tetto salvadanaio 🐷<small>Il 🐷 è enorme a questa cifra</small></span>'
+        + '<input type="number" class="silly-tetto-inp" min="100" step="50" value="' + (parseFloat(cassaCorrente.silly_tetto)||1000) + '" onchange="salvaTettoSilly(this.value)"></div>';
+    }
     set += '<button class="mb-danger" onclick="apriEliminaCassa()">🗑️ Elimina cassa</button>';
     html += '<div class="card"><div class="card-titolo">Impostazioni</div>' + set + '</div>';
   }
