@@ -16,6 +16,7 @@ function dotC(cls, txt){
 async function apriCassa(id){
   cassaCorrente = CASSE.find(function(c){ return c.id === id; });
   if(!cassaCorrente) return;
+  document.body.setAttribute("data-tema", cassaCorrente.tema || "salvadanaio");
   mostraSchermata("cassa-screen");
   intestaCassa();
   var _br = document.getElementById("btn-ricorrenti-cassa");

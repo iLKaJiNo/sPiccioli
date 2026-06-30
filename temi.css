@@ -1,0 +1,31 @@
+/* ════════════════════════════════════════════════════════
+   sPiccioli! — temi.css
+   Variabili di TEMA (--th-*), valide dentro una cassa via
+   body[data-tema=...]. Default (:root) = Salvadanaio (brand).
+   Il guscio usa --br-* (auth.css) e non è toccato dai temi.
+   ════════════════════════════════════════════════════════ */
+:root{
+  --th-accent: var(--br-cyan);
+  --th-accent-dark:#00b8d4;
+  --th-accent2: var(--br-yellow);
+  --th-accent-soft: rgba(0,229,255,.08);
+  --th-on-accent:#06232a;
+}
+/* 🐷 Salvadanaio = default (:root). Blocco esplicito per chiarezza: */
+body[data-tema="salvadanaio"]{
+  --th-accent: var(--br-cyan); --th-accent-dark:#00b8d4;
+  --th-accent2: var(--br-yellow); --th-accent-soft: rgba(0,229,255,.08);
+  --th-on-accent:#06232a;
+}
+/* 🐟 Pesci */
+body[data-tema="pesci"]{
+  --th-accent:#2BC0E4; --th-accent-dark:#1A8CB0;
+  --th-accent2:#FFD166; --th-accent-soft:rgba(43,192,228,.10);
+  --th-on-accent:#04252b;
+}
+/* 🤠 West */
+body[data-tema="west"]{
+  --th-accent:#E0945A; --th-accent-dark:#B5683A;
+  --th-accent2:#F2C94C; --th-accent-soft:rgba(224,148,90,.10);
+  --th-on-accent:#2a1c0f;
+}
