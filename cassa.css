@@ -184,3 +184,17 @@
 /* ── S7d: banner promemoria ricorrenti manuali ── */
 .ric-banner{display:flex;align-items:center;gap:8px;background:rgba(255,234,0,.10);border:1px solid rgba(255,234,0,.35);border-radius:14px;padding:11px 14px;margin-bottom:12px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:.88rem;color:var(--br-text);}
 .ric-banner-go{margin-left:auto;color:var(--th-accent2);font-weight:800;font-size:.82rem;}
+
+/* ── S8c: Silly mode ── */
+.silly-stage{display:inline-flex;align-items:center;gap:4px;margin-left:6px;vertical-align:middle;}
+.silly-pig{line-height:1;transition:font-size .5s ease;}
+.silly-inatt{font-size:1.05rem;line-height:1;}
+.silly-tetto-inp{width:96px;height:38px;border-radius:10px;border:1.5px solid var(--br-line);background:var(--br-bg);color:#fff;font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;text-align:right;padding:0 10px;outline:none;-webkit-appearance:none;flex-shrink:0;}
+.silly-tetto-inp:focus{border-color:var(--th-accent);}
+.silly-confetti{position:fixed;inset:0;pointer-events:none;z-index:3000;overflow:hidden;}
+.silly-confetti span{position:absolute;top:-32px;animation:sillyFall 2.4s linear forwards;}
+@keyframes sillyFall{to{transform:translateY(112vh) rotate(380deg);opacity:0;}}
+@media (prefers-reduced-motion: reduce){
+  .silly-confetti{display:none!important;}
+  .silly-pig{transition:none;}
+}
