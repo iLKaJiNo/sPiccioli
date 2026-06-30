@@ -200,3 +200,22 @@ function tornaAlleCasse(){
 // Overlay riusabile: per ora dal login, in futuro slide (S10) e crawl Silly (S8).
 function apriInfo(){ document.getElementById("info-overlay").classList.add("attivo"); }
 function chiudiInfo(){ document.getElementById("info-overlay").classList.remove("attivo"); }
+
+// ── S8d: crawl easter egg ──
+function apriCrawl(){
+  var ov = document.getElementById("crawl-overlay");
+  if(!ov) return;
+  ov.classList.add("attivo");
+  // restart pulito delle animazioni (intro + testo) a ogni apertura
+  ["crawl-intro","crawl-text"].forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.animation = "none";
+    void el.offsetHeight;        // forza reflow
+    el.style.animation = "";     // riparte dalla regola CSS
+  });
+}
+function chiudiCrawl(){
+  var ov = document.getElementById("crawl-overlay");
+  if(ov) ov.classList.remove("attivo");
+}

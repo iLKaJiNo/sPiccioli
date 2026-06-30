@@ -477,13 +477,30 @@ if("serviceWorker" in navigator){
 <div id="info-overlay" class="info-overlay">
   <button class="info-close" onclick="chiudiInfo()" aria-label="Chiudi">×</button>
   <div class="info-content">
-    <img src="./spiccioli.svg" class="info-logo" alt="">
+    <img src="./spiccioli.svg" class="info-logo" alt="" onclick="apriCrawl()" style="cursor:pointer;">
     <div class="info-title">sPiccioli!</div>
     <p class="info-manifesto">Al mondo d'oggi abbiamo controllo solo sulle piccole cose. Ma spesso da piccole cose nascono grandi amori, grandi litigi, problemi o situazioni fantastiche.</p>
     <p class="info-manifesto">sPiccioli! ti aiuta a tenere da conto le piccole Spese, i <i>Piccioli</i> — che tu sia da solo, in due, o in un gruppo scellerato di persone.</p>
     <p class="info-manifesto">L'importante è rimanere <b>Silly</b>, per dare il giusto peso alle cose piccole ma importanti.</p>
-    <div class="info-tagline">Resta Silly 🐷</div>
+    <div class="info-tagline">Resta Silly <span onclick="apriCrawl()" style="cursor:pointer;">🐷</span></div>
     <button class="info-cta" onclick="chiudiInfo()">Ho capito!</button>
+  </div>
+</div>
+
+<div id="crawl-overlay" class="crawl-overlay" onclick="chiudiCrawl()">
+  <button class="crawl-close" onclick="event.stopPropagation();chiudiCrawl()" aria-label="Chiudi">×</button>
+  <div class="crawl-intro" id="crawl-intro">Tanto tempo fa, in una cassa molto, molto lontana…</div>
+  <div class="crawl-mask">
+    <div class="crawl-text" id="crawl-text">
+      <p class="crawl-ep">EPISODIO 🐷</p>
+      <h2 class="crawl-h">sPiccioli!<br>La minaccia della spesa</h2>
+      <p>È un'epoca di grandi cene e piccoli rancori. Gruppi di amici scellerati vagano per il mondo dividendo conti, dimenticando puntualmente chi ha pagato la pizza.</p>
+      <p>Nell'ombra veglia un eroe silenzioso: il <b>Saldo</b>, forza misteriosa che sa sempre chi è in pari e chi è in debito. Nessuno sfugge alla sua bilancia.</p>
+      <p>Dai un nome alla tua cassa — da solo, in due, o in un gruppo scellerato — registra i tuoi <b>Piccioli</b>, e lascia che il Salvadanaio 🐷 cresca pasciuto fino al giorno della resa dei conti.</p>
+      <p>Ma ricorda, giovane risparmiatore: il vero potere non è avere tutti i soldi. È restare <b>Silly</b> mentre li dividi.</p>
+      <p class="crawl-end">Che il saldo sia con te.</p>
+      <p class="crawl-end">— Resta Silly 🐷</p>
+    </div>
   </div>
 </div>
 
