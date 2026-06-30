@@ -44,7 +44,7 @@
   display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:54px;
   border:none;border-radius:16px;background:linear-gradient(135deg,var(--th-accent),var(--th-accent-dark));
   color:var(--th-on-accent);font-family:'Baloo 2',cursive;font-size:1.05rem;font-weight:800;cursor:pointer;
-  box-shadow:0 6px 20px rgba(0,229,255,.22);transition:transform .12s;
+  box-shadow:0 6px 20px var(--th-accent-glow);transition:transform .12s;
 }
 .btn-nuova-spesa:active{transform:scale(.98);}
 
