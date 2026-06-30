@@ -119,7 +119,7 @@ function renderCasse(){
   }).join("");
 }
 function emojiTema(t){
-  var m = { orsi:"🐻", pesci:"🐟", west:"🤠", alieni:"👽", jungle:"🦜", flamingo:"🦩" };
+  var m = { salvadanaio:"🐷", orsi:"🐻", pesci:"🐟", west:"🤠", alieni:"👽", jungle:"🦜", flamingo:"🦩" };
   return m[t] || "💰";
 }
 

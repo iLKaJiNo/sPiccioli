@@ -4,6 +4,12 @@
 //  spesa, settle, dettaglio, gestione membri/cassa.
 // ════════════════════════════════════════════════════════
 
+var THEMES = [
+  { k:"salvadanaio", e:"🐷", n:"Salvadanaio" },
+  { k:"pesci",       e:"🐟", n:"Pesci" },
+  { k:"west",        e:"🤠", n:"West" }
+];
+
 // ── INTESTAZIONE / TAB ──
 function intestaCassa(){
   document.getElementById("cassa-emoji").textContent  = emojiTema(cassaCorrente.tema);
@@ -273,6 +279,13 @@ function renderMembri(){
       set += '<label class="mb-toggle-row"><span>Modalità grezza<small>Mostra il divario di spesa invece del saldo</small></span>'
         + '<input type="checkbox" ' + (cassaCorrente.grezza ? "checked" : "") + ' onchange="toggleGrezza(this.checked)"></label>';
     }
+    set += '<div class="mb-toggle-row"><span>Tema<small>L\'aspetto della cassa</small></span></div>';
+    set += '<div class="split-seg" style="margin-bottom:14px;">'
+      + THEMES.map(function(t){
+          return '<button class="split-btn ' + (cassaCorrente.tema===t.k?"attivo":"") + '" '
+            + 'onclick="cambiaTema(\'' + t.k + '\')">' + t.e + ' ' + t.n + '</button>';
+        }).join('')
+      + '</div>';
     set += '<button class="mb-danger" onclick="apriEliminaCassa()">🗑️ Elimina cassa</button>';
     html += '<div class="card"><div class="card-titolo">Impostazioni</div>' + set + '</div>';
   }
@@ -336,6 +349,17 @@ async function switchModalita(nuova){
   if(r.error){ alert("Errore: " + r.error.message); return; }
   cassaCorrente.modalita = nuova;
   renderCassa();
+}
+
+// ── CAMBIA TEMA (admin: aggiorna casse.tema + palette dal vivo) ──
+async function cambiaTema(t){
+  if(!cassaCorrente || t === cassaCorrente.tema) return;
+  var r = await sb.from("casse").update({ tema: t }).eq("id", cassaCorrente.id);
+  if(r.error){ alert("Errore nel cambio tema: " + r.error.message); return; }
+  cassaCorrente.tema = t;
+  document.body.setAttribute("data-tema", t);
+  intestaCassa();   // aggiorna emoji header
+  renderMembri();   // aggiorna evidenziazione selettore
 }
 
 // ── ELIMINA CASSA (admin, conferma col nome) ──
