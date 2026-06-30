@@ -189,6 +189,7 @@ function traduciErroreUnisci(m){
 function entraInCassa(id){ apriCassa(id); }        // apriCassa vive in api.js
 function tornaAlleCasse(){
   chiudiRealtimeCassa();
+  document.body.removeAttribute("data-tema");
   cassaCorrente = null;
   membriCorrente = [];
   S.movimenti = [];
