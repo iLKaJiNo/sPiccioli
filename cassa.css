@@ -259,3 +259,14 @@
 /* ── Gruppo terminato — banner ── */
 .cassa-banner:empty{ display:none; }
 .cassa-terminata-banner{ background:var(--br-bg2); border:1px solid var(--br-line); color:var(--br-text); border-radius:12px; padding:10px 14px; margin:0 0 12px; text-align:center; font-family:'Nunito',sans-serif; font-weight:700; font-size:.9rem; }
+
+/* ── Report finale gruppo terminato ── */
+.report-finale{ border:1px solid var(--th-accent-soft); }
+.report-sub{ color:var(--br-dim); font-size:.9rem; margin:2px 0 14px; }
+.report-metriche{ display:flex; gap:10px; margin-bottom:14px; }
+.report-metrica{ flex:1; min-width:0; background:var(--br-bg2); border:1px solid var(--br-line); border-radius:12px; padding:10px 8px; text-align:center; }
+.rm-val{ display:block; font-family:'Baloo 2',cursive; font-weight:800; color:var(--br-text); font-size:1.05rem; word-break:break-word; }
+.rm-lab{ display:block; color:var(--br-dim); font-size:.72rem; margin-top:2px; }
+.report-sez-tit{ font-size:.78rem; font-weight:700; color:var(--br-dim); text-transform:uppercase; letter-spacing:.4px; margin:6px 0 8px; }
+.report-saldo-row{ display:flex; align-items:center; justify-content:space-between; padding:7px 2px; border-bottom:1px solid var(--br-line); font-size:.92rem; color:var(--br-text); }
+.report-saldo-row:last-of-type{ border-bottom:none; }
