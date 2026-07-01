@@ -24,27 +24,29 @@ function renderLista(){
   if(!el) return;
   if(!S.note) S.note = [];
   if(!S.lista) S.lista = [];
+  var bloc = cassaBloccata();
 
   var compEl = document.getElementById("nota-nuova");
   var compVal = compEl ? compEl.value : "";
   var compFocused = compEl && document.activeElement === compEl;
 
   var h = "";
-
   // 1. BACHECA NOTE
   h += '<div class="card bacheca-card">';
   h += '<div class="card-titolo">📝 Bacheca</div>';
-  h += '<div class="nota-composer">';
-  h += '<textarea id="nota-nuova" class="nota-textarea" placeholder="Scrivi una nota per la cassa…" oninput="_notaAuto(this)"></textarea>';
-  h += '<button class="btn-accent btn-nota-add" onclick="addNota()">Aggiungi nota</button>';
-  h += '</div>';
+  if(!bloc){
+    h += '<div class="nota-composer">';
+    h += '<textarea id="nota-nuova" class="nota-textarea" placeholder="Scrivi una nota per la cassa…" oninput="_notaAuto(this)"></textarea>';
+    h += '<button class="btn-accent btn-nota-add" onclick="addNota()">Aggiungi nota</button>';
+    h += '</div>';
+  }
   if(!S.note.length){
     h += '<div class="vuoto-hint">Ancora nessuna nota.</div>';
   } else {
     S.note.forEach(function(n){
       var puoi = (n.autore === _mioUid()) || _sonoAdmin();
       var mod = n.aggiornata_il && n.creata_il && (new Date(n.aggiornata_il) - new Date(n.creata_il) > 1000);
-      if(_notaEdit === n.id){
+      if(_notaEdit === n.id && !bloc){
         h += '<div class="nota-item in-edit">';
         h += '<textarea id="nota-edit-'+n.id+'" class="nota-textarea">'+escapeHtml(n.testo)+'</textarea>';
         h += '<div class="nota-edit-actions">';
@@ -56,7 +58,7 @@ function renderLista(){
         h += '<div class="nota-testo">'+escapeHtml(n.testo)+'</div>';
         h += '<div class="nota-foot">';
         h += '<span class="nota-meta">'+escapeHtml(nomeAutore(n.autore))+' · '+fmt(n.creata_il)+(mod?' · modificata':'')+'</span>';
-        if(puoi){
+        if(puoi && !bloc){
           h += '<span class="nota-azioni">';
           h += '<button class="nota-ico" title="Modifica" onclick="startNotaEdit(\''+n.id+'\')">✏️</button>';
           h += '<button class="nota-ico" title="Elimina" onclick="deleteNota(\''+n.id+'\')">🗑️</button>';
@@ -71,20 +73,24 @@ function renderLista(){
   // 2. LISTA DELLA SPESA
   h += '<div class="card lista-card">';
   h += '<div class="card-titolo">🧺 Lista della spesa</div>';
-  h += '<div class="lista-input-row">';
-  h += '<input class="lista-inp-testo" type="text" id="lista-testo" placeholder="Latte, Pasta, Miele…" autocomplete="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();addListaItem();}">';
-  h += '<input class="lista-inp-qty" type="text" id="lista-qty" placeholder="Qtà" autocomplete="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();addListaItem();}">';
-  h += '<button class="btn-accent btn-add-lista" onclick="addListaItem()" aria-label="Aggiungi">+</button>';
-  h += '</div>';
+  if(!bloc){
+    h += '<div class="lista-input-row">';
+    h += '<input class="lista-inp-testo" type="text" id="lista-testo" placeholder="Latte, Pasta, Miele…" autocomplete="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();addListaItem();}">';
+    h += '<input class="lista-inp-qty" type="text" id="lista-qty" placeholder="Qtà" autocomplete="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();addListaItem();}">';
+    h += '<button class="btn-accent btn-add-lista" onclick="addListaItem()" aria-label="Aggiungi">+</button>';
+    h += '</div>';
+  }
   var attivi = S.lista.filter(function(i){ return !i.completata; });
   var fatti  = S.lista.filter(function(i){ return i.completata; });
   if(!S.lista.length){
-    h += '<div class="vuoto-hint">Lista vuota — aggiungi qualcosa!</div>';
+    h += '<div class="vuoto-hint">Lista vuota'+(bloc?'.':' — aggiungi qualcosa!')+'</div>';
   } else {
-    h += '<div class="lista-check-all-row">';
-    if(attivi.length) h += '<button class="btn-ghost btn-mini" onclick="checkAllLista(true)">✅ Spunta tutti ('+attivi.length+')</button>';
-    if(fatti.length)  h += '<button class="btn-ghost btn-mini" onclick="checkAllLista(false)">⬜ Deseleziona ('+fatti.length+')</button>';
-    h += '</div>';
+    if(!bloc){
+      h += '<div class="lista-check-all-row">';
+      if(attivi.length) h += '<button class="btn-ghost btn-mini" onclick="checkAllLista(true)">✅ Spunta tutti ('+attivi.length+')</button>';
+      if(fatti.length)  h += '<button class="btn-ghost btn-mini" onclick="checkAllLista(false)">⬜ Deseleziona ('+fatti.length+')</button>';
+      h += '</div>';
+    }
     attivi.forEach(function(it){ h += renderListaItem(it); });
     if(fatti.length){
       h += '<div class="lista-sep">✅ Nel carrello ('+fatti.length+')</div>';
@@ -93,7 +99,7 @@ function renderLista(){
       } else {
         var _cn = fatti.length - 3;
         var _ckey = "spiccioli_carrello_aperto_" + cassaCorrente.id;
-        var _cap = accordionAperto(_ckey, false);   // carrello: default CHIUSO
+        var _cap = accordionAperto(_ckey, false);
         fatti.slice(0,3).forEach(function(it){ h += renderListaItem(it); });
         h += '<button id="car-acc-btn" onclick="accordionToggle(\'car-acc-box\',\'car-acc-btn\',\''+_ckey+'\')" style="'+ACCORDION_BTN_STYLE+'">'
            + (_cap ? "▾ Nascondi" : ("▸ Mostra gli altri "+_cn)) + '</button>';
@@ -102,15 +108,17 @@ function renderLista(){
         h += '</div>';
       }
     }
-    h += '<div class="lista-actions">';
-    if(fatti.length) h += '<button class="btn-ghost btn-mini" onclick="clearListaCompletati()">🗑️ Elimina spuntati ('+fatti.length+')</button>';
-    h += '<button class="btn-ghost btn-mini" onclick="svuotaListaConfirm()">🗑️ Svuota tutto</button>';
-    h += '</div>';
-    if(_svuotaListaConfirm){
-      h += '<div class="svuota-confirm"><span>Eliminare tutta la lista?</span>';
-      h += '<button class="btn-mini btn-accent" onclick="svuotaLista()">Sì</button>';
-      h += '<button class="btn-mini btn-ghost" onclick="_svuotaListaConfirm=false;renderLista()">No</button>';
+    if(!bloc){
+      h += '<div class="lista-actions">';
+      if(fatti.length) h += '<button class="btn-ghost btn-mini" onclick="clearListaCompletati()">🗑️ Elimina spuntati ('+fatti.length+')</button>';
+      h += '<button class="btn-ghost btn-mini" onclick="svuotaListaConfirm()">🗑️ Svuota tutto</button>';
       h += '</div>';
+      if(_svuotaListaConfirm){
+        h += '<div class="svuota-confirm"><span>Eliminare tutta la lista?</span>';
+        h += '<button class="btn-mini btn-accent" onclick="svuotaLista()">Sì</button>';
+        h += '<button class="btn-mini btn-ghost" onclick="_svuotaListaConfirm=false;renderLista()">No</button>';
+        h += '</div>';
+      }
     }
   }
   h += '</div>';
@@ -122,19 +130,23 @@ function renderLista(){
 }
 
 function renderListaItem(item){
+  var bloc = cassaBloccata();
   var h = '<div class="lista-item'+(item.completata?" completata":"")+'">';
-  h += '<button class="lista-check" onclick="toggleListaItem(\''+item.id+'\')">'+(item.completata?'✅':'⬜')+'</button>';
+  h += bloc
+     ? '<span class="lista-check">'+(item.completata?'✅':'⬜')+'</span>'
+     : '<button class="lista-check" onclick="toggleListaItem(\''+item.id+'\')">'+(item.completata?'✅':'⬜')+'</button>';
   h += '<div class="lista-item-body">';
   if(item.quantita) h += '<span class="lista-qty">'+escapeHtml(item.quantita)+'</span>';
   h += '<span class="lista-testo">'+escapeHtml(item.testo)+'</span>';
   h += '</div>';
-  h += '<button class="lista-del" onclick="deleteListaItem(\''+item.id+'\')" aria-label="Elimina">✕</button>';
+  if(!bloc) h += '<button class="lista-del" onclick="deleteListaItem(\''+item.id+'\')" aria-label="Elimina">✕</button>';
   h += '</div>';
   return h;
 }
 
 // ── NOTE — CRUD (optimistic + rollback) ──
 async function addNota(){
+  if(cassaBloccata()) return;
   var t = document.getElementById("nota-nuova");
   var testo = t ? t.value.trim() : "";
   if(!testo){ if(t) t.focus(); return; }
@@ -174,6 +186,7 @@ async function deleteNota(id){
 
 // ── LISTA SPESA — CRUD (optimistic + rollback) ──
 async function addListaItem(){
+  if(cassaBloccata()) return;
   var testoEl = document.getElementById("lista-testo");
   var qtyEl   = document.getElementById("lista-qty");
   var testo = testoEl ? testoEl.value.trim() : "";

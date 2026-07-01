@@ -55,8 +55,16 @@ function iconaCat(nome){
   return (c && c.icona) || "📌";
 }
 
+// ── GRUPPO TERMINATO — sola lettura lato client (la guardia vera è nel backend) ──
+function cassaBloccata(){ return !!(cassaCorrente && cassaCorrente.stato === "terminata"); }
+
 // ── RENDER PRINCIPALE ──
 function renderCassa(){
+  var _ban = document.getElementById("cassa-banner");
+  if(_ban) _ban.innerHTML = cassaBloccata()
+    ? '<div class="cassa-terminata-banner">🏁 Gruppo terminato · sola lettura</div>' : "";
+  var _bs = document.querySelector('#cassa-screen .btn-nuova-spesa[onclick="apriNuovaSpesa()"]');
+  if(_bs) _bs.style.display = cassaBloccata() ? "none" : "";
   renderSaldi();
   renderPaganteSelect();
   renderMovimenti();
@@ -311,6 +319,11 @@ function renderMembri(){
       set += '<div class="mb-toggle-row"><span>Tetto salvadanaio 🐷<small>Il 🐷 è enorme a questa cifra</small></span>'
         + '<input type="number" class="silly-tetto-inp" min="100" step="50" value="' + (parseFloat(cassaCorrente.silly_tetto)||1000) + '" onchange="salvaTettoSilly(this.value)"></div>';
     }
+    if(cassaCorrente.tipo === "gruppo"){
+      set += (cassaCorrente.stato === "terminata")
+        ? '<button class="mb-azione-btn" onclick="riattivaGruppo()">♻️ Riattiva gruppo</button>'
+        : '<button class="mb-azione-btn" onclick="terminaGruppo()">🏁 Termina gruppo</button>';
+    }
     set += '<button class="mb-danger" onclick="apriEliminaCassa()">🗑️ Elimina cassa</button>';
     html += '<div class="card"><div class="card-titolo">Impostazioni</div>' + set + '</div>';
   }
@@ -409,6 +422,24 @@ async function confermaEliminaCassa(){
   tornaAlleCasse();
 }
 
+// ── TERMINA / RIATTIVA GRUPPO (admin) ──
+async function terminaGruppo(){
+  if(!confirm("Terminare il gruppo? Diventa in sola lettura (potrai riattivarlo).")) return;
+  var r = await sb.rpc("termina_gruppo", { p_cassa_id: cassaCorrente.id });
+  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  cassaCorrente.stato = "terminata";
+  var c = CASSE.find(function(x){ return x.id === cassaCorrente.id; }); if(c) c.stato = "terminata";
+  renderCassa(); renderMembri(); toastInfo("Gruppo terminato 🏁");
+}
+async function riattivaGruppo(){
+  if(!confirm("Riattivare il gruppo? Torna modificabile.")) return;
+  var r = await sb.rpc("riattiva_gruppo", { p_cassa_id: cassaCorrente.id });
+  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  cassaCorrente.stato = "attiva";
+  var c = CASSE.find(function(x){ return x.id === cassaCorrente.id; }); if(c) c.stato = "attiva";
+  renderCassa(); renderMembri(); toastInfo("Gruppo riattivato ♻️");
+}
+
 // ════════════════════════════════════════════════════════
 //  NUOVA SPESA — valuta, paganti multipli, metodi di split
 // ════════════════════════════════════════════════════════
@@ -417,6 +448,7 @@ var valutaCorrente = "EUR";
 var tassoCorrente  = 1;
 
 function apriNuovaSpesa(){
+  if(cassaBloccata()){ toastInfo("Gruppo terminato: sola lettura."); return; }
   document.getElementById("modal-spesa").classList.add("attivo");
   resetFormSpesa();
   popolaCategoriaSelect();
