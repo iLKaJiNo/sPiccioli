@@ -80,6 +80,7 @@ async function caricaProfilo(){
 async function vaiAlleCasse(){
   mostraSchermata("casse-screen");
   await caricaCasse();
+  maybeWelcome();
 }
 async function caricaCasse(){
   var lista = document.getElementById("casse-list");

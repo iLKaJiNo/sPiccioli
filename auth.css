@@ -169,3 +169,22 @@ body{
   .crawl-mask::after{display:none;}
   .crawl-text{animation:none;position:static;transform:none;top:auto;left:auto;margin:0 auto;padding:20px 0 80px;}
 }
+
+/* ── S10 — Slide benvenuto (first-run) ── */
+.welcome-content{ display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:48px 28px; }
+.welcome-salta{ position:fixed; top:max(14px,env(safe-area-inset-top)); right:16px; background:transparent; border:none; color:var(--br-dim); font-family:'Nunito',sans-serif; font-weight:700; font-size:.9rem; cursor:pointer; z-index:2; }
+.welcome-body{ min-height:230px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.welcome-emoji{ font-size:4rem; margin-bottom:18px; }
+.welcome-titolo{ font-family:'Baloo 2',cursive; font-weight:800; font-size:1.6rem; color:var(--br-text); margin-bottom:10px; }
+.welcome-testo{ color:var(--br-dim); font-size:1rem; line-height:1.5; max-width:340px; }
+.welcome-dots{ display:flex; gap:8px; margin:22px 0; }
+.welcome-dot{ width:8px; height:8px; border-radius:50%; background:var(--br-line); transition:all .2s; }
+.welcome-dot.attivo{ background:var(--br-cyan); width:22px; border-radius:4px; }
+.welcome-nav{ display:flex; align-items:center; gap:12px; width:100%; max-width:340px; }
+.welcome-back{ background:transparent; border:none; color:var(--br-dim); font-family:'Nunito',sans-serif; font-weight:700; cursor:pointer; padding:8px; }
+.welcome-nav .info-cta{ flex:1; }
+/* ── S10 — FAQ a fisarmonica dentro info-overlay ── */
+.info-faq{ text-align:left; margin:24px 0 8px; }
+.info-faq-titolo{ font-family:'Baloo 2',cursive; font-weight:800; color:var(--br-text); font-size:1.05rem; margin-bottom:10px; text-align:center; }
+.faq-q{ display:block; width:100%; text-align:left; background:var(--br-card); border:1px solid var(--br-line); border-radius:10px; color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; font-size:.9rem; padding:10px 12px; margin:6px 0; cursor:pointer; }
+.faq-a{ color:var(--br-dim); font-size:.88rem; line-height:1.45; padding:6px 12px 10px; margin:0; }
