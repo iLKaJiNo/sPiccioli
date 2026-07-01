@@ -255,3 +255,7 @@
 .gr-leg-val{ flex:none; color:var(--br-dim); font-weight:700; }
 .gr-leg-tot{ border-top:1px solid var(--br-line); padding-top:6px; margin-top:2px; }
 .gr-leg-tot .gr-leg-nome{ color:var(--br-dim); }
+
+/* ── Gruppo terminato — banner ── */
+.cassa-banner:empty{ display:none; }
+.cassa-terminata-banner{ background:var(--br-bg2); border:1px solid var(--br-line); color:var(--br-text); border-radius:12px; padding:10px 14px; margin:0 0 12px; text-align:center; font-family:'Nunito',sans-serif; font-weight:700; font-size:.9rem; }
