@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spiccioli-v28';
+const CACHE_NAME = 'spiccioli-v29';
 const ASSETS = [
   './','./index.html','./auth.css','./cassa.css','./temi.css',
   './utils.js','./pwa.js','./api.js','./cassa.js','./lista.js','./grafici.js','./auth.js','./solo.js','./ricorrenti.js','./silly.js','./app.js',
