@@ -72,6 +72,14 @@ async function caricaCassa(){
       chiusureCassa = [];
     }
 
+    var rlista = await sb.from("lista_cassa").select("*")
+      .eq("cassa_id", cassaCorrente.id).order("creata_il", { ascending: true });
+    S.lista = rlista.data || [];
+
+    var rnote = await sb.from("note_cassa").select("*")
+      .eq("cassa_id", cassaCorrente.id).order("creata_il", { ascending: false });
+    S.note = rnote.data || [];
+
     await caricaRicorrentiCassa();
 
     dotC("ok", "Sincronizzata");
@@ -107,7 +115,7 @@ function initRealtimeCassa(){
     _rtTimer = setTimeout(function(){ if(cassaCorrente) caricaCassa(); }, 700);
   };
   var ch = sb.channel("cassa-" + rid);
-  ["movimenti","membri","categorie","chiusure_coppia","ricorrenti"].forEach(function(tab){
+  ["movimenti","membri","categorie","chiusure_coppia","ricorrenti","lista_cassa","note_cassa"].forEach(function(tab){
     ch.on("postgres_changes",
       { event: "*", schema: "public", table: tab, filter: "cassa_id=eq." + rid },
       ricarica);
@@ -132,6 +140,32 @@ async function runAction(p){
       break;
     case "deleteMovimento":
       r = await sb.from("movimenti").delete().eq("id", p.id);
+      break;
+    case "addListaItem":
+      r = await sb.from("lista_cassa").insert({ id:p.id, cassa_id:p.cassa_id, testo:p.testo, quantita:p.quantita||null, autore:p.autore });
+      break;
+    case "toggleListaItem":
+      r = await sb.from("lista_cassa").update({ completata:p.completata }).eq("id", p.id);
+      break;
+    case "checkAllLista":
+      r = await sb.from("lista_cassa").update({ completata:p.completata }).eq("cassa_id", p.cassa_id).eq("completata", !p.completata);
+      break;
+    case "deleteListaItem":
+      r = await sb.from("lista_cassa").delete().eq("id", p.id);
+      break;
+    case "clearListaItems":
+      var _q = sb.from("lista_cassa").delete().eq("cassa_id", p.cassa_id);
+      if(p.soloCompletate) _q = _q.eq("completata", true);
+      r = await _q;
+      break;
+    case "addNota":
+      r = await sb.from("note_cassa").insert({ id:p.id, cassa_id:p.cassa_id, testo:p.testo, autore:p.autore });
+      break;
+    case "editNota":
+      r = await sb.from("note_cassa").update({ testo:p.testo, aggiornata_il:new Date().toISOString() }).eq("id", p.id);
+      break;
+    case "deleteNota":
+      r = await sb.from("note_cassa").delete().eq("id", p.id);
       break;
     default:
       return "ok";

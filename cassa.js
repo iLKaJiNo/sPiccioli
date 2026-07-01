@@ -32,6 +32,7 @@ function switchCassaTab(tab){
   });
   if(tab === "membri") renderMembri();
   if(tab === "archivio") renderArchivio();
+  if(tab === "lista") renderLista();
 }
 
 // nome con fallback: membro → profilo → "Senza nome". Cerca tra TUTTI i membri.
@@ -61,6 +62,8 @@ function renderCassa(){
   renderMovimenti();
   var mt = document.querySelector('#cassa-screen .cassa-tab[data-tab="membri"]');
   if(mt && mt.classList.contains("attiva")) renderMembri();
+  var lt = document.querySelector('#cassa-screen .cassa-tab[data-tab="lista"]');
+  if(lt && lt.classList.contains("attiva")) renderLista();
   sillyCheck();
 }
 
