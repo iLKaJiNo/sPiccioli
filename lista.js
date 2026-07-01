@@ -88,7 +88,19 @@ function renderLista(){
     attivi.forEach(function(it){ h += renderListaItem(it); });
     if(fatti.length){
       h += '<div class="lista-sep">✅ Nel carrello ('+fatti.length+')</div>';
-      fatti.forEach(function(it){ h += renderListaItem(it); });
+      if(fatti.length <= 4){
+        fatti.forEach(function(it){ h += renderListaItem(it); });
+      } else {
+        var _cn = fatti.length - 3;
+        var _ckey = "spiccioli_carrello_aperto_" + cassaCorrente.id;
+        var _cap = accordionAperto(_ckey, false);   // carrello: default CHIUSO
+        fatti.slice(0,3).forEach(function(it){ h += renderListaItem(it); });
+        h += '<button id="car-acc-btn" onclick="accordionToggle(\'car-acc-box\',\'car-acc-btn\',\''+_ckey+'\')" style="'+ACCORDION_BTN_STYLE+'">'
+           + (_cap ? "▾ Nascondi" : ("▸ Mostra gli altri "+_cn)) + '</button>';
+        h += '<div id="car-acc-box" data-open="'+(_cap?"1":"0")+'" data-count="'+_cn+'" style="overflow:hidden;transition:max-height .35s ease;max-height:'+(_cap?"none":"0px")+';">';
+        fatti.slice(3).forEach(function(it){ h += renderListaItem(it); });
+        h += '</div>';
+      }
     }
     h += '<div class="lista-actions">';
     if(fatti.length) h += '<button class="btn-ghost btn-mini" onclick="clearListaCompletati()">🗑️ Elimina spuntati ('+fatti.length+')</button>';

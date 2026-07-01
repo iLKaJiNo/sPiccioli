@@ -50,6 +50,30 @@ function escapeHtml(s){
   });
 }
 
+// ── Accordion / fisarmonica per liste lunghe (helper condivisi) ──
+var ACCORDION_BTN_STYLE = "display:block;width:100%;background:var(--br-bg2);border:1px dashed var(--br-line);border-radius:10px;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:700;font-size:.78rem;padding:7px 8px;margin:8px 0;cursor:pointer;";
+function accordionAperto(key, def){
+  try{ var v = localStorage.getItem(key); return v === null ? def : (v === "1"); }catch(e){ return def; }
+}
+function accordionToggle(boxId, btnId, key){
+  var box = document.getElementById(boxId); if(!box) return;
+  var btn = document.getElementById(btnId);
+  var n = box.getAttribute("data-count") || "";
+  var apri = box.getAttribute("data-open") !== "1";
+  if(apri){
+    box.style.maxHeight = box.scrollHeight + "px";
+    box.setAttribute("data-open", "1");
+    setTimeout(function(){ if(box.getAttribute("data-open") === "1") box.style.maxHeight = "none"; }, 360);
+  } else {
+    box.style.maxHeight = box.scrollHeight + "px";
+    void box.offsetHeight;                       // forza reflow prima di collassare
+    requestAnimationFrame(function(){ box.style.maxHeight = "0px"; });
+    box.setAttribute("data-open", "0");
+  }
+  if(btn) btn.innerHTML = apri ? "▾ Nascondi le voci precedenti" : ("▸ Mostra le altre " + n + " voci");
+  try{ localStorage.setItem(key, apri ? "1" : "0"); }catch(e){}
+}
+
 // toast informativo non-bloccante (auto-dismiss)
 function toastInfo(msg){
   try{

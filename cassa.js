@@ -152,7 +152,7 @@ function renderMovimenti(){
   }
   var nomi = nomiMembri();
   var _trofeoId = sillyTrofeoMovId();
-  wrap.innerHTML = movs.map(function(mov){
+  var _rows = movs.map(function(mov){
     var temp = String(mov.id).indexOf("temp-") === 0;
     var val  = mov.valuta_mov || "EUR";
     var isApertura = mov.origine === "apertura";
@@ -185,7 +185,20 @@ function renderMovimenti(){
       +   '</div>'
       +   '<div class="mv-imp">' + importoCon(mov.importo, val) + '</div>' + del
       + '</div>';
-  }).join("");
+  });
+  if(_rows.length <= 4){
+    wrap.innerHTML = _rows.join("");
+  } else {
+    var _n = _rows.length - 3;
+    var _key = "spiccioli_mov_aperto_" + cassaCorrente.id;
+    var _ap = accordionAperto(_key, true);
+    wrap.innerHTML =
+      _rows.slice(0,3).join("")
+      + '<button id="mv-acc-btn" onclick="accordionToggle(\'mv-acc-box\',\'mv-acc-btn\',\''+_key+'\')" style="'+ACCORDION_BTN_STYLE+'">'
+        + (_ap ? "▾ Nascondi le voci precedenti" : ("▸ Mostra le altre "+_n+" voci")) + '</button>'
+      + '<div id="mv-acc-box" data-open="'+(_ap?"1":"0")+'" data-count="'+_n+'" style="overflow:hidden;transition:max-height .35s ease;max-height:'+(_ap?"none":"0px")+';">'
+        + _rows.slice(3).join("") + '</div>';
+  }
 }
 function etichettaMetodo(m){ return { esatto:"importi", percentuale:"%", quote:"quote" }[m] || m; }
 
