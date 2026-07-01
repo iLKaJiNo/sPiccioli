@@ -499,7 +499,31 @@ if("serviceWorker" in navigator){
     <p class="info-manifesto">sPiccioli! ti aiuta a tenere da conto le piccole Spese, i <i>Piccioli</i> — che tu sia da solo, in due, o in un gruppo scellerato di persone.</p>
     <p class="info-manifesto">L'importante è rimanere <b>Silly</b>, per dare il giusto peso alle cose piccole ma importanti.</p>
     <div class="info-tagline">Resta Silly <span onclick="apriCrawl()" style="cursor:pointer;">🐷</span></div>
+    <div class="info-faq">
+      <div class="info-faq-titolo">Domande frequenti</div>
+      <button id="faq1-btn" class="faq-q" onclick="faqToggle('faq1-box','faq1-btn')">▸ Come divido una spesa?</button>
+      <div id="faq1-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: aggiungi una spesa, scegli chi ha pagato e come dividerla (equo, per importi, percentuale o quote).</p></div>
+      <button id="faq2-btn" class="faq-q" onclick="faqToggle('faq2-box','faq2-btn')">▸ Che differenza c'è tra Solo, Coppia e Gruppo?</button>
+      <div id="faq2-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: Solo per le tue spese, Coppia con ciclo mensile, Gruppo per spese condivise fra più persone.</p></div>
+      <button id="faq3-btn" class="faq-q" onclick="faqToggle('faq3-box','faq3-btn')">▸ Cos'è la modalità Silly?</button>
+      <div id="faq3-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: un tocco di leggerezza per la cassa, attivabile dall'admin.</p></div>
+      <button id="faq4-btn" class="faq-q" onclick="faqToggle('faq4-box','faq4-btn')">▸ I miei dati sono privati?</button>
+      <div id="faq4-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: vedi solo le casse di cui fai parte; ogni cassa è isolata dalle altre.</p></div>
+    </div>
     <button class="info-cta" onclick="chiudiInfo()">Ho capito!</button>
+  </div>
+</div>
+
+<!-- OVERLAY — BENVENUTO (first-run) -->
+<div id="welcome-overlay" class="info-overlay" ontouchstart="_welcomeTouchStart(event)" ontouchend="_welcomeTouchEnd(event)">
+  <div class="info-content welcome-content">
+    <button class="welcome-salta" onclick="welcomeFine()">Salta</button>
+    <div id="welcome-body" class="welcome-body"></div>
+    <div id="welcome-dots" class="welcome-dots"></div>
+    <div class="welcome-nav">
+      <button id="welcome-indietro" class="welcome-back" onclick="welcomeIndietro()">← Indietro</button>
+      <button id="welcome-avanti" class="info-cta" onclick="welcomeAvanti()">Avanti</button>
+    </div>
   </div>
 </div>
 
@@ -531,6 +555,7 @@ if("serviceWorker" in navigator){
 <script src="./ricorrenti.js"></script>
 <script src="./silly.js"></script>
 <script src="./auth.js"></script>
+<script src="./welcome.js"></script>
 <script src="./app.js"></script>
 </body>
 </html>
