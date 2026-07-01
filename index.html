@@ -55,6 +55,7 @@ if("serviceWorker" in navigator){
   <div class="casse-top">
     <img src="./spiccioli.svg" alt="sPiccioli!">
     <div class="ct-titoli"><h1>Le tue casse</h1><p>Ciao, <span id="casse-nome-utente">…</span></p></div>
+    <button class="btn-tema-utente" onclick="apriTemaUtente()" title="Tema" aria-label="Tema">🎨</button>
     <button class="btn-esci" onclick="logout()">Esci</button>
   </div>
   <div class="casse-body">
@@ -344,6 +345,16 @@ if("serviceWorker" in navigator){
       <button class="m-annulla" onclick="closeUnisci()">Annulla</button>
       <button class="m-conferma" id="unisci-btn" onclick="confermaUnisci()">Entra</button>
     </div>
+  </div>
+</div>
+
+<!-- OVERLAY — TEMA UTENTE -->
+<div class="modal-overlay" id="modal-tema-utente" onclick="if(event.target===this)chiudiTemaUtente()">
+  <div class="br-modal">
+    <h2>🎨 Il tuo tema</h2>
+    <p class="tema-utente-hint">Vale per la Home e il tuo Solo. Ogni cassa ha il suo tema.</p>
+    <div id="tema-utente-body" class="tema-utente-grid"></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiTemaUtente()">Chiudi</button></div>
   </div>
 </div>
 
