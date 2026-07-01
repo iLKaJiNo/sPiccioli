@@ -188,3 +188,8 @@ body{
 .info-faq-titolo{ font-family:'Baloo 2',cursive; font-weight:800; color:var(--br-text); font-size:1.05rem; margin-bottom:10px; text-align:center; }
 .faq-q{ display:block; width:100%; text-align:left; background:var(--br-card); border:1px solid var(--br-line); border-radius:10px; color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; font-size:.9rem; padding:10px 12px; margin:6px 0; cursor:pointer; }
 .faq-a{ color:var(--br-dim); font-size:.88rem; line-height:1.45; padding:6px 12px 10px; margin:0; }
+
+/* ── Tema utente (picker in home) ── */
+.btn-tema-utente{ background:transparent; border:none; font-size:1.3rem; cursor:pointer; padding:4px 8px; line-height:1; }
+.tema-utente-hint{ color:var(--br-dim); font-size:.85rem; margin:2px 0 14px; }
+.tema-utente-grid{ display:flex; flex-direction:column; gap:8px; }

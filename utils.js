@@ -23,6 +23,14 @@ function mostraSchermata(id){
     var el = document.getElementById(s);
     if(el) el.classList.toggle("attiva", s === id);
   });
+  // ── tema per schermata ──
+  if(id === "cassa-screen"){
+    document.body.setAttribute("data-tema", (cassaCorrente && cassaCorrente.tema) || "salvadanaio");
+  } else if(id === "casse-screen" || id === "solo-screen"){
+    document.body.setAttribute("data-tema", (profiloUtente && profiloUtente.tema) || "salvadanaio");
+  } else {
+    document.body.removeAttribute("data-tema");   // auth-screen → brand
+  }
 }
 
 // ── HELPER DI FORMATO ──────────────────────────────────

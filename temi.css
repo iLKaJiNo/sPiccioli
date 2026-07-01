@@ -1,8 +1,12 @@
 /* ════════════════════════════════════════════════════════
-   sPiccioli! — temi.css
-   Variabili di TEMA (--th-*), valide dentro una cassa via
-   body[data-tema=...]. Default (:root) = Salvadanaio (brand).
-   Il guscio usa --br-* (auth.css) e non è toccato dai temi.
+   sPiccioli! — temi.css  (CONTRATTO TEMI full-palette)
+   Applicato via body[data-tema="..."]. auth-screen = brand (nessun tema).
+   Un tema PUÒ ridefinire questi token (default = brand di auth.css):
+     Superfici:  --br-bg --br-bg2 --br-card --br-line --br-text --br-dim
+     Accenti:    --th-accent --th-accent-dark --th-accent2
+                 --th-accent-soft --th-on-accent --th-accent-glow
+   salvadanaio = baseline brand (solo accenti).
+   pesci/west  = palette PROVVISORIE scure (Design le rifà incisive).
    ════════════════════════════════════════════════════════ */
 :root{
   --th-accent: var(--br-cyan);
@@ -12,24 +16,25 @@
   --th-on-accent:#06232a;
   --th-accent-glow: rgba(0,229,255,.22);
 }
-/* 🐷 Salvadanaio = default (:root). Blocco esplicito per chiarezza: */
+/* 🐷 Salvadanaio = baseline brand (solo accenti) */
 body[data-tema="salvadanaio"]{
   --th-accent: var(--br-cyan); --th-accent-dark:#00b8d4;
   --th-accent2: var(--br-yellow); --th-accent-soft: rgba(0,229,255,.08);
-  --th-on-accent:#06232a;
-  --th-accent-glow: rgba(0,229,255,.22);
+  --th-on-accent:#06232a; --th-accent-glow: rgba(0,229,255,.22);
 }
-/* 🐟 Pesci */
+/* 🐟 Pesci — PROVVISORIO (Design) */
 body[data-tema="pesci"]{
+  --br-bg:#0F1E24; --br-bg2:#162A32; --br-card:#1C3540;
+  --br-line:rgba(43,192,228,.14);
   --th-accent:#2BC0E4; --th-accent-dark:#1A8CB0;
-  --th-accent2:#FFD166; --th-accent-soft:rgba(43,192,228,.10);
-  --th-on-accent:#04252b;
-  --th-accent-glow: rgba(43,192,228,.22);
+  --th-accent2:#FFD166; --th-accent-soft:rgba(43,192,228,.12);
+  --th-on-accent:#04252b; --th-accent-glow:rgba(43,192,228,.24);
 }
-/* 🤠 West */
+/* 🤠 West — PROVVISORIO (Design) */
 body[data-tema="west"]{
+  --br-bg:#211913; --br-bg2:#2C221A; --br-card:#352A20;
+  --br-line:rgba(224,148,90,.16);
   --th-accent:#E0945A; --th-accent-dark:#B5683A;
-  --th-accent2:#F2C94C; --th-accent-soft:rgba(224,148,90,.10);
-  --th-on-accent:#2a1c0f;
-  --th-accent-glow: rgba(224,148,90,.22);
+  --th-accent2:#F2C94C; --th-accent-soft:rgba(224,148,90,.12);
+  --th-on-accent:#2a1c0f; --th-accent-glow:rgba(224,148,90,.24);
 }
