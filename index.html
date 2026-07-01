@@ -83,6 +83,7 @@ if("serviceWorker" in navigator){
       <span id="silly-stage" class="silly-stage"></span>
     </div>
     <div class="cassa-hazioni">
+      <button class="btn-invita" onclick="apriGrafici()" title="Grafici">📊</button>
       <button class="btn-invita" onclick="invitaCassa()">🔑 Invita</button>
       <div class="cassa-sync-wrap"><span class="sync-dot" id="cassa-dot"></span><span class="cassa-sync-txt" id="cassa-sync">…</span></div>
     </div>
@@ -224,6 +225,16 @@ if("serviceWorker" in navigator){
     <h2>🔁 Fisse e previste</h2>
     <div id="ricorrenti-body"></div>
     <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiRicorrenti()">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- OVERLAY — GRAFICI -->
+<div class="modal-overlay" id="modal-grafico" onclick="if(event.target===this)chiudiGrafici()">
+  <div class="br-modal">
+    <h2>📊 Grafici</h2>
+    <div id="grafico-tabs" class="grafico-tabs"></div>
+    <div id="grafico-body" class="grafico-body"></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiGrafici()">Chiudi</button></div>
   </div>
 </div>
 
@@ -515,6 +526,7 @@ if("serviceWorker" in navigator){
 <script src="./api.js"></script>
 <script src="./cassa.js"></script>
 <script src="./lista.js"></script>
+<script src="./grafici.js"></script>
 <script src="./solo.js"></script>
 <script src="./ricorrenti.js"></script>
 <script src="./silly.js"></script>
