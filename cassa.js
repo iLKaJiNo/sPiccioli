@@ -63,6 +63,7 @@ function renderCassa(){
   var _ban = document.getElementById("cassa-banner");
   if(_ban) _ban.innerHTML = cassaBloccata()
     ? '<div class="cassa-terminata-banner">🏁 Gruppo terminato · sola lettura</div>' : "";
+  if(typeof renderReportGruppo === "function") renderReportGruppo();
   var _bs = document.querySelector('#cassa-screen .btn-nuova-spesa[onclick="apriNuovaSpesa()"]');
   if(_bs) _bs.style.display = cassaBloccata() ? "none" : "";
   renderSaldi();

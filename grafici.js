@@ -148,3 +148,37 @@ function _roundRect(ctx,x,y,w,h,r){
   ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
   ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
 }
+
+// ── Report finale gruppo terminato (riusa le aggregazioni sopra) ──
+function renderReportGruppo(){
+  var slot = document.getElementById("report-gruppo");
+  if(!slot) return;
+  if(!cassaCorrente || cassaCorrente.tipo !== "gruppo" || cassaCorrente.stato !== "terminata"){ slot.innerHTML = ""; return; }
+
+  var movs = _movValide();
+  var nMov = movs.length;
+  var tot  = movs.reduce(function(a,m){ return a + (parseFloat(m.importo)||0)*(parseFloat(m.tasso_cambio)||1); }, 0);
+  var cat  = _datiCategoria();
+  var topCat = cat.length ? cat[0] : null;
+  var saldi = calcolaSaldi();
+  var nomi  = nomiMembri();
+
+  var h = '<div class="card report-finale">';
+  h += '<div class="card-titolo">🏁 Riepilogo finale</div>';
+  h += '<p class="report-sub">Il gruppo è terminato. Ecco com\'è andata!</p>';
+  h += '<div class="report-metriche">';
+  h += '<div class="report-metrica"><span class="rm-val">'+eur(tot)+'</span><span class="rm-lab">speso in totale</span></div>';
+  h += '<div class="report-metrica"><span class="rm-val">'+nMov+'</span><span class="rm-lab">'+(nMov===1?'movimento':'movimenti')+'</span></div>';
+  if(topCat) h += '<div class="report-metrica"><span class="rm-val">'+escapeHtml(topCat.label)+'</span><span class="rm-lab">categoria top</span></div>';
+  h += '</div>';
+  h += '<div class="report-sez-tit">Saldo finale</div>';
+  membriCorrente.forEach(function(m){
+    var s = saldi[m.id] || 0;
+    var badge = Math.abs(s) < 0.005 ? '<span class="mb-pari">in pari</span>'
+      : (s > 0 ? '<span class="mb-cred">+'+eur(s)+'</span>' : '<span class="mb-deb">−'+eur(Math.abs(s))+'</span>');
+    h += '<div class="report-saldo-row"><span>'+escapeHtml(nomi[m.id]||"?")+'</span>'+badge+'</div>';
+  });
+  h += '<button class="btn-ghost btn-mini" style="margin-top:12px;" onclick="apriGrafici()">📊 Vedi i grafici</button>';
+  h += '</div>';
+  slot.innerHTML = h;
+}
