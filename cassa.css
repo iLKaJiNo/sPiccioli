@@ -239,3 +239,19 @@
 .lista-sep{ font-size:.75rem; font-weight:700; color:var(--br-dim); text-transform:uppercase; letter-spacing:.4px; margin:10px 0 4px; }
 .lista-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
 .svuota-confirm{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; padding:10px; border:1px solid var(--br-line); border-radius:12px; background:var(--br-bg2); font-size:.85rem; color:var(--br-text); }
+
+/* ── S9a — Grafici (overlay) ── */
+.grafico-tabs{ display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 14px; }
+.gr-tab{ flex:1; min-width:0; padding:8px 6px; border:1px solid var(--br-line); border-radius:10px; background:var(--br-bg2); color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; font-size:.8rem; cursor:pointer; white-space:nowrap; }
+.gr-tab.attivo{ border-color:var(--th-accent); color:var(--th-accent); background:var(--th-accent-soft); }
+.grafico-body{ min-height:220px; }
+.grafico-vuoto{ color:var(--br-dim); text-align:center; padding:40px 10px; font-size:.9rem; }
+.grafico-donut-wrap{ display:flex; justify-content:center; padding:8px 0 14px; }
+.grafico-barre-wrap{ padding:8px 0; }
+.grafico-legenda{ display:flex; flex-direction:column; gap:6px; }
+.gr-leg-item{ display:flex; align-items:center; gap:8px; font-size:.85rem; color:var(--br-text); }
+.gr-leg-dot{ width:12px; height:12px; border-radius:4px; flex:none; }
+.gr-leg-nome{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gr-leg-val{ flex:none; color:var(--br-dim); font-weight:700; }
+.gr-leg-tot{ border-top:1px solid var(--br-line); padding-top:6px; margin-top:2px; }
+.gr-leg-tot .gr-leg-nome{ color:var(--br-dim); }
