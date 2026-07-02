@@ -104,6 +104,17 @@ function toastInfo(msg){
   }catch(e){}
 }
 
+// ── NUDGE PROMEMORIA CHIUSURA (banner "registro multi-mese") ──
+var _nudgeDismiss = {};   // per-sessione: chiave → true
+function registroMultiMese(righe, campoData){
+  var mesi = {};
+  (righe||[]).forEach(function(r){
+    var d = r[campoData]; if(!d) return;
+    mesi[String(d).slice(0,7)] = true;   // "YYYY-MM"
+  });
+  return Object.keys(mesi).length > 1;
+}
+
 // ── HELPER SALDI (net-balance, valuta base) ──
 function mioMembro(){
   return membriCorrente.find(function(m){ return m.user_id === (profiloUtente && profiloUtente.id); });

@@ -54,6 +54,15 @@ function iconaSoloCat(nome){
 
 // ── RENDER ──
 function renderSolo(){
+  var _ban = document.getElementById("solo-banner");
+  if(_ban){
+    _ban.innerHTML = (registroMultiMese(soloVoci, "data") && !_nudgeDismiss["solo"])
+      ? '<div class="cassa-terminata-banner">📆 Il registro abbraccia più mesi. '
+        + '<button class="btn-mini btn-accent" onclick="confermaChiudiMeseSolo()">Archivia</button> '
+        + '<button class="btn-mini btn-ghost" onclick="_nudgeDismiss[\'solo\']=true;renderSolo()">Più tardi</button></div>'
+      : "";
+  }
+
   // saldo = entrate − uscite
   var saldo = 0;
   (soloVoci || []).forEach(function(v){

@@ -61,8 +61,18 @@ function cassaBloccata(){ return !!(cassaCorrente && cassaCorrente.stato === "te
 // ── RENDER PRINCIPALE ──
 function renderCassa(){
   var _ban = document.getElementById("cassa-banner");
-  if(_ban) _ban.innerHTML = cassaBloccata()
-    ? '<div class="cassa-terminata-banner">🏁 Gruppo terminato · sola lettura</div>' : "";
+  if(_ban){
+    if(cassaBloccata()){
+      _ban.innerHTML = '<div class="cassa-terminata-banner">🏁 Gruppo terminato · sola lettura</div>';
+    } else if(cassaCorrente.tipo === "coppia" && registroMultiMese(S.movimenti, "data")
+              && !_nudgeDismiss["c_"+cassaCorrente.id]){
+      _ban.innerHTML = '<div class="cassa-terminata-banner">📆 Il registro abbraccia più mesi. '
+        + '<button class="btn-mini btn-accent" onclick="apriChiudiMese()">Archivia</button> '
+        + '<button class="btn-mini btn-ghost" onclick="_nudgeDismiss[\'c_\'+cassaCorrente.id]=true;renderCassa()">Più tardi</button></div>';
+    } else {
+      _ban.innerHTML = "";
+    }
+  }
   if(typeof renderReportGruppo === "function") renderReportGruppo();
   var _bs = document.querySelector('#cassa-screen .btn-nuova-spesa[onclick="apriNuovaSpesa()"]');
   if(_bs) _bs.style.display = cassaBloccata() ? "none" : "";
