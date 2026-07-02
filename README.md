@@ -84,7 +84,7 @@ multipli, tab Lista e Note, grafici di spesa, slide di benvenuto e help.
 ## Filosofia
 
 Le grandi piattaforme inseguono funzioni su funzioni. sPiccioli! va dall'altra
-parte: poche cose, fatte bene, con un po' di leggerezza. Perché i piccioli sono
+parte: poche cose, fatte bene, con un po' di leggerezza. Perché i Piccioli sono
 piccoli, ma le persone con cui li dividi no.
 
 ---
