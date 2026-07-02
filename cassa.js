@@ -893,8 +893,7 @@ function renderArchivio(){
   } else {
     html += ch.map(function(c, idx){
       var ripr = (idx === 0)
-        ? '<button class="btn-ripristina" onclick="event.stopPropagation();confermaRipristino()">↩︎ Ripristina</button>'
-          + '<button class="btn-ghost btn-mini" onclick="event.stopPropagation();ripristinaCoppia()">♻️ Ripristina</button>' : '';
+        ? '<button class="btn-ripristina" onclick="event.stopPropagation();ripristinaCoppia()">↩︎ Ripristina</button>' : '';
       return '<div class="arch-row" onclick="apriDettaglioChiusura(\'' + c.id + '\')">'
         + '<div class="arch-main"><div class="arch-titolo">Chiusura #' + c.seq + '</div>'
         + '<div class="arch-meta">' + fmtLong(c.chiusa_il) + ' · ' + eur(c.totale_speso) + '</div></div>'
@@ -937,23 +936,6 @@ async function confermaChiudiMese(){
   chiudiModalChiudiMese();
   await caricaCassa();
   switchCassaTab("archivio");
-}
-
-async function confermaRipristino(){
-  if(!navigator.onLine){ alert("Serve una connessione per ripristinare."); return; }
-  if(!confirm("Ripristinare l'ultimo mese chiuso?\nI movimenti archiviati tornano nella cassa e quell'archivio viene rimosso.")) return;
-  var r = await sb.rpc("ripristina_mese_coppia", { p_cassa_id: cassaCorrente.id });
-  if(r.error){
-    var m = r.error.message || "";
-    if(m.indexOf("movimenti nel mese corrente") > -1){
-      alert("Ci sono movimenti nel mese corrente: eliminali prima di ripristinare (il ripristino li perderebbe).");
-    } else { alert("Errore nel ripristino: " + m); }
-    return;
-  }
-  var avvisi = (r.data && r.data.avvisi) || [];
-  await caricaCassa();
-  switchCassaTab("archivio");
-  if(avvisi.length){ alert("Ripristino completato, con avvisi:\n\n• " + avvisi.join("\n• ")); }
 }
 
 async function ripristinaCoppia(){

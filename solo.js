@@ -318,8 +318,7 @@ function renderArchivioSolo(){
   } else {
     html += ch.map(function(c, idx){
       var ripr = (idx === 0)
-        ? '<button class="btn-ripristina" onclick="event.stopPropagation();confermaRipristinoSolo()">↩︎ Ripristina</button>'
-          + '<button class="btn-ghost btn-mini" onclick="event.stopPropagation();ripristinaSolo()">♻️ Ripristina</button>' : '';
+        ? '<button class="btn-ripristina" onclick="event.stopPropagation();ripristinaSolo()">↩︎ Ripristina</button>' : '';
       var sd = parseFloat(c.saldo)||0;
       return '<div class="arch-row" onclick="apriDettaglioChiusuraSolo(\'' + c.id + '\')">'
         + '<div class="arch-main"><div class="arch-titolo">Chiusura #' + c.seq + '</div>'
@@ -341,21 +340,6 @@ async function confermaChiudiMeseSolo(){
   if(!confirm(msg)) return;
   var r = await sb.rpc("chiudi_mese_solo");
   if(r.error){ alert("Errore nella chiusura: " + r.error.message); return; }
-  await caricaSolo();
-  renderArchivioSolo();
-}
-
-async function confermaRipristinoSolo(){
-  if(!navigator.onLine){ alert("Serve una connessione per ripristinare."); return; }
-  if(!confirm("Ripristinare l'ultimo mese chiuso?\nLe voci archiviate tornano nel registro e quell'archivio viene rimosso.")) return;
-  var r = await sb.rpc("ripristina_mese_solo");
-  if(r.error){
-    var m = r.error.message || "";
-    if(m.indexOf("registro corrente ha") > -1){
-      alert("Il registro corrente non è vuoto: svuotalo prima di ripristinare (il ripristino lo sovrascriverebbe).");
-    } else { alert("Errore nel ripristino: " + m); }
-    return;
-  }
   await caricaSolo();
   renderArchivioSolo();
 }
