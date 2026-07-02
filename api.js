@@ -61,6 +61,7 @@ async function caricaCassa(){
 
     var rcat = await sb.from("categorie").select("*")
       .eq("cassa_id", cassaCorrente.id).order("ordine").order("nome");
+    if(rcat.error) return gestisciErroreCassa(rcat.error);
     categorieCassa = rcat.data || [];
 
     if(cassaCorrente.tipo === "coppia"){
@@ -74,10 +75,12 @@ async function caricaCassa(){
 
     var rlista = await sb.from("lista_cassa").select("*")
       .eq("cassa_id", cassaCorrente.id).order("creata_il", { ascending: true });
+    if(rlista.error) return gestisciErroreCassa(rlista.error);
     S.lista = rlista.data || [];
 
     var rnote = await sb.from("note_cassa").select("*")
       .eq("cassa_id", cassaCorrente.id).order("creata_il", { ascending: false });
+    if(rnote.error) return gestisciErroreCassa(rnote.error);
     S.note = rnote.data || [];
 
     await caricaRicorrentiCassa();
@@ -181,7 +184,7 @@ async function post(payload){
     if(errDiRete(e)){
       accodaOperazione(payload);
       dotC("err", "Offline — in attesa");
-      throw e;
+      return "queued";
     }
     if(((e && e.message) || "").indexOf("JWT") > -1){
       sb.auth.signOut().then(function(){ location.reload(); });

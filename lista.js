@@ -155,7 +155,7 @@ async function addNota(){
   S.note.unshift(n);
   if(t) t.value = "";
   renderLista(); dotC("", "Salvataggio…");
-  try{ await post({ action:"addNota", id:n.id, cassa_id:n.cassa_id, testo:n.testo, autore:n.autore }); dotC("ok","Sincronizzata"); }
+  try{ var esito = await post({ action:"addNota", id:n.id, cassa_id:n.cassa_id, testo:n.testo, autore:n.autore }); dotC(esito==="queued" ? "err" : "ok", esito==="queued" ? "In attesa" : "Sincronizzata"); }
   catch(e){ S.note = S.note.filter(function(x){ return x.id !== n.id; }); renderLista(); dotC("err","Errore"); }
 }
 function startNotaEdit(id){
@@ -171,7 +171,7 @@ async function salvaNotaEdit(id){
   var vT = n.testo, vA = n.aggiornata_il;
   n.testo = nuovo; n.aggiornata_il = new Date().toISOString();
   _notaEdit = null; renderLista(); dotC("", "Salvataggio…");
-  try{ await post({ action:"editNota", id:id, testo:nuovo }); dotC("ok","Sincronizzata"); }
+  try{ var esito = await post({ action:"editNota", id:id, testo:nuovo }); dotC(esito==="queued" ? "err" : "ok", esito==="queued" ? "In attesa" : "Sincronizzata"); }
   catch(e2){ n.testo = vT; n.aggiornata_il = vA; renderLista(); dotC("err","Errore"); }
 }
 async function deleteNota(id){
@@ -180,7 +180,7 @@ async function deleteNota(id){
   var bak = S.note[idx];
   S.note.splice(idx,1); if(_notaEdit===id) _notaEdit=null;
   renderLista(); dotC("", "Salvataggio…");
-  try{ await post({ action:"deleteNota", id:id }); dotC("ok","Sincronizzata"); }
+  try{ var esito = await post({ action:"deleteNota", id:id }); dotC(esito==="queued" ? "err" : "ok", esito==="queued" ? "In attesa" : "Sincronizzata"); }
   catch(e){ S.note.splice(idx,0,bak); renderLista(); dotC("err","Errore"); }
 }
 
@@ -199,7 +199,7 @@ async function addListaItem(){
   renderLista();
   setTimeout(function(){ var e=document.getElementById("lista-testo"); if(e) e.focus(); }, 40);
   dotC("", "Salvataggio…");
-  try{ await post({ action:"addListaItem", id:item.id, cassa_id:item.cassa_id, testo:item.testo, quantita:item.quantita, autore:item.autore }); dotC("ok","Sincronizzata"); }
+  try{ var esito = await post({ action:"addListaItem", id:item.id, cassa_id:item.cassa_id, testo:item.testo, quantita:item.quantita, autore:item.autore }); dotC(esito==="queued" ? "err" : "ok", esito==="queued" ? "In attesa" : "Sincronizzata"); }
   catch(e){ S.lista = S.lista.filter(function(x){ return x.id !== item.id; }); renderLista(); dotC("err","Errore"); }
 }
 async function toggleListaItem(id){
@@ -207,28 +207,28 @@ async function toggleListaItem(id){
   if(!it) return;
   it.completata = !it.completata;
   renderLista(); dotC("", "Salvataggio…");
-  try{ await post({ action:"toggleListaItem", id:id, completata:it.completata }); dotC("ok","Sincronizzata"); }
+  try{ var esito = await post({ action:"toggleListaItem", id:id, completata:it.completata }); dotC(esito==="queued" ? "err" : "ok", esito==="queued" ? "In attesa" : "Sincronizzata"); }
   catch(e){ it.completata = !it.completata; renderLista(); dotC("err","Errore"); }
 }
 async function checkAllLista(v){
   var bak = S.lista.map(function(x){ return { id:x.id, completata:x.completata }; });
   S.lista.forEach(function(it){ it.completata = v; });
   renderLista(); dotC("", "Salvataggio…");
-  try{ await post({ action:"checkAllLista", cassa_id:cassaCorrente.id, completata:v }); dotC("ok","Sincronizzata"); }
+  try{ var esito = await post({ action:"checkAllLista", cassa_id:cassaCorrente.id, completata:v }); dotC(esito==="queued" ? "err" : "ok", esito==="queued" ? "In attesa" : "Sincronizzata"); }
   catch(e){ bak.forEach(function(b){ var it=S.lista.find(function(x){return x.id===b.id;}); if(it) it.completata=b.completata; }); renderLista(); dotC("err","Errore"); }
 }
 async function deleteListaItem(id){
   var bak = S.lista.slice();
   S.lista = S.lista.filter(function(x){ return x.id !== id; });
   renderLista(); dotC("", "Salvataggio…");
-  try{ await post({ action:"deleteListaItem", id:id }); dotC("ok","Sincronizzata"); }
+  try{ var esito = await post({ action:"deleteListaItem", id:id }); dotC(esito==="queued" ? "err" : "ok", esito==="queued" ? "In attesa" : "Sincronizzata"); }
   catch(e){ S.lista = bak; renderLista(); dotC("err","Errore"); }
 }
 async function clearListaCompletati(){
   var bak = S.lista.slice();
   S.lista = S.lista.filter(function(x){ return !x.completata; });
   renderLista(); dotC("", "Salvataggio…");
-  try{ await post({ action:"clearListaItems", cassa_id:cassaCorrente.id, soloCompletate:true }); dotC("ok","Sincronizzata"); }
+  try{ var esito = await post({ action:"clearListaItems", cassa_id:cassaCorrente.id, soloCompletate:true }); dotC(esito==="queued" ? "err" : "ok", esito==="queued" ? "In attesa" : "Sincronizzata"); }
   catch(e){ S.lista = bak; renderLista(); dotC("err","Errore"); }
 }
 function svuotaListaConfirm(){ _svuotaListaConfirm = true; renderLista(); }
@@ -236,6 +236,6 @@ async function svuotaLista(){
   var bak = S.lista.slice();
   S.lista = []; _svuotaListaConfirm = false;
   renderLista(); dotC("", "Salvataggio…");
-  try{ await post({ action:"clearListaItems", cassa_id:cassaCorrente.id, soloCompletate:false }); dotC("ok","Sincronizzata"); }
+  try{ var esito = await post({ action:"clearListaItems", cassa_id:cassaCorrente.id, soloCompletate:false }); dotC(esito==="queued" ? "err" : "ok", esito==="queued" ? "In attesa" : "Sincronizzata"); }
   catch(e){ S.lista = bak; renderLista(); dotC("err","Errore"); }
 }
