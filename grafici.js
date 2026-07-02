@@ -165,7 +165,7 @@ function renderReportGruppo(){
 
   var h = '<div class="card report-finale">';
   h += '<div class="card-titolo">🏁 Riepilogo finale</div>';
-  h += '<p class="report-sub">Il gruppo è terminato. Ecco com\'è andata!</p>';
+  h += '<p class="report-sub">Sipario! Il gruppo è terminato: applausi, abbracci e conti in chiaro.</p>';
   h += '<div class="report-metriche">';
   h += '<div class="report-metrica"><span class="rm-val">'+eur(tot)+'</span><span class="rm-lab">speso in totale</span></div>';
   h += '<div class="report-metrica"><span class="rm-val">'+nMov+'</span><span class="rm-lab">'+(nMov===1?'movimento':'movimenti')+'</span></div>';
@@ -178,6 +178,7 @@ function renderReportGruppo(){
       : (s > 0 ? '<span class="mb-cred">+'+eur(s)+'</span>' : '<span class="mb-deb">−'+eur(Math.abs(s))+'</span>');
     h += '<div class="report-saldo-row"><span>'+escapeHtml(nomi[m.id]||"?")+'</span>'+badge+'</div>';
   });
+  h += '<p class="report-sub" style="margin-top:10px;">È stato un bel viaggio. Il maialino ringrazia. 🐷</p>';
   h += '<button class="btn-ghost btn-mini" style="margin-top:12px;" onclick="apriGrafici()">📊 Vedi i grafici</button>';
   h += '</div>';
   slot.innerHTML = h;

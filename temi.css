@@ -5,16 +5,14 @@
      Superfici:  --br-bg --br-bg2 --br-card --br-line --br-text --br-dim
      Accenti:    --th-accent --th-accent-dark --th-accent2
                  --th-accent-soft --th-on-accent --th-accent-glow
+     Semantici:  --br-pos (positivo/credito) --br-neg (negativo/debito)
    salvadanaio = baseline brand (solo accenti).
-   pesci/west  = palette PROVVISORIE scure (Design le rifà incisive).
    ════════════════════════════════════════════════════════ */
 :root{
-  --th-accent: var(--br-cyan);
-  --th-accent-dark:#00b8d4;
-  --th-accent2: var(--br-yellow);
-  --th-accent-soft: rgba(0,229,255,.08);
-  --th-on-accent:#06232a;
-  --th-accent-glow: rgba(0,229,255,.22);
+  --th-accent: var(--br-cyan); --th-accent-dark:#00b8d4;
+  --th-accent2: var(--br-yellow); --th-accent-soft: rgba(0,229,255,.08);
+  --th-on-accent:#06232a; --th-accent-glow: rgba(0,229,255,.22);
+  --br-pos:#6FCF5A; --br-neg:#FF8A80;
 }
 /* 🐷 Salvadanaio = baseline brand (solo accenti) */
 body[data-tema="salvadanaio"]{
@@ -22,19 +20,106 @@ body[data-tema="salvadanaio"]{
   --th-accent2: var(--br-yellow); --th-accent-soft: rgba(0,229,255,.08);
   --th-on-accent:#06232a; --th-accent-glow: rgba(0,229,255,.22);
 }
-/* 🐟 Pesci — PROVVISORIO (Design) */
+/* 🐟 Pesci */
 body[data-tema="pesci"]{
-  --br-bg:#0F1E24; --br-bg2:#162A32; --br-card:#1C3540;
-  --br-line:rgba(43,192,228,.14);
-  --th-accent:#2BC0E4; --th-accent-dark:#1A8CB0;
-  --th-accent2:#FFD166; --th-accent-soft:rgba(43,192,228,.12);
-  --th-on-accent:#04252b; --th-accent-glow:rgba(43,192,228,.24);
+  --br-bg:#04141F; --br-bg2:#0A2230; --br-card:#10303F;
+  --br-line:rgba(77,208,255,.16);
+  --br-text:#EAF6FB; --br-dim:rgba(198,229,241,.62);
+  --th-accent:#4DD0FF; --th-accent-dark:#1E9CD7;
+  --th-accent2:#FFC24D; --th-accent-soft:rgba(77,208,255,.12);
+  --th-on-accent:#02222E; --th-accent-glow:rgba(77,208,255,.30);
 }
-/* 🤠 West — PROVVISORIO (Design) */
+/* 🤠 West */
 body[data-tema="west"]{
-  --br-bg:#211913; --br-bg2:#2C221A; --br-card:#352A20;
-  --br-line:rgba(224,148,90,.16);
-  --th-accent:#E0945A; --th-accent-dark:#B5683A;
-  --th-accent2:#F2C94C; --th-accent-soft:rgba(224,148,90,.12);
-  --th-on-accent:#2a1c0f; --th-accent-glow:rgba(224,148,90,.24);
+  --br-bg:#1C1108; --br-bg2:#291A0D; --br-card:#332314;
+  --br-line:rgba(255,158,61,.17);
+  --br-text:#FBEFDD; --br-dim:rgba(238,213,180,.62);
+  --th-accent:#FF9E3D; --th-accent-dark:#D97420;
+  --th-accent2:#FFD84D; --th-accent-soft:rgba(255,158,61,.13);
+  --th-on-accent:#2B1500; --th-accent-glow:rgba(255,158,61,.30);
 }
+/* 🐻 Orsi */
+body[data-tema="orsi"]{
+  --br-bg:#131A11; --br-bg2:#1C2618; --br-card:#243020;
+  --br-line:rgba(255,200,87,.15);
+  --br-text:#F2F5EA; --br-dim:rgba(216,226,199,.62);
+  --th-accent:#FFC857; --th-accent-dark:#DBA32E;
+  --th-accent2:#9BD65B; --th-accent-soft:rgba(255,200,87,.12);
+  --th-on-accent:#2A1F00; --th-accent-glow:rgba(255,200,87,.28);
+}
+/* 👽 Alieni */
+body[data-tema="alieni"]{
+  --br-bg:#0B0714; --br-bg2:#150E24; --br-card:#1D1531;
+  --br-line:rgba(124,255,107,.15);
+  --br-text:#F1EDFB; --br-dim:rgba(206,196,233,.62);
+  --th-accent:#7CFF6B; --th-accent-dark:#45D338;
+  --th-accent2:#C77DFF; --th-accent-soft:rgba(124,255,107,.10);
+  --th-on-accent:#04230B; --th-accent-glow:rgba(124,255,107,.30);
+}
+/* 🦜 Jungle — CHIARO */
+body[data-tema="jungle"]{
+  --br-bg:#F1F6E9; --br-bg2:#E6EFD7; --br-card:#FFFFFF;
+  --br-line:rgba(23,86,49,.16);
+  --br-text:#1D3324; --br-dim:rgba(29,51,36,.62);
+  --th-accent:#1F8A4C; --th-accent-dark:#136B39;
+  --th-accent2:#E8641F; --th-accent-soft:rgba(31,138,76,.10);
+  --th-on-accent:#FFFFFF; --th-accent-glow:rgba(31,138,76,.24);
+  --br-pos:#1E7E3C; --br-neg:#C93A2E;
+}
+/* 🦩 Flamingo — CHIARO */
+body[data-tema="flamingo"]{
+  --br-bg:#FDF2F0; --br-bg2:#FAE4E1; --br-card:#FFFFFF;
+  --br-line:rgba(196,43,96,.15);
+  --br-text:#3A2230; --br-dim:rgba(92,54,74,.62);
+  --th-accent:#E8447A; --th-accent-dark:#C42B60;
+  --th-accent2:#0F9C97; --th-accent-soft:rgba(232,68,122,.09);
+  --th-on-accent:#FFFFFF; --th-accent-glow:rgba(232,68,122,.24);
+  --br-pos:#1E7E3C; --br-neg:#C93A2E;
+}
+
+/* ── Riparazioni SOLO per i temi chiari — auth.css/cassa.css NON si toccano ── */
+body[data-tema="jungle"] .br-inp, body[data-tema="jungle"] .m-row input,
+body[data-tema="jungle"] .m-row select, body[data-tema="jungle"] .split-inp,
+body[data-tema="jungle"] .silly-tetto-inp{ color:var(--br-text); }
+body[data-tema="jungle"] .br-inp::placeholder{ color:rgba(0,0,0,.32); }
+body[data-tema="jungle"] .btn-esci, body[data-tema="jungle"] .btn-invita,
+body[data-tema="jungle"] .mb-btn{ background:rgba(0,0,0,.05); }
+body[data-tema="jungle"] .sk{
+  background:linear-gradient(90deg,var(--br-card),var(--br-bg2),var(--br-card));
+  background-size:200% 100%;
+}
+body[data-tema="jungle"] .sm-val.credito, body[data-tema="jungle"] .mb-cred,
+body[data-tema="jungle"] .saldi-pari, body[data-tema="jungle"] .solo-saldo-val.pos,
+body[data-tema="jungle"] .mv-settle .mv-desc, body[data-tema="jungle"] .split-info.ok
+  { color:var(--br-pos); }
+body[data-tema="jungle"] .sm-val.debito, body[data-tema="jungle"] .mb-deb,
+body[data-tema="jungle"] .solo-saldo-val.neg, body[data-tema="jungle"] .auth-error,
+body[data-tema="jungle"] .modal-error, body[data-tema="jungle"] .elimina-warn,
+body[data-tema="jungle"] .mb-danger, body[data-tema="jungle"] .mv-del:hover
+  { color:var(--br-neg); }
+body[data-tema="jungle"] .voce-entrata{ color:var(--br-pos)!important; }
+body[data-tema="jungle"] .voce-uscita{ color:var(--br-neg)!important; }
+body[data-tema="jungle"] .sync-dot.ok{ background:var(--br-pos); }
+
+body[data-tema="flamingo"] .br-inp, body[data-tema="flamingo"] .m-row input,
+body[data-tema="flamingo"] .m-row select, body[data-tema="flamingo"] .split-inp,
+body[data-tema="flamingo"] .silly-tetto-inp{ color:var(--br-text); }
+body[data-tema="flamingo"] .br-inp::placeholder{ color:rgba(0,0,0,.32); }
+body[data-tema="flamingo"] .btn-esci, body[data-tema="flamingo"] .btn-invita,
+body[data-tema="flamingo"] .mb-btn{ background:rgba(0,0,0,.05); }
+body[data-tema="flamingo"] .sk{
+  background:linear-gradient(90deg,var(--br-card),var(--br-bg2),var(--br-card));
+  background-size:200% 100%;
+}
+body[data-tema="flamingo"] .sm-val.credito, body[data-tema="flamingo"] .mb-cred,
+body[data-tema="flamingo"] .saldi-pari, body[data-tema="flamingo"] .solo-saldo-val.pos,
+body[data-tema="flamingo"] .mv-settle .mv-desc, body[data-tema="flamingo"] .split-info.ok
+  { color:var(--br-pos); }
+body[data-tema="flamingo"] .sm-val.debito, body[data-tema="flamingo"] .mb-deb,
+body[data-tema="flamingo"] .solo-saldo-val.neg, body[data-tema="flamingo"] .auth-error,
+body[data-tema="flamingo"] .modal-error, body[data-tema="flamingo"] .elimina-warn,
+body[data-tema="flamingo"] .mb-danger, body[data-tema="flamingo"] .mv-del:hover
+  { color:var(--br-neg); }
+body[data-tema="flamingo"] .voce-entrata{ color:var(--br-pos)!important; }
+body[data-tema="flamingo"] .voce-uscita{ color:var(--br-neg)!important; }
+body[data-tema="flamingo"] .sync-dot.ok{ background:var(--br-pos); }

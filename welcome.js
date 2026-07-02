@@ -8,10 +8,10 @@
 var WELCOME_KEY = "spiccioli_welcome_visto";
 var _welcomeIdx = 0;
 var WELCOME_SLIDES = [
-  { emoji:"🐷", titolo:"Benvenuto in sPiccioli!", testo:"Tieni da conto le piccole spese — i Piccioli — da solo, in due o in gruppo." },
-  { emoji:"👥", titolo:"Solo, Coppia o Gruppo",   testo:"Crea una cassa e adattala a come dividete le spese. Ognuno vede la sua quota." },
-  { emoji:"🧺", titolo:"Lista, Note e Grafici",    testo:"Condividete la lista della spesa, lasciate note sulla bacheca, guardate chi ha speso cosa." },
-  { emoji:"✨", titolo:"Resta Silly",              testo:"Dai il giusto peso alle cose piccole ma importanti. Pronti a iniziare?" }
+  { emoji:"🐷", titolo:"Oink! Sono sPiccioli!", testo:"Tengo da conto i tuoi Piccioli: le piccole spese che, messe insieme, fanno le grandi storie." },
+  { emoji:"👥", titolo:"Da solo, in due o in banda", testo:"Il Solo è il tuo bilancio personale. La Coppia chiude i conti ogni mese. Il Gruppo regge fino a 20 scellerati." },
+  { emoji:"🧺", titolo:"Lista, note e grafici", testo:"Scrivete la lista della spesa insieme, lasciatevi bigliettini in bacheca e scoprite chi ha pagato più pizze." },
+  { emoji:"✨", titolo:"I numeri sono seri. Noi no.", testo:"Attiva la modalità Silly e la cassa prende vita: io cresco, dormo, festeggio. Pronti? Io ho già fame di Piccioli." }
 ];
 
 function maybeWelcome(){

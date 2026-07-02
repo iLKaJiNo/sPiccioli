@@ -81,7 +81,7 @@ function chiudiTemaUtente(){ document.getElementById("modal-tema-utente").classL
 async function cambiaTemaUtente(t){
   if(!profiloUtente || t === profiloUtente.tema) return;
   var r = await sb.from("profili").update({ tema: t }).eq("id", profiloUtente.id);
-  if(r.error){ alert("Errore nel cambio tema: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore nel cambio tema: " + r.error.message); return; }
   profiloUtente.tema = t;
   document.body.setAttribute("data-tema", t);   // siamo su home → applica subito
   apriTemaUtente();                              // rinfresca evidenziazione
@@ -120,7 +120,7 @@ function renderCasse(){
   document.getElementById("casse-nome-utente").textContent = profiloUtente.nome || profiloUtente.email;
   var lista = document.getElementById("casse-list");
   if(!CASSE.length){
-    lista.innerHTML = '<div class="casse-empty">Non sei ancora in nessuna cassa.<br>Creane una o unisciti con un codice! 👇</div>';
+    lista.innerHTML = '<div class="casse-empty">Nessuna cassa qui. Creane una o fatti invitare — io non mordo.</div>';
     return;
   }
   lista.innerHTML = CASSE.map(function(c){
@@ -208,6 +208,8 @@ function traduciErroreUnisci(m){
 function entraInCassa(id){ apriCassa(id); }        // apriCassa vive in api.js
 function tornaAlleCasse(){
   chiudiRealtimeCassa();
+  if(typeof chiudiRealtimeScherzi === "function") chiudiRealtimeScherzi();
+  if(typeof _scherziCassaId !== "undefined") _scherziCassaId = null;
   cassaCorrente = null;
   membriCorrente = [];
   S.movimenti = [];

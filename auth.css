@@ -149,20 +149,34 @@ body{
 .info-cta:active{transform:scale(.97);}
 
 /* ── S8d: crawl easter egg ── */
-.crawl-overlay{display:none;position:fixed;inset:0;z-index:1200;background:#000;overflow:hidden;}
+.crawl-overlay{
+  display:none;position:fixed;inset:0;z-index:1200;overflow:hidden;
+  background:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.9), transparent),
+    radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,.7), transparent),
+    radial-gradient(1.5px 1.5px at 50% 60%, rgba(255,255,255,.8), transparent),
+    radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,.6), transparent),
+    radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,.7), transparent),
+    radial-gradient(1.5px 1.5px at 65% 35%, rgba(255,255,255,.9), transparent),
+    radial-gradient(1px 1px at 15% 55%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1px 1px at 45% 15%, rgba(255,255,255,.6), transparent),
+    radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,.55), transparent),
+    radial-gradient(1px 1px at 70% 90%, rgba(255,255,255,.6), transparent),
+    #000;
+}
 .crawl-overlay.attivo{display:block;}
 .crawl-close{position:fixed;top:max(14px,env(safe-area-inset-top));right:16px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;z-index:3;}
 .crawl-intro{position:absolute;top:42%;width:88%;max-width:480px;left:50%;transform:translateX(-50%);text-align:center;color:#4FD1E0;font-family:'Nunito',sans-serif;font-weight:700;font-size:1.05rem;opacity:0;animation:crawlIntro 5s ease forwards;}
-.crawl-mask{position:absolute;inset:0;perspective:340px;overflow:hidden;}
+.crawl-mask{position:absolute;inset:0;perspective:320px;overflow:hidden;}
 .crawl-mask::after{content:'';position:absolute;top:0;left:0;right:0;height:46%;background:linear-gradient(to bottom,#000 0%,transparent 100%);pointer-events:none;z-index:2;}
-.crawl-text{position:absolute;top:100%;left:50%;width:90%;max-width:520px;transform:translateX(-50%) rotateX(26deg);transform-origin:50% 100%;color:#FFEA00;font-family:'Baloo 2',cursive;font-weight:800;text-align:center;line-height:1.5;animation:crawlScroll 48s linear 4.5s forwards;}
+.crawl-text{position:absolute;top:105%;left:50%;width:90%;max-width:520px;transform:translateX(-50%) rotateX(52deg);transform-origin:50% 0;color:#FFEA00;font-family:'Baloo 2',cursive;font-weight:800;text-align:center;line-height:1.5;animation:crawlScroll 28s linear 4.5s forwards;}
 .crawl-text p{margin:0 0 18px;font-size:1.15rem;}
 .crawl-text b{color:#fff;}
 .crawl-ep{font-size:1rem !important;letter-spacing:1px;opacity:.85;}
 .crawl-h{font-size:1.9rem;line-height:1.15;margin:0 0 26px;}
 .crawl-end{font-style:italic;}
 @keyframes crawlIntro{0%{opacity:0;}20%{opacity:1;}80%{opacity:1;}100%{opacity:0;}}
-@keyframes crawlScroll{0%{top:100%;}100%{top:-260%;}}
+@keyframes crawlScroll{0%{top:105%;}100%{top:-280%;}}
 @media (prefers-reduced-motion: reduce){
   .crawl-intro{animation:none;opacity:1;position:static;transform:none;margin:70px auto 10px;}
   .crawl-mask{perspective:none;overflow:auto;}
