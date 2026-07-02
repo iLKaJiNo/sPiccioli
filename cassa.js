@@ -893,7 +893,8 @@ function renderArchivio(){
   } else {
     html += ch.map(function(c, idx){
       var ripr = (idx === 0)
-        ? '<button class="btn-ripristina" onclick="event.stopPropagation();confermaRipristino()">↩︎ Ripristina</button>' : '';
+        ? '<button class="btn-ripristina" onclick="event.stopPropagation();confermaRipristino()">↩︎ Ripristina</button>'
+          + '<button class="btn-ghost btn-mini" onclick="event.stopPropagation();ripristinaCoppia()">♻️ Ripristina</button>' : '';
       return '<div class="arch-row" onclick="apriDettaglioChiusura(\'' + c.id + '\')">'
         + '<div class="arch-main"><div class="arch-titolo">Chiusura #' + c.seq + '</div>'
         + '<div class="arch-meta">' + fmtLong(c.chiusa_il) + ' · ' + eur(c.totale_speso) + '</div></div>'
@@ -953,6 +954,15 @@ async function confermaRipristino(){
   await caricaCassa();
   switchCassaTab("archivio");
   if(avvisi.length){ alert("Ripristino completato, con avvisi:\n\n• " + avvisi.join("\n• ")); }
+}
+
+async function ripristinaCoppia(){
+  var altri = (S.movimenti||[]).some(function(m){ return m.origine !== "apertura"; });
+  if(altri){ toastInfo("Il registro corrente non è vuoto: chiudi o svuota prima."); return; }
+  if(!confirm("Ripristinare l'ultima chiusura? Le voci tornano nel registro e la chiusura viene eliminata.")) return;
+  var r = await sb.rpc("ripristina_coppia", { p_cassa_id: cassaCorrente.id });
+  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  await caricaCassa(); renderCassa(); renderArchivio(); toastInfo("Chiusura ripristinata ♻️");
 }
 
 function apriDettaglioChiusura(id){
