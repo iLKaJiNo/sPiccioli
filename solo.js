@@ -321,8 +321,8 @@ function renderArchivioSolo(){
         ? '<button class="btn-ripristina" onclick="event.stopPropagation();ripristinaSolo()">↩︎ Ripristina</button>' : '';
       var sd = parseFloat(c.saldo)||0;
       return '<div class="arch-row" onclick="apriDettaglioChiusuraSolo(\'' + c.id + '\')">'
-        + '<div class="arch-main"><div class="arch-titolo">Chiusura #' + c.seq + '</div>'
-        + '<div class="arch-meta">' + fmtLong(c.chiusa_il) + ' · saldo ' + (sd<0?"−":"") + eur(sd) + '</div></div>'
+        + '<div class="arch-main"><div class="arch-titolo">' + escapeHtml(etichettaChiusura(c)) + '</div>'
+        + '<div class="arch-meta">#' + c.seq + ' · ' + fmtLong(c.chiusa_il) + ' · saldo ' + (sd<0?"−":"") + eur(sd) + '</div></div>'
         + ripr + '<div class="cassa-freccia">›</div></div>';
     }).join("");
   }
@@ -356,8 +356,9 @@ function apriDettaglioChiusuraSolo(id){
   var c = (soloChiusure || []).find(function(x){ return String(x.id) === String(id); });
   if(!c) return;
   var voci = c.voci || [];
-  var html = '<div class="det-top"><div class="det-titolo">Chiusura #' + c.seq + '</div>'
-    + '<div class="det-data">' + fmtLong(c.chiusa_il) + '</div></div>';
+  var html = '<div class="det-top"><div class="det-titolo">' + escapeHtml(etichettaChiusura(c))
+    + ' <button class="nota-ico" onclick="rinominaChiusuraSolo(\'' + c.id + '\')">✏️</button></div>'
+    + '<div class="det-data">#' + c.seq + ' · ' + fmtLong(c.chiusa_il) + '</div></div>';
   html += '<div class="det-sez">';
   html += '<div class="det-riga"><span>Entrate</span><span class="voce-entrata">+ ' + eur(parseFloat(c.tot_entrate)||0) + '</span></div>';
   html += '<div class="det-riga"><span>Uscite</span><span class="voce-uscita">− ' + eur(parseFloat(c.tot_uscite)||0) + '</span></div>';
@@ -379,3 +380,15 @@ function apriDettaglioChiusuraSolo(id){
   document.getElementById("modal-dettaglio-chiusura-solo").classList.add("attivo");
 }
 function chiudiDettaglioChiusuraSolo(){ document.getElementById("modal-dettaglio-chiusura-solo").classList.remove("attivo"); }
+
+async function rinominaChiusuraSolo(id){
+  var c = (soloChiusure || []).find(function(x){ return x.id === id; }); if(!c) return;
+  var nuovo = prompt("Nome della chiusura (vuoto = automatico):", c.nome || "");
+  if(nuovo === null) return;
+  var r = await sb.rpc("rinomina_chiusura_solo", { p_id:id, p_nome:nuovo });
+  if(r.error){ toastInfo("Errore: "+r.error.message); return; }
+  c.nome = nuovo.trim() || null;
+  renderArchivioSolo();
+  apriDettaglioChiusuraSolo(id);
+  toastInfo("Rinominata ✏️");
+}
