@@ -30,7 +30,7 @@ function _renderGrafico(){
   var tg = document.getElementById("grafico-tabs");
   if(tg){
     var t = "";
-    t += '<button class="gr-tab'+(_graficoVista==="chi"?" attivo":"")+'" onclick="setGraficoVista(\'chi\')">👥 Chi ha speso</button>';
+    t += '<button class="gr-tab'+(_graficoVista==="chi"?" attivo":"")+'" onclick="setGraficoVista(\'chi\')">👥 Membri</button>';
     t += '<button class="gr-tab'+(_graficoVista==="categoria"?" attivo":"")+'" onclick="setGraficoVista(\'categoria\')">🏷️ Categorie</button>';
     if(isCoppia) t += '<button class="gr-tab'+(_graficoVista==="storico"?" attivo":"")+'" onclick="setGraficoVista(\'storico\')">📊 Storico</button>';
     tg.innerHTML = t;
