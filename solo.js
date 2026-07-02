@@ -318,7 +318,8 @@ function renderArchivioSolo(){
   } else {
     html += ch.map(function(c, idx){
       var ripr = (idx === 0)
-        ? '<button class="btn-ripristina" onclick="event.stopPropagation();confermaRipristinoSolo()">↩︎ Ripristina</button>' : '';
+        ? '<button class="btn-ripristina" onclick="event.stopPropagation();confermaRipristinoSolo()">↩︎ Ripristina</button>'
+          + '<button class="btn-ghost btn-mini" onclick="event.stopPropagation();ripristinaSolo()">♻️ Ripristina</button>' : '';
       var sd = parseFloat(c.saldo)||0;
       return '<div class="arch-row" onclick="apriDettaglioChiusuraSolo(\'' + c.id + '\')">'
         + '<div class="arch-main"><div class="arch-titolo">Chiusura #' + c.seq + '</div>'
@@ -357,6 +358,14 @@ async function confermaRipristinoSolo(){
   }
   await caricaSolo();
   renderArchivioSolo();
+}
+
+async function ripristinaSolo(){
+  if(soloVoci.length){ toastInfo("Il registro corrente non è vuoto: svuotalo o chiudilo prima."); return; }
+  if(!confirm("Ripristinare l'ultimo mese chiuso?")) return;
+  var r = await sb.rpc("ripristina_solo");
+  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  await caricaSolo(); toastInfo("Mese ripristinato ♻️");
 }
 
 function apriDettaglioChiusuraSolo(id){
