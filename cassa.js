@@ -7,8 +7,53 @@
 var THEMES = [
   { k:"salvadanaio", e:"🐷", n:"Salvadanaio" },
   { k:"pesci",       e:"🐟", n:"Pesci" },
-  { k:"west",        e:"🤠", n:"West" }
+  { k:"west",        e:"🤠", n:"West" },
+  { k:"orsi",        e:"🐻", n:"Orsi" },
+  { k:"alieni",      e:"👽", n:"Alieni" },
+  { k:"jungle",      e:"🦜", n:"Jungle" },
+  { k:"flamingo",    e:"🦩", n:"Flamingo" }
 ];
+
+var FLAVOR = {
+  salvadanaio:{ set:["🐷","🪙","💰","✨","🏦"], conf:["🪙","✨"],
+    empty:"Ancora nessuna spesa. Il maialino attende paziente. 🐷",
+    pari:"🎉 Siete pari! Il maialino è commosso." },
+  pesci:{ set:["🐟","🐠","🐡","🦈","🫧","🪸","🦀"], conf:["🫧","🐠"],
+    empty:"Acque calme: nessuna spesa in vista. 🫧",
+    pari:"🫧 Siete pari! L'acquario gorgoglia felice." },
+  west:{ set:["🌵","🤠","🐴","🐍","🏜️","🪕","⭐"], conf:["⭐","🌵"],
+    empty:"Solo rotolacampo da queste parti… 🌵",
+    pari:"⭐ Pari e patta, cowboy. La resa dei conti è rimandata." },
+  orsi:{ set:["🐻","🐾","🪵","🍯","🌲","🦫"], conf:["🍯","🐾"],
+    empty:"Il bosco tace. Nemmeno un'orma. 🐾",
+    pari:"🍯 Pari! Miele per tutti nella tana." },
+  alieni:{ set:["👽","🛸","🪐","✨","🌌","🚀"], conf:["✨","🛸"],
+    empty:"Nessun segnale di vita. Né di spese. 🛸",
+    pari:"🪐 Equilibrio cosmico raggiunto. Gli anziani approvano." },
+  jungle:{ set:["🐒","🦍","🍌","🦜","🌴","🐆"], conf:["🍌","🌴"],
+    empty:"La giungla è silenziosa. Troppo silenziosa. 🐒",
+    pari:"🍌 Pari! Le scimmie fanno festa." },
+  flamingo:{ set:["🦩","🍸","🪩","🌴","🕺","💃"], conf:["🪩","🍸"],
+    empty:"Pista vuota, cocktail intonsi. 🍸",
+    pari:"🪩 Pari! Si balla a bordo piscina." }
+};
+function flavorTema(){ return FLAVOR[(cassaCorrente && cassaCorrente.tema)] || FLAVOR.salvadanaio; }
+
+// decorazioni ambientali di sfondo, solo con silly attivo
+var _DECOR_POS = [
+  {top:"6%",  left:"8%"},  {top:"14%", left:"78%"}, {top:"46%", left:"4%"},
+  {top:"60%", left:"86%"}, {top:"82%", left:"14%"}
+];
+function renderFlavorDecor(){
+  var box = document.getElementById("cassa-decor");
+  if(!box) return;
+  if(!sillyAttivo()){ box.innerHTML = ""; return; }
+  var set = flavorTema().set || [];
+  box.innerHTML = _DECOR_POS.map(function(p, i){
+    var e = set[i % set.length] || "";
+    return '<span style="top:'+p.top+';left:'+p.left+';">'+e+'</span>';
+  }).join("");
+}
 
 // ── INTESTAZIONE / TAB ──
 function intestaCassa(){
@@ -21,7 +66,15 @@ function skeletonsCassa(){
   document.getElementById("movimenti-list").innerHTML = '<div class="sk"></div><div class="sk"></div><div class="sk"></div>';
 }
 function invitaCassa(){
-  alert("Condividi questo codice per far entrare qualcuno:\n\n" + cassaCorrente.codice_invito);
+  document.getElementById("invito-codice-txt").textContent = cassaCorrente.codice_invito;
+  document.getElementById("modal-invito").classList.add("attivo");
+}
+function chiudiInvito(){ document.getElementById("modal-invito").classList.remove("attivo"); }
+function copiaCodiceInvito(){
+  var codice = cassaCorrente.codice_invito;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(codice).then(function(){ toastInfo("Codice copiato 📋"); }).catch(function(){});
+  }
 }
 function switchCassaTab(tab){
   document.querySelectorAll("#cassa-screen .cassa-tab").forEach(function(t){
@@ -63,10 +116,10 @@ function renderCassa(){
   var _ban = document.getElementById("cassa-banner");
   if(_ban){
     if(cassaBloccata()){
-      _ban.innerHTML = '<div class="cassa-terminata-banner">🏁 Gruppo terminato · sola lettura</div>';
+      _ban.innerHTML = '<div class="cassa-terminata-banner">🏁 Gruppo terminato: si guarda, non si tocca.</div>';
     } else if(cassaCorrente.tipo === "coppia" && registroMultiMese(S.movimenti, "data")
               && !_nudgeDismiss["c_"+cassaCorrente.id]){
-      _ban.innerHTML = '<div class="cassa-terminata-banner">📆 Il registro abbraccia più mesi. '
+      _ban.innerHTML = '<div class="cassa-terminata-banner">📆 Qui dentro c\'è più di un mese. Lo metto in ordine? '
         + '<button class="btn-mini btn-accent" onclick="apriChiudiMese()">Archivia</button> '
         + '<button class="btn-mini btn-ghost" onclick="_nudgeDismiss[\'c_\'+cassaCorrente.id]=true;renderCassa()">Più tardi</button></div>';
     } else {
@@ -84,6 +137,8 @@ function renderCassa(){
   var lt = document.querySelector('#cassa-screen .cassa-tab[data-tab="lista"]');
   if(lt && lt.classList.contains("attiva")) renderLista();
   sillyCheck();
+  renderFlavorDecor();
+  if(typeof _syncRealtimeScherzi === "function") _syncRealtimeScherzi();
 }
 
 // ── SALDI ──
@@ -103,13 +158,13 @@ function renderSaldi(){
 
   if(cassaCorrente.modalita === "diretti"){
     titolo.textContent = "Chi deve a chi";
-    if(tuttiPari){ wrap.innerHTML = '<div class="saldi-pari">Tutti in pari! 🎉</div>'; return; }
+    if(tuttiPari){ wrap.innerHTML = '<div class="saldi-pari">'+flavorTema().pari+'</div>'; return; }
     wrap.innerHTML = simplificaDebiti(saldi).map(rigaDebito).join("");
     return;
   }
 
   titolo.textContent = "I conti";
-  if(tuttiPari){ wrap.innerHTML = '<div class="saldi-pari">Tutti in pari! 🎉</div>'; return; }
+  if(tuttiPari){ wrap.innerHTML = '<div class="saldi-pari">'+flavorTema().pari+'</div>'; return; }
   var nomi = nomiMembri();
   wrap.innerHTML = membriCorrente.map(function(m){
     var s   = saldi[m.id] || 0;
@@ -133,7 +188,7 @@ function renderGrezza(saldi){
   var ids  = membriCorrente.map(function(m){ return m.id; });
   var a = saldi[ids[0]] || 0, b = saldi[ids[1]] || 0;
   var gap = Math.abs(a - b);                       // divario di spesa = 2× il netto
-  if(gap < 0.005){ wrap.innerHTML = '<div class="saldi-pari">In pari! 🎉</div>'; return; }
+  if(gap < 0.005){ wrap.innerHTML = '<div class="saldi-pari">'+flavorTema().pari+'</div>'; return; }
   var nomi  = nomiMembri();
   var debId = a < b ? ids[0] : ids[1];
   var creId = a < b ? ids[1] : ids[0];
@@ -166,7 +221,7 @@ function renderMovimenti(){
   var wrap = document.getElementById("movimenti-list");
   var movs = S.movimenti || [];
   if(!movs.length){
-    wrap.innerHTML = '<div class="mv-empty">Ancora nessuna spesa.<br>Aggiungi la prima! 👆</div>';
+    wrap.innerHTML = '<div class="mv-empty">'+flavorTema().empty+'<br>Aggiungi la prima! 👆</div>';
     return;
   }
   var nomi = nomiMembri();
@@ -196,7 +251,7 @@ function renderMovimenti(){
     var valBadge = (val !== (cassaCorrente.valuta_base||"EUR")) ? '<span class="mv-badge">' + val + '</span>' : '';
     var ico = mov.categoria ? (iconaCat(mov.categoria) + " ") : "";
     var ricorr = (mov.origine === "ricorrente") ? "🔁 " : "";
-    var _tro = (mov.id === _trofeoId) ? "🏆 " : "";
+    var _tro = (mov.id === _trofeoId) ? '<span id="mv-trofeo-cur" class="mv-trofeo">🏆</span> ' : "";
     return '<div class="mv-item' + (temp ? " mv-temp" : "") + '"' + apri + '>'
       +   '<div class="mv-main">'
       +     '<div class="mv-desc">' + _tro + ico + escapeHtml(mov.descrizione || "(senza descrizione)") + badge + valBadge + '</div>'
@@ -285,7 +340,9 @@ function renderMembri(){
     var tu    = m.id === mioId ? '<span class="cassa-badge-tu">tu</span>' : '';
     var puoiRinominare = true;  // app silly: chiunque puo rinominare chiunque
     var puoiRimuovere  = admin && m.id !== mioId && Math.abs(s) < 0.005;
+    var puoiScherzare  = m.id !== mioId && m.user_id && sillyAttivo() && !cassaBloccata();
     var az = '';
+    if(puoiScherzare)  az += '<button class="mb-btn" onclick="apriScherzoPicker(\'' + m.user_id + '\')" title="Scherzo">😜</button>';
     if(puoiRinominare) az += '<button class="mb-btn" onclick="apriRinomina(\'' + m.id + '\')" title="Rinomina">✏️</button>';
     if(puoiRimuovere)  az += '<button class="mb-btn" onclick="rimuoviMembro(\'' + m.id + '\')" title="Rimuovi">🗑️</button>';
     return '<div class="mb-row"><div class="mb-info">'
@@ -367,18 +424,28 @@ async function confermaRinomina(){
 // ── RIMUOVI MEMBRO (admin, solo se in pari) ──
 async function rimuoviMembro(id){
   var nomi = nomiMembri();
-  if(!confirm("Rimuovere " + (nomi[id] || "questo membro") + " dalla cassa?\nI suoi movimenti passati restano.")) return;
+  var ok = await confermaBrand({
+    titolo: "Rimuovere questo membro?",
+    testo: escapeHtml(nomi[id] || "Questo membro") + " lascia la cassa. I suoi movimenti passati restano.",
+    cta: "🗑️ Rimuovi", danger: true
+  });
+  if(!ok) return;
   var r = await sb.from("membri").update({ attivo: false }).eq("id", id);
-  if(r.error){ alert("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
   await caricaCassa();
   renderMembri();
 }
 
 // ── RIGENERA CODICE (admin) ──
 async function rigeneraCodice(){
-  if(!confirm("Generare un nuovo codice? Quello vecchio smetterà di funzionare.")) return;
+  var ok = await confermaBrand({
+    titolo: "Rigenerare il codice?",
+    testo: "Quello vecchio smette di funzionare subito.",
+    cta: "🔄 Rigenera"
+  });
+  if(!ok) return;
   var r = await sb.rpc("rigenera_codice", { p_cassa: cassaCorrente.id });
-  if(r.error){ alert("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
   cassaCorrente.codice_invito = r.data;
   renderMembri();
 }
@@ -386,7 +453,7 @@ async function rigeneraCodice(){
 // ── TOGGLE GREZZA (admin) ──
 async function toggleGrezza(on){
   var r = await sb.from("casse").update({ grezza: on }).eq("id", cassaCorrente.id);
-  if(r.error){ alert("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
   cassaCorrente.grezza = on;
   renderCassa();
 }
@@ -395,7 +462,7 @@ async function toggleGrezza(on){
 async function switchModalita(nuova){
   if(nuova === cassaCorrente.modalita) return;
   var r = await sb.from("casse").update({ modalita: nuova }).eq("id", cassaCorrente.id);
-  if(r.error){ alert("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
   cassaCorrente.modalita = nuova;
   renderCassa();
 }
@@ -404,11 +471,12 @@ async function switchModalita(nuova){
 async function cambiaTema(t){
   if(!cassaCorrente || t === cassaCorrente.tema) return;
   var r = await sb.from("casse").update({ tema: t }).eq("id", cassaCorrente.id);
-  if(r.error){ alert("Errore nel cambio tema: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore nel cambio tema: " + r.error.message); return; }
   cassaCorrente.tema = t;
   document.body.setAttribute("data-tema", t);
   intestaCassa();   // aggiorna emoji header
   renderMembri();   // aggiorna evidenziazione selettore
+  renderFlavorDecor();
 }
 
 // ── ELIMINA CASSA (admin, conferma col nome) ──
@@ -435,7 +503,12 @@ async function confermaEliminaCassa(){
 
 // ── TERMINA / RIATTIVA GRUPPO (admin) ──
 async function terminaGruppo(){
-  if(!confirm("Terminare il gruppo? Diventa in sola lettura (potrai riattivarlo).")) return;
+  var ok = await confermaBrand({
+    titolo: "Terminare il gruppo?",
+    testo: "Diventa di sola lettura. Potrai riattivarlo quando vuoi.",
+    cta: "🏁 Termina", danger: true
+  });
+  if(!ok) return;
   var r = await sb.rpc("termina_gruppo", { p_cassa_id: cassaCorrente.id });
   if(r.error){ toastInfo("Errore: " + r.error.message); return; }
   cassaCorrente.stato = "terminata";
@@ -443,7 +516,12 @@ async function terminaGruppo(){
   renderCassa(); renderMembri(); toastInfo("Gruppo terminato 🏁");
 }
 async function riattivaGruppo(){
-  if(!confirm("Riattivare il gruppo? Torna modificabile.")) return;
+  var ok = await confermaBrand({
+    titolo: "Riattivare il gruppo?",
+    testo: "Torna modificabile per tutti.",
+    cta: "♻️ Riattiva"
+  });
+  if(!ok) return;
   var r = await sb.rpc("riattiva_gruppo", { p_cassa_id: cassaCorrente.id });
   if(r.error){ toastInfo("Errore: " + r.error.message); return; }
   cassaCorrente.stato = "attiva";
@@ -687,11 +765,12 @@ async function salvaSpesa(){
   S.movimenti.unshift(temp);
   renderCassa();
   try{
-    await post(payload);
-    await caricaCassa();
+    var esito = await post(payload);
+    if(esito === "queued"){ dotC("err", "In attesa"); toastInfo("Sei offline: la tengo io da parte 🐷"); }
+    else{ await caricaCassa(); }
   }catch(e){
     if(errDiRete(e)){}
-    else{ S.movimenti = S.movimenti.filter(function(m){ return m.id !== temp.id; }); renderCassa(); alert("Non è stato possibile salvare la spesa."); }
+    else{ S.movimenti = S.movimenti.filter(function(m){ return m.id !== temp.id; }); renderCassa(); await alertBrand("Ops: la spesa non si è salvata. Riprova — io da qui non mi muovo."); }
   }
 }
 
@@ -722,15 +801,20 @@ async function confermaSettle(){
     metodo: "equo", data: data, creatoDa: mio ? mio.id : _settleDa,
     paganti: paganti, quote: quote
   };
+  if(sillyAttivo()) sillyPioggiaMonete(document.querySelector('#modal-settle .m-conferma'));
   chiudiSettle();
   var temp = { id: "temp-" + Date.now(), tipo: "settle", descrizione: "Rimborso",
     importo: imp, valuta_mov: base, tasso_cambio: 1, data: data, paganti: paganti, quote: quote };
   S.movimenti.unshift(temp);
   renderCassa();
-  try{ await post(payload); await caricaCassa(); }
+  try{
+    var esito = await post(payload);
+    if(esito === "queued"){ dotC("err", "In attesa"); toastInfo("Sei offline: la tengo io da parte 🐷"); }
+    else{ await caricaCassa(); }
+  }
   catch(e){
     if(errDiRete(e)){}
-    else{ S.movimenti = S.movimenti.filter(function(m){ return m.id !== temp.id; }); renderCassa(); alert("Rimborso non salvato."); }
+    else{ S.movimenti = S.movimenti.filter(function(m){ return m.id !== temp.id; }); renderCassa(); await alertBrand("Ops: il rimborso non si è salvato. Riprova — io da qui non mi muovo."); }
   }
 }
 
@@ -800,7 +884,12 @@ function modificaCategoria(id){
   document.getElementById("cat-nome").focus();
 }
 async function eliminaCategoria(id){
-  if(!confirm("Eliminare questa categoria?\nLe spese passate restano (mostreranno 📌).")) return;
+  var ok = await confermaBrand({
+    titolo: "Eliminare questa categoria?",
+    testo: "Le spese passate restano (mostreranno 📌).",
+    cta: "🗑️ Elimina", danger: true
+  });
+  if(!ok) return;
   var r = await sb.from("categorie").delete().eq("id", id);
   if(r.error){ catErrore("Errore: " + r.error.message); return; }
   await caricaCassa();
@@ -829,12 +918,19 @@ async function aggiungiSetComuni(){
 // ── ELIMINA MOVIMENTO ──
 async function eliminaMovimento(id){
   if(String(id).indexOf("temp-") === 0) return;
-  if(!confirm("Eliminare questo movimento?")) return;
+  var mov = (S.movimenti || []).find(function(m){ return m.id === id; });
+  var desc = mov ? (mov.tipo === "settle" ? "Rimborso" : (mov.descrizione || "questa spesa")) : "questa spesa";
+  var ok = await confermaBrand({
+    titolo: "Butto via questa spesa?",
+    testo: "«" + escapeHtml(desc) + "» sparisce dai conti di tutti. Niente ripensamenti.",
+    cta: "🗑️ Elimina", annulla: "Tienila", danger: true
+  });
+  if(!ok) return;
   var backup = S.movimenti.slice();
   S.movimenti = S.movimenti.filter(function(m){ return m.id !== id; });
   renderCassa();
   try{ await post({ action: "deleteMovimento", id: id }); }
-  catch(e){ if(!errDiRete(e)){ S.movimenti = backup; renderCassa(); alert("Eliminazione non riuscita."); } }
+  catch(e){ if(!errDiRete(e)){ S.movimenti = backup; renderCassa(); await alertBrand("Ops: l'eliminazione non è riuscita. Riprova."); } }
 }
 
 // ════════════════════════════════════════════════════════
@@ -938,11 +1034,11 @@ function apriChiudiMese(){
 function chiudiModalChiudiMese(){ document.getElementById("modal-chiudi-mese").classList.remove("attivo"); }
 
 async function confermaChiudiMese(){
-  if(!navigator.onLine){ alert("Serve una connessione per chiudere il mese."); return; }
+  if(!navigator.onLine){ await alertBrand("Serve una connessione per chiudere il mese."); return; }
   var btn = document.getElementById("chiudi-mese-btn"); if(btn) btn.disabled = true;
   var r = await sb.rpc("chiudi_mese_coppia", { p_cassa_id: cassaCorrente.id });
   if(btn) btn.disabled = false;
-  if(r.error){ alert("Errore nella chiusura: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore nella chiusura: " + r.error.message); return; }
   chiudiModalChiudiMese();
   await caricaCassa();
   switchCassaTab("archivio");
@@ -951,7 +1047,12 @@ async function confermaChiudiMese(){
 async function ripristinaCoppia(){
   var altri = (S.movimenti||[]).some(function(m){ return m.origine !== "apertura"; });
   if(altri){ toastInfo("Il registro corrente non è vuoto: chiudi o svuota prima."); return; }
-  if(!confirm("Ripristinare l'ultima chiusura? Le voci tornano nel registro e la chiusura viene eliminata.")) return;
+  var ok = await confermaBrand({
+    titolo: "Ripristinare l'ultima chiusura?",
+    testo: "Le voci tornano nel registro e la chiusura viene eliminata.",
+    cta: "↩︎ Ripristina"
+  });
+  if(!ok) return;
   var r = await sb.rpc("ripristina_coppia", { p_cassa_id: cassaCorrente.id });
   if(r.error){ toastInfo("Errore: " + r.error.message); return; }
   await caricaCassa(); renderCassa(); renderArchivio(); toastInfo("Chiusura ripristinata ♻️");
@@ -1000,7 +1101,11 @@ function chiudiDettaglioChiusura(){ document.getElementById("modal-dettaglio-chi
 
 async function rinominaChiusura(id){
   var c = chiusureCassa.find(function(x){return x.id===id;}); if(!c) return;
-  var nuovo = prompt("Nome della chiusura (vuoto = automatico):", c.nome || "");
+  var nuovo = await promptBrand({
+    titolo: "Come battezziamo questo mese?",
+    testo: "Vuoto = automatico.",
+    placeholder: "Nome del mese", valore: c.nome || ""
+  });
   if(nuovo === null) return;
   var r = await sb.rpc("rinomina_chiusura_coppia", { p_id:id, p_nome:nuovo });
   if(r.error){ toastInfo("Errore: "+r.error.message); return; }

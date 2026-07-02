@@ -57,7 +57,7 @@ function renderSolo(){
   var _ban = document.getElementById("solo-banner");
   if(_ban){
     _ban.innerHTML = (registroMultiMese(soloVoci, "data") && !_nudgeDismiss["solo"])
-      ? '<div class="cassa-terminata-banner">📆 Il registro abbraccia più mesi. '
+      ? '<div class="cassa-terminata-banner">📆 Qui dentro c\'è più di un mese. Lo metto in ordine? '
         + '<button class="btn-mini btn-accent" onclick="confermaChiudiMeseSolo()">Archivia</button> '
         + '<button class="btn-mini btn-ghost" onclick="_nudgeDismiss[\'solo\']=true;renderSolo()">Più tardi</button></div>'
       : "";
@@ -162,15 +162,20 @@ async function salvaVoce(){
     tipo: _voceTipo, importo: imp,
     categoria: cat || null, nota: nota || null, data: data
   });
-  if(r.error){ alert("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
   chiudiNuovaVoce();
   await caricaSolo();
 }
 
 async function eliminaVoce(id){
-  if(!confirm("Eliminare questa voce?")) return;
+  var ok = await confermaBrand({
+    titolo: "Eliminare questa voce?",
+    testo: "Sparisce dal tuo registro. Niente ripensamenti.",
+    cta: "🗑️ Elimina", annulla: "Tienila", danger: true
+  });
+  if(!ok) return;
   var r = await sb.from("solo_voci").delete().eq("id", id);
-  if(r.error){ alert("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
   await caricaSolo();
 }
 
@@ -238,7 +243,12 @@ function modificaSoloCat(id){
   document.getElementById("solocat-nome").focus();
 }
 async function eliminaSoloCat(id){
-  if(!confirm("Eliminare questa categoria?\nLe voci passate restano (mostreranno 📌).")) return;
+  var ok = await confermaBrand({
+    titolo: "Eliminare questa categoria?",
+    testo: "Le voci passate restano (mostreranno 📌).",
+    cta: "🗑️ Elimina", danger: true
+  });
+  if(!ok) return;
   var r = await sb.from("solo_categorie").delete().eq("id", id);
   if(r.error){ soloCatErrore("Errore: " + r.error.message); return; }
   await caricaSolo();
@@ -340,22 +350,24 @@ function renderArchivioSolo(){
 }
 
 async function confermaChiudiMeseSolo(){
-  if(!navigator.onLine){ alert("Serve una connessione per chiudere il mese."); return; }
+  if(!navigator.onLine){ await alertBrand("Serve una connessione per chiudere il mese."); return; }
   var t = _totaliSolo();
-  if(!t.n){ alert("Registro vuoto: niente da chiudere."); return; }
-  var msg = "Chiudere il mese?\n\nEntrate: " + eur(t.ent) + "\nUscite: " + eur(t.usc)
-    + "\nSaldo: " + (t.saldo<0?"−":"") + eur(t.saldo)
-    + "\n\nLe " + t.n + " voci verranno archiviate e il registro riparte pulito. Potrai ripristinare l'ultimo mese.";
-  if(!confirm(msg)) return;
+  if(!t.n){ await alertBrand("Registro vuoto: niente da chiudere."); return; }
+  var testo = "Entrate: " + eur(t.ent) + "<br>Uscite: " + eur(t.usc)
+    + "<br>Saldo: " + (t.saldo<0?"−":"") + eur(t.saldo)
+    + "<br><br>Le " + t.n + " voci verranno archiviate e il registro riparte pulito. Potrai ripristinare l'ultimo mese.";
+  var ok = await confermaBrand({ titolo: "Chiudere il mese?", testo: testo, cta: "📆 Chiudi" });
+  if(!ok) return;
   var r = await sb.rpc("chiudi_mese_solo");
-  if(r.error){ alert("Errore nella chiusura: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore nella chiusura: " + r.error.message); return; }
   await caricaSolo();
   renderArchivioSolo();
 }
 
 async function ripristinaSolo(){
   if(soloVoci.length){ toastInfo("Il registro corrente non è vuoto: svuotalo o chiudilo prima."); return; }
-  if(!confirm("Ripristinare l'ultimo mese chiuso?")) return;
+  var ok = await confermaBrand({ titolo: "Ripristinare l'ultimo mese chiuso?", testo: "", cta: "↩︎ Ripristina" });
+  if(!ok) return;
   var r = await sb.rpc("ripristina_solo");
   if(r.error){ toastInfo("Errore: " + r.error.message); return; }
   await caricaSolo(); toastInfo("Mese ripristinato ♻️");
@@ -392,7 +404,11 @@ function chiudiDettaglioChiusuraSolo(){ document.getElementById("modal-dettaglio
 
 async function rinominaChiusuraSolo(id){
   var c = (soloChiusure || []).find(function(x){ return x.id === id; }); if(!c) return;
-  var nuovo = prompt("Nome della chiusura (vuoto = automatico):", c.nome || "");
+  var nuovo = await promptBrand({
+    titolo: "Come battezziamo questo mese?",
+    testo: "Vuoto = automatico.",
+    placeholder: "Nome del mese", valore: c.nome || ""
+  });
   if(nuovo === null) return;
   var r = await sb.rpc("rinomina_chiusura_solo", { p_id:id, p_nome:nuovo });
   if(r.error){ toastInfo("Errore: "+r.error.message); return; }

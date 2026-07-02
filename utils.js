@@ -87,6 +87,71 @@ function accordionToggle(boxId, btnId, key){
   try{ localStorage.setItem(key, apri ? "1" : "0"); }catch(e){}
 }
 
+// ── MODALI BRAND (confermaBrand / promptBrand / alertBrand) ──
+// Riusano #modal-brand (.modal-overlay/.br-modal/.m-btns) al posto di confirm()/prompt()/alert().
+var _brandResolve = null;
+function _brandClose(result){
+  var ov = document.getElementById("modal-brand");
+  if(ov) ov.classList.remove("attivo");
+  var r = _brandResolve; _brandResolve = null;
+  if(r) r(result);
+}
+function confermaBrand(opts){
+  opts = opts || {};
+  return new Promise(function(resolve){
+    _brandResolve = resolve;
+    document.getElementById("brand-titolo").textContent = opts.titolo || "";
+    document.getElementById("brand-testo").innerHTML = opts.testo || "";
+    document.getElementById("brand-input-wrap").style.display = "none";
+    var cta = document.getElementById("brand-cta");
+    cta.textContent = opts.cta || "Conferma";
+    cta.className = "m-conferma" + (opts.danger ? " m-elimina" : "");
+    cta.onclick = function(){ _brandClose(true); };
+    var ann = document.getElementById("brand-annulla");
+    ann.style.display = "";
+    ann.textContent = opts.annulla || "Annulla";
+    ann.onclick = function(){ _brandClose(false); };
+    document.getElementById("modal-brand").classList.add("attivo");
+  });
+}
+function promptBrand(opts){
+  opts = opts || {};
+  return new Promise(function(resolve){
+    _brandResolve = resolve;
+    document.getElementById("brand-titolo").textContent = opts.titolo || "";
+    document.getElementById("brand-testo").innerHTML = opts.testo || "";
+    document.getElementById("brand-input-wrap").style.display = "";
+    var inp = document.getElementById("brand-input");
+    inp.placeholder = opts.placeholder || "";
+    inp.value = opts.valore || "";
+    var cta = document.getElementById("brand-cta");
+    cta.textContent = opts.cta || "Salva";
+    cta.className = "m-conferma";
+    cta.onclick = function(){ _brandClose(inp.value); };
+    var ann = document.getElementById("brand-annulla");
+    ann.style.display = "";
+    ann.textContent = "Annulla";
+    ann.onclick = function(){ _brandClose(null); };
+    document.getElementById("modal-brand").classList.add("attivo");
+    setTimeout(function(){ inp.focus(); }, 100);
+  });
+}
+function alertBrand(testo, titolo){
+  return new Promise(function(resolve){
+    _brandResolve = resolve;
+    document.getElementById("brand-titolo").textContent = titolo || "";
+    document.getElementById("brand-testo").innerHTML = testo || "";
+    document.getElementById("brand-input-wrap").style.display = "none";
+    var cta = document.getElementById("brand-cta");
+    cta.textContent = "Ok";
+    cta.className = "m-conferma";
+    cta.onclick = function(){ _brandClose(true); };
+    var ann = document.getElementById("brand-annulla");
+    ann.style.display = "none";
+    document.getElementById("modal-brand").classList.add("attivo");
+  });
+}
+
 // toast informativo non-bloccante (auto-dismiss)
 function toastInfo(msg){
   try{

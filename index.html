@@ -91,6 +91,7 @@ if("serviceWorker" in navigator){
   </div>
 
   <div class="cassa-body">
+    <div id="cassa-decor" class="cassa-decor" aria-hidden="true"></div>
     <div id="cassa-banner" class="cassa-banner"></div>
     <!-- TAB CONTI -->
     <div class="cassa-tab attiva" data-tab="conti">
@@ -323,6 +324,10 @@ if("serviceWorker" in navigator){
         <option value="salvadanaio">🐷 Salvadanaio</option>
         <option value="pesci">🐟 Pesci</option>
         <option value="west">🤠 West</option>
+        <option value="orsi">🐻 Orsi</option>
+        <option value="alieni">👽 Alieni</option>
+        <option value="jungle">🦜 Jungle</option>
+        <option value="flamingo">🦩 Flamingo</option>
       </select>
     </div>
     <div class="m-row"><label>🙂 Il tuo nome in questa cassa</label><input type="text" id="crea-nome-membro" placeholder="Lascia vuoto per usare il tuo nome"></div>
@@ -346,6 +351,43 @@ if("serviceWorker" in navigator){
       <button class="m-annulla" onclick="closeUnisci()">Annulla</button>
       <button class="m-conferma" id="unisci-btn" onclick="confermaUnisci()">Entra</button>
     </div>
+  </div>
+</div>
+
+<!-- MODALE — BRAND (confermaBrand / promptBrand / alertBrand, utils.js) -->
+<div class="modal-overlay" id="modal-brand" onclick="if(event.target===this)_brandClose(null)">
+  <div class="br-modal">
+    <h2 id="brand-titolo"></h2>
+    <p id="brand-testo"></p>
+    <div class="m-row" id="brand-input-wrap" style="display:none;">
+      <input type="text" id="brand-input" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('brand-cta').click();}">
+    </div>
+    <div class="m-btns">
+      <button class="m-annulla" id="brand-annulla">Annulla</button>
+      <button class="m-conferma" id="brand-cta">Ok</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE — INVITA (codice cassa) -->
+<div class="modal-overlay" id="modal-invito" onclick="if(event.target===this)chiudiInvito()">
+  <div class="br-modal">
+    <h2>🔑 Invita nella cassa</h2>
+    <p>Condividi questo codice per far entrare qualcuno.</p>
+    <div class="codice-big" id="invito-codice-txt"></div>
+    <div class="m-btns">
+      <button class="m-annulla" onclick="chiudiInvito()">Chiudi</button>
+      <button class="m-conferma" onclick="copiaCodiceInvito()">📋 Copia</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE — SCHERZO (scherzi.js) -->
+<div class="modal-overlay" id="modal-scherzo" onclick="if(event.target===this)chiudiScherzoPicker()">
+  <div class="br-modal">
+    <h2>😜 Fai uno scherzo</h2>
+    <div id="scherzo-body" class="scherzo-grid"></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-annulla" onclick="chiudiScherzoPicker()">Annulla</button></div>
   </div>
 </div>
 
@@ -516,13 +558,13 @@ if("serviceWorker" in navigator){
     <div class="info-faq">
       <div class="info-faq-titolo">Domande frequenti</div>
       <button id="faq1-btn" class="faq-q" onclick="faqToggle('faq1-box','faq1-btn')">▸ Come divido una spesa?</button>
-      <div id="faq1-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: aggiungi una spesa, scegli chi ha pagato e come dividerla (equo, per importi, percentuale o quote).</p></div>
+      <div id="faq1-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Aggiungi la spesa, dimmi chi ha pagato (anche in più d'uno) e come dividerla: parti uguali, importi esatti, percentuali o quote. Ai conti penso io.</p></div>
       <button id="faq2-btn" class="faq-q" onclick="faqToggle('faq2-box','faq2-btn')">▸ Che differenza c'è tra Solo, Coppia e Gruppo?</button>
-      <div id="faq2-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: Solo per le tue spese, Coppia con ciclo mensile, Gruppo per spese condivise fra più persone.</p></div>
+      <div id="faq2-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Il Solo è il tuo bilancio personale: entrate, uscite, chiusure mensili. La Coppia è una cassa a due con ciclo mensile e archivio. Il Gruppo arriva a 20 persone senza cicli: perfetto per viaggi e coinquilini.</p></div>
       <button id="faq3-btn" class="faq-q" onclick="faqToggle('faq3-box','faq3-btn')">▸ Cos'è la modalità Silly?</button>
-      <div id="faq3-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: un tocco di leggerezza per la cassa, attivabile dall'admin.</p></div>
+      <div id="faq3-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Un interruttore che dà un'anima alla cassa: io cresco con lo speso, dormo se non spendete, festeggio quando siete in pari. I numeri restano serissimi, promesso. La accende chi amministra la cassa.</p></div>
       <button id="faq4-btn" class="faq-q" onclick="faqToggle('faq4-box','faq4-btn')">▸ I miei dati sono privati?</button>
-      <div id="faq4-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: vedi solo le casse di cui fai parte; ogni cassa è isolata dalle altre.</p></div>
+      <div id="faq4-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Sì: vedi solo le casse di cui fai parte e ogni cassa vede solo se stessa. Il tuo Solo è tuo e basta — nemmeno io ci ficco il grugno.</p></div>
     </div>
     <button class="info-cta" onclick="chiudiInfo()">Ho capito!</button>
   </div>
@@ -547,13 +589,12 @@ if("serviceWorker" in navigator){
   <div class="crawl-mask">
     <div class="crawl-text" id="crawl-text">
       <p class="crawl-ep">EPISODIO 🐷</p>
-      <h2 class="crawl-h">sPiccioli!<br>La minaccia della spesa</h2>
-      <p>È un'epoca di grandi cene e piccoli rancori. Gruppi di amici scellerati vagano per il mondo dividendo conti, dimenticando puntualmente chi ha pagato la pizza.</p>
-      <p>Nell'ombra veglia un eroe silenzioso: il <b>Saldo</b>, forza misteriosa che sa sempre chi è in pari e chi è in debito. Nessuno sfugge alla sua bilancia.</p>
-      <p>Dai un nome alla tua cassa — da solo, in due, o in un gruppo scellerato — registra i tuoi <b>Piccioli</b>, e lascia che il Salvadanaio 🐷 cresca pasciuto fino al giorno della resa dei conti.</p>
-      <p>Ma ricorda, giovane risparmiatore: il vero potere non è avere tutti i soldi. È restare <b>Silly</b> mentre li dividi.</p>
-      <p class="crawl-end">Che il saldo sia con te.</p>
-      <p class="crawl-end">— Resta Silly 🐷</p>
+      <h2 class="crawl-h">sPiccioli!<br>— La minaccia della spesa</h2>
+      <p>È un'epoca oscura per i portafogli. Cene infinite, caffè offerti col «poi mi ridai», gruppi scellerati che dividono il conto a occhio. E l'occhio, si sa, è di parte.</p>
+      <p>Ma nell'ombra veglia il <b>Saldo</b>, forza antica e infallibile: sa sempre chi è in pari, chi è in credito e chi giura di aver «già mandato i soldi».</p>
+      <p>Registra i tuoi <b>Piccioli</b>, giovane risparmiatore, e il Salvadanaio 🐷 crescerà pasciuto fino al giorno della resa dei conti.</p>
+      <p>Perché il vero potere non è avere tutti i soldi. È restare <b>Silly</b> mentre li dividi.</p>
+      <p class="crawl-end">Che il Saldo sia con te. 🐷</p>
     </div>
   </div>
 </div>
@@ -568,6 +609,7 @@ if("serviceWorker" in navigator){
 <script src="./solo.js"></script>
 <script src="./ricorrenti.js"></script>
 <script src="./silly.js"></script>
+<script src="./scherzi.js"></script>
 <script src="./auth.js"></script>
 <script src="./welcome.js"></script>
 <script src="./app.js"></script>

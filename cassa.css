@@ -25,7 +25,9 @@
 .cassa-sync-txt{font-size:.66rem;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;white-space:nowrap;}
 
 /* ── CORPO ── */
-.cassa-body{flex:1;width:100%;max-width:620px;margin:0 auto;padding:18px;display:flex;flex-direction:column;gap:18px;}
+.cassa-body{position:relative;z-index:0;flex:1;width:100%;max-width:620px;margin:0 auto;padding:18px;display:flex;flex-direction:column;gap:18px;}
+.cassa-decor{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:-1;}
+.cassa-decor span{position:absolute;font-size:2.4rem;line-height:1;opacity:.14;}
 .card{background:var(--br-card);border:1px solid var(--br-line);border-radius:18px;padding:16px;}
 .card-titolo{font-family:'Nunito',sans-serif;font-weight:700;color:var(--br-dim);font-size:.74rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
 
@@ -194,9 +196,24 @@
 .silly-confetti{position:fixed;inset:0;pointer-events:none;z-index:3000;overflow:hidden;}
 .silly-confetti span{position:absolute;top:-32px;animation:sillyFall 2.4s linear forwards;}
 @keyframes sillyFall{to{transform:translateY(112vh) rotate(380deg);opacity:0;}}
+
+/* ── S8e: 8 nuovi momenti Silly ── */
+.mv-trofeo{display:inline-block;}
+.mv-trofeo.silly-shake{animation:sillyShake .5s ease 2;}
+@keyframes sillyShake{0%,100%{transform:rotate(0);}25%{transform:rotate(-16deg);}75%{transform:rotate(16deg);}}
+.silly-fissa{display:inline-block;font-size:1.05rem;line-height:1;animation:sillyBounce .6s ease infinite;}
+@keyframes sillyBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+.silly-virtuosa, .silly-notturno{font-size:1.05rem;line-height:1;}
+.silly-pig.silly-tremor{display:inline-block;animation:sillyTremor .12s ease infinite;}
+@keyframes sillyTremor{0%,100%{transform:translateX(0);}25%{transform:translateX(-2px);}75%{transform:translateX(2px);}}
+.silly-coinrain{position:fixed;pointer-events:none;z-index:3000;overflow:visible;}
+.silly-coinrain span{position:absolute;top:0;left:0;font-size:1.1rem;animation:sillyCoinRise 1.2s ease-out forwards;}
+@keyframes sillyCoinRise{0%{transform:translateY(0);opacity:1;}100%{transform:translateY(-46px);opacity:0;}}
 @media (prefers-reduced-motion: reduce){
   .silly-confetti{display:none!important;}
   .silly-pig{transition:none;}
+  .mv-trofeo.silly-shake, .silly-fissa, .silly-pig.silly-tremor{animation:none!important;}
+  .silly-coinrain{display:none!important;}
 }
 
 /* ── S9b — Tab Lista (bacheca note + lista spesa) ── */
@@ -269,4 +286,69 @@
 .rm-lab{ display:block; color:var(--br-dim); font-size:.72rem; margin-top:2px; }
 .report-sez-tit{ font-size:.78rem; font-weight:700; color:var(--br-dim); text-transform:uppercase; letter-spacing:.4px; margin:6px 0 8px; }
 .report-saldo-row{ display:flex; align-items:center; justify-content:space-between; padding:7px 2px; border-bottom:1px solid var(--br-line); font-size:.92rem; color:var(--br-text); }
+
+/* ── S8f — Scherzi tra membri ── */
+.scherzo-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px; }
+.scherzo-btn{ display:flex; flex-direction:column; align-items:center; gap:4px; background:var(--br-bg2); border:1px solid var(--br-line); border-radius:14px; padding:14px 6px; color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; font-size:.8rem; cursor:pointer; }
+.scherzo-btn:active{ transform:scale(.97); }
+.scherzo-btn-e{ font-size:1.8rem; line-height:1; }
+
+.scherzo-fish{ position:fixed; top:38%; left:-80px; font-size:3rem; z-index:4000; pointer-events:none; animation:scherzoFishSlap .9s ease-in-out forwards; }
+@keyframes scherzoFishSlap{
+  0%{ left:-80px; transform:rotate(0); }
+  40%{ left:48%; transform:rotate(-34deg); }
+  55%{ transform:rotate(30deg); }
+  70%{ transform:rotate(-18deg); }
+  100%{ left:110%; transform:rotate(14deg); }
+}
+
+.scherzo-fly{ position:fixed; font-size:1.8rem; z-index:4000; cursor:pointer; animation:scherzoFlyBuzz 10s ease-in-out forwards; }
+@keyframes scherzoFlyBuzz{
+  0%{ top:20%; left:10%; }
+  15%{ top:60%; left:70%; }
+  30%{ top:15%; left:80%; }
+  45%{ top:70%; left:20%; }
+  60%{ top:40%; left:50%; }
+  75%{ top:80%; left:65%; }
+  90%{ top:25%; left:35%; }
+  100%{ top:50%; left:50%; opacity:0; }
+}
+
+.scherzo-boo{ position:fixed; bottom:10px; right:10px; font-size:2.6rem; z-index:4000; pointer-events:none; animation:scherzoBoo 1s ease; }
+@keyframes scherzoBoo{
+  0%{ transform:scale(0) translateY(20px); opacity:0; }
+  30%{ transform:scale(1.1) translateY(0); opacity:1; }
+  70%{ transform:scale(1) translateY(0); opacity:1; }
+  100%{ transform:scale(0) translateY(20px); opacity:0; }
+}
+
+.scherzo-puff{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:2.4rem; z-index:4000; pointer-events:none; animation:scherzoPuff .7s ease forwards; }
+@keyframes scherzoPuff{ 0%{ opacity:1; transform:translate(-50%,-50%) scale(.6); } 100%{ opacity:0; transform:translate(-50%,-50%) scale(2.2); } }
+body.scherzo-shake{ animation:scherzoShake .5s ease; }
+@keyframes scherzoShake{
+  0%,100%{ transform:translate(0,0); }
+  20%{ transform:translate(-6px,3px); }
+  40%{ transform:translate(6px,-3px); }
+  60%{ transform:translate(-5px,-2px); }
+  80%{ transform:translate(5px,2px); }
+}
+
+.scherzo-slowmo{ filter:saturate(.35) blur(.4px); transition:filter 3s ease; }
+
+.scherzo-dance{ position:fixed; top:45%; left:50%; transform:translate(-50%,-50%); font-size:4rem; z-index:4000; pointer-events:none; animation:scherzoDance 4s ease; }
+@keyframes scherzoDance{
+  0%,100%{ transform:translate(-50%,-50%) rotate(0) scale(1); }
+  15%{ transform:translate(-50%,-50%) rotate(-18deg) scale(1.1); }
+  30%{ transform:translate(-50%,-50%) rotate(14deg) scale(.95); }
+  45%{ transform:translate(-50%,-50%) rotate(-14deg) scale(1.08); }
+  60%{ transform:translate(-50%,-50%) rotate(18deg) scale(1); }
+  75%{ transform:translate(-50%,-50%) rotate(-10deg) scale(1.05); }
+  90%{ transform:translate(-50%,-50%) rotate(8deg) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .scherzo-fish, .scherzo-fly, .scherzo-boo, .scherzo-puff, .scherzo-dance{ display:none!important; animation:none!important; }
+  body.scherzo-shake{ animation:none!important; }
+  .scherzo-slowmo{ filter:none!important; transition:none!important; }
+}
 .report-saldo-row:last-of-type{ border-bottom:none; }
