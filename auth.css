@@ -90,7 +90,7 @@ body{
 .modal-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:22px;backdrop-filter:blur(3px);}
 .modal-overlay.attivo{display:flex;}
 .br-modal{background:var(--br-bg2);border:1px solid var(--br-line);border-radius:22px;padding:24px 22px;width:100%;max-width:min(380px,100%);box-sizing:border-box;max-height:90vh;overflow-y:auto;}
-.br-modal h2{font-size:1.3rem;font-weight:800;color:var(--br-cyan);margin-bottom:6px;}
+.br-modal h2{font-size:1.3rem;font-weight:800;color:var(--th-accent);margin-bottom:6px;}
 .br-modal p{font-size:.85rem;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;margin-bottom:16px;line-height:1.5;}
 .m-row{margin-bottom:14px;}
 .m-row label{display:block;font-size:.8rem;font-weight:700;color:var(--br-text);margin-bottom:6px;font-family:'Nunito',sans-serif;}
@@ -103,7 +103,7 @@ body{
 .m-btns button{flex:1;height:48px;border-radius:12px;font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:800;cursor:pointer;border:none;transition:transform .12s;}
 .m-btns button:active{transform:scale(.98);}
 .m-annulla{background:var(--br-card);color:var(--br-dim);border:1px solid var(--br-line);}
-.m-conferma{background:linear-gradient(135deg,var(--br-cyan),#00b8d4);color:#06232a;}
+.m-conferma{background:linear-gradient(135deg,var(--th-accent),var(--th-accent-dark));color:var(--th-on-accent);}
 .m-conferma:disabled{opacity:.5;}
 
 .m-opz{font-family:'Nunito',sans-serif;font-weight:600;font-size:.72rem;color:var(--br-dim);}
@@ -145,7 +145,7 @@ body{
 .info-manifesto i{color:var(--br-yellow);font-style:normal;font-weight:700;}
 .info-manifesto b{color:var(--br-cyan);}
 .info-tagline{font-family:'Baloo 2',cursive;font-weight:800;font-size:1.15rem;color:var(--br-yellow);margin:8px 0 28px;}
-.info-cta{height:50px;padding:0 32px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--br-cyan),#00b8d4);color:#06232a;font-family:'Baloo 2',cursive;font-weight:800;font-size:1.05rem;cursor:pointer;box-shadow:0 6px 20px rgba(0,229,255,.22);}
+.info-cta{height:50px;padding:0 32px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--th-accent),var(--th-accent-dark));color:var(--th-on-accent);font-family:'Baloo 2',cursive;font-weight:800;font-size:1.05rem;cursor:pointer;box-shadow:0 6px 20px rgba(0,229,255,.22);}
 .info-cta:active{transform:scale(.97);}
 
 /* ── S8d: crawl easter egg ── */

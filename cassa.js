@@ -375,7 +375,7 @@ function renderMembri(){
         + '<input type="checkbox" ' + (cassaCorrente.grezza ? "checked" : "") + ' onchange="toggleGrezza(this.checked)"></label>';
     }
     set += '<div class="mb-toggle-row"><span>Tema<small>L\'aspetto della cassa</small></span></div>';
-    set += '<div class="split-seg" style="margin-bottom:14px;">'
+    set += '<div class="split-seg mb-tema-row" style="margin-bottom:14px;">'
       + THEMES.map(function(t){
           return '<button class="split-btn ' + (cassaCorrente.tema===t.k?"attivo":"") + '" '
             + 'onclick="cambiaTema(\'' + t.k + '\')">' + t.e + ' ' + t.n + '</button>';
@@ -477,6 +477,7 @@ async function cambiaTema(t){
   intestaCassa();   // aggiorna emoji header
   renderMembri();   // aggiorna evidenziazione selettore
   renderFlavorDecor();
+  renderCassa();
 }
 
 // ── ELIMINA CASSA (admin, conferma col nome) ──

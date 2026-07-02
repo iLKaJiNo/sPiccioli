@@ -84,6 +84,8 @@
 .split-seg{display:flex;gap:6px;margin-bottom:10px;}
 .split-btn{flex:1;height:38px;border-radius:10px;border:1.5px solid var(--br-line);background:var(--br-card);color:var(--br-dim);font-family:'Baloo 2',cursive;font-size:.82rem;font-weight:700;cursor:pointer;padding:0;}
 .split-btn.attivo{border-color:var(--th-accent);color:var(--th-accent);background:var(--th-accent-soft);}
+.mb-tema-row{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
+.mb-tema-row .split-btn{flex:none;white-space:nowrap;}
 .split-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .split-nome{flex:1;font-family:'Nunito',sans-serif;font-weight:700;font-size:.9rem;color:var(--br-text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .split-inp{width:90px;height:42px;border-radius:10px;border:1.5px solid var(--br-line);background:var(--br-bg);color:#fff;font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;text-align:right;padding:0 10px;outline:none;-webkit-appearance:none;}
@@ -262,7 +264,7 @@
 
 /* ── S9a — Grafici (overlay) ── */
 .grafico-tabs{ display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 14px; }
-.gr-tab{ flex:1; min-width:0; padding:8px 4px; border:1px solid var(--br-line); border-radius:10px; background:var(--br-bg2); color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; font-size:.74rem; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.gr-tab{ flex:1; min-width:0; padding:8px 4px; border:1px solid var(--br-line); border-radius:10px; background:var(--br-bg2); color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; font-size:.74rem; cursor:pointer; white-space:nowrap; }
 .gr-tab.attivo{ border-color:var(--th-accent); color:var(--th-accent); background:var(--th-accent-soft); }
 .grafico-body{ min-height:220px; }
 .grafico-vuoto{ color:var(--br-dim); text-align:center; padding:40px 10px; font-size:.9rem; }
