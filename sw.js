@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spiccioli-v33';
+const CACHE_NAME = 'spiccioli-v34';
 const ASSETS = [
   './','./index.html','./auth.css','./cassa.css','./temi.css',
   './utils.js','./pwa.js','./api.js','./cassa.js','./lista.js','./grafici.js','./auth.js','./welcome.js','./solo.js','./ricorrenti.js','./silly.js','./app.js',
@@ -10,7 +10,10 @@ self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))));
+  e.waitUntil(
+    caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
 });
 self.addEventListener('fetch', e => {
   var u = e.request.url;
