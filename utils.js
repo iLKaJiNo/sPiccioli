@@ -47,6 +47,11 @@ function fmtLong(iso){
 function eur(n){
   return Math.abs(Math.round(n*100)/100).toFixed(2).replace(".",",")+"\u00a0\u20ac";
 }
+function etichettaChiusura(c){
+  if(c.nome) return c.nome;
+  if(c.mese) return new Date(c.mese).toLocaleDateString("it-IT",{month:"long",year:"numeric"});
+  return fmt(c.chiusa_il || c.created_at);
+}
 function importoCon(n, valuta){
   var s = Math.abs(Math.round(n*100)/100).toFixed(2).replace(".",",");
   var simb = { EUR:"\u20ac", GBP:"\u00a3", USD:"$", CHF:"CHF" };

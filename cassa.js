@@ -895,8 +895,8 @@ function renderArchivio(){
       var ripr = (idx === 0)
         ? '<button class="btn-ripristina" onclick="event.stopPropagation();ripristinaCoppia()">↩︎ Ripristina</button>' : '';
       return '<div class="arch-row" onclick="apriDettaglioChiusura(\'' + c.id + '\')">'
-        + '<div class="arch-main"><div class="arch-titolo">Chiusura #' + c.seq + '</div>'
-        + '<div class="arch-meta">' + fmtLong(c.chiusa_il) + ' · ' + eur(c.totale_speso) + '</div></div>'
+        + '<div class="arch-main"><div class="arch-titolo">' + escapeHtml(etichettaChiusura(c)) + '</div>'
+        + '<div class="arch-meta">#' + c.seq + ' · ' + fmtLong(c.chiusa_il) + ' · ' + eur(c.totale_speso) + '</div></div>'
         + ripr + '<div class="cassa-freccia">›</div></div>';
     }).join("");
   }
@@ -951,9 +951,10 @@ function apriDettaglioChiusura(id){
   var c = (chiusureCassa || []).find(function(x){ return String(x.id) === String(id); });
   if(!c) return;
   var nomi = nomiMembri(), movs = c.movimenti || [];
-  var html = '<div class="det-top"><div class="det-titolo">Chiusura #' + c.seq + '</div>'
+  var html = '<div class="det-top"><div class="det-titolo">' + escapeHtml(etichettaChiusura(c))
+    + ' <button class="nota-ico" onclick="rinominaChiusura(\'' + c.id + '\')">✏️</button></div>'
     + '<div class="det-imp">' + eur(c.totale_speso) + '</div>'
-    + '<div class="det-data">' + fmtLong(c.chiusa_il) + '</div></div>';
+    + '<div class="det-data">#' + c.seq + ' · ' + fmtLong(c.chiusa_il) + '</div></div>';
   // saldi finali
   html += '<div class="det-sez"><div class="det-sez-h">Saldi a fine mese</div>';
   var saldi = c.saldi || {}, kk = Object.keys(saldi);
@@ -986,3 +987,15 @@ function apriDettaglioChiusura(id){
   document.getElementById("modal-dettaglio-chiusura").classList.add("attivo");
 }
 function chiudiDettaglioChiusura(){ document.getElementById("modal-dettaglio-chiusura").classList.remove("attivo"); }
+
+async function rinominaChiusura(id){
+  var c = chiusureCassa.find(function(x){return x.id===id;}); if(!c) return;
+  var nuovo = prompt("Nome della chiusura (vuoto = automatico):", c.nome || "");
+  if(nuovo === null) return;
+  var r = await sb.rpc("rinomina_chiusura_coppia", { p_id:id, p_nome:nuovo });
+  if(r.error){ toastInfo("Errore: "+r.error.message); return; }
+  c.nome = nuovo.trim() || null;
+  renderArchivio();
+  apriDettaglioChiusura(id);
+  toastInfo("Rinominata ✏️");
+}

@@ -108,7 +108,7 @@ function _drawDonut(canvas, slices, tot){
 // ── storico (coppia): barre per chiusura + corrente ──
 function _renderStorico(body){
   var chiusure = [].concat(chiusureCassa || []).reverse(); // da seq desc → asc
-  var dati = chiusure.map(function(c){ return { label: _meseLabel(c.chiusa_il), val: parseFloat(c.totale_speso)||0 }; });
+  var dati = chiusure.map(function(c){ return { label: c.nome || _meseLabel(c.mese || c.chiusa_il), val: parseFloat(c.totale_speso)||0 }; });
   var totCorr = _movValide().reduce(function(a,m){ return a + (parseFloat(m.importo)||0)*(parseFloat(m.tasso_cambio)||1); }, 0);
   dati.push({ label: "Corrente", val: Math.round(totCorr*100)/100 });
   if(!dati.some(function(d){ return d.val > 0; })){ body.innerHTML = '<div class="grafico-vuoto">Chiudi almeno un mese per lo storico.</div>'; return; }
