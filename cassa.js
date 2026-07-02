@@ -384,7 +384,7 @@ function renderMembri(){
     set += '<label class="mb-toggle-row"><span>Silly mode<small>Reazioni e animazioni sceme</small></span>'
       + '<input type="checkbox" ' + (cassaCorrente.silly?"checked":"") + ' onchange="toggleSilly(this.checked)"></label>';
     if(cassaCorrente.silly){
-      set += '<div class="mb-toggle-row"><span>Tetto salvadanaio 🐷<small>Il 🐷 è enorme a questa cifra</small></span>'
+      set += '<div class="mb-toggle-row mb-tetto-row"><span>Tetto salvadanaio 🐷<small>Il 🐷 è enorme a questa cifra</small></span>'
         + '<input type="number" class="silly-tetto-inp" min="100" step="50" value="' + (parseFloat(cassaCorrente.silly_tetto)||1000) + '" onchange="salvaTettoSilly(this.value)"></div>';
     }
     if(cassaCorrente.tipo === "gruppo"){
