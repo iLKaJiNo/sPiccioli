@@ -149,16 +149,17 @@
 .m-elimina:disabled{opacity:.4;cursor:default;}
 
 /* ── CATEGORIE (mini-modale) ── */
-.cat-lista{display:flex;flex-direction:column;margin-bottom:8px;}
-.cat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--br-line);}
+.cat-lista{display:flex;flex-direction:column;margin-bottom:8px;min-width:0;}
+.cat-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:9px 0;border-bottom:1px solid var(--br-line);min-width:0;}
 .cat-row:last-child{border-bottom:none;}
 .cat-ico{font-size:1.2rem;line-height:1;flex-shrink:0;}
 .cat-nome{flex:1;font-weight:700;font-size:.98rem;color:var(--br-text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cat-row .mb-btn{flex:none;}
 .cat-empty{text-align:center;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;padding:14px 4px 12px;}
-.cat-form{display:flex;gap:8px;align-items:center;}
-.cat-icona-inp{width:52px;flex:none;text-align:center;}
-.cat-nome-inp{flex:1;min-width:0;}
-.cat-add{flex-shrink:0;padding:0 16px;}
+.cat-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0;}
+.cat-form .cat-icona-inp{width:52px;max-width:100%;flex:none;min-width:0;text-align:center;}
+.cat-form .cat-nome-inp{flex:1;min-width:0;}
+.cat-add{flex:none;padding:0 16px;}
 
 /* ── S7c: archivio / chiusura mensile ── */
 .arch-sum{font-family:'Nunito',sans-serif;font-weight:700;font-size:.9rem;color:var(--br-text);margin-bottom:12px;line-height:1.5;}
@@ -193,6 +194,8 @@
 .silly-inatt{font-size:1.05rem;line-height:1;}
 .silly-tetto-inp{width:96px;height:38px;border-radius:10px;border:1.5px solid var(--br-line);background:var(--br-bg);color:#fff;font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;text-align:right;padding:0 10px;outline:none;-webkit-appearance:none;flex-shrink:0;}
 .silly-tetto-inp:focus{border-color:var(--th-accent);}
+.mb-tetto-row{flex-wrap:wrap;}
+.mb-tetto-row .silly-tetto-inp{width:100%;max-width:160px;box-sizing:border-box;margin-left:0;text-align:right;}
 .silly-confetti{position:fixed;inset:0;pointer-events:none;z-index:3000;overflow:hidden;}
 .silly-confetti span{position:absolute;top:-32px;animation:sillyFall 2.4s linear forwards;}
 @keyframes sillyFall{to{transform:translateY(112vh) rotate(380deg);opacity:0;}}
@@ -259,7 +262,7 @@
 
 /* ── S9a — Grafici (overlay) ── */
 .grafico-tabs{ display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 14px; }
-.gr-tab{ flex:1; min-width:0; padding:8px 6px; border:1px solid var(--br-line); border-radius:10px; background:var(--br-bg2); color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; font-size:.8rem; cursor:pointer; white-space:nowrap; }
+.gr-tab{ flex:1; min-width:0; padding:8px 4px; border:1px solid var(--br-line); border-radius:10px; background:var(--br-bg2); color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; font-size:.74rem; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .gr-tab.attivo{ border-color:var(--th-accent); color:var(--th-accent); background:var(--th-accent-soft); }
 .grafico-body{ min-height:220px; }
 .grafico-vuoto{ color:var(--br-dim); text-align:center; padding:40px 10px; font-size:.9rem; }
@@ -352,3 +355,8 @@ body.scherzo-shake{ animation:scherzoShake .5s ease; }
   .scherzo-slowmo{ filter:none!important; transition:none!important; }
 }
 .report-saldo-row:last-of-type{ border-bottom:none; }
+
+/* ── Pass difensivo overflow (S: fix mirati mobile) ── */
+.br-modal *, .card *{ min-width:0; }
+.br-modal input, .br-modal select{ max-width:100%; box-sizing:border-box; }
+button{ white-space:normal; }
