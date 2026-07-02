@@ -23,6 +23,14 @@ function mostraSchermata(id){
     var el = document.getElementById(s);
     if(el) el.classList.toggle("attiva", s === id);
   });
+  // ── tema per schermata ──
+  if(id === "cassa-screen"){
+    document.body.setAttribute("data-tema", (cassaCorrente && cassaCorrente.tema) || "salvadanaio");
+  } else if(id === "casse-screen" || id === "solo-screen"){
+    document.body.setAttribute("data-tema", (profiloUtente && profiloUtente.tema) || "salvadanaio");
+  } else {
+    document.body.removeAttribute("data-tema");   // auth-screen → brand
+  }
 }
 
 // ── HELPER DI FORMATO ──────────────────────────────────
@@ -39,6 +47,11 @@ function fmtLong(iso){
 function eur(n){
   return Math.abs(Math.round(n*100)/100).toFixed(2).replace(".",",")+"\u00a0\u20ac";
 }
+function etichettaChiusura(c){
+  if(c.nome) return c.nome;
+  if(c.mese) return new Date(c.mese).toLocaleDateString("it-IT",{month:"long",year:"numeric"});
+  return fmt(c.chiusa_il || c.created_at);
+}
 function importoCon(n, valuta){
   var s = Math.abs(Math.round(n*100)/100).toFixed(2).replace(".",",");
   var simb = { EUR:"\u20ac", GBP:"\u00a3", USD:"$", CHF:"CHF" };
@@ -48,6 +61,30 @@ function escapeHtml(s){
   return (s||"").replace(/[&<>"]/g, function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
   });
+}
+
+// ── Accordion / fisarmonica per liste lunghe (helper condivisi) ──
+var ACCORDION_BTN_STYLE = "display:block;width:100%;background:var(--br-bg2);border:1px dashed var(--br-line);border-radius:10px;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:700;font-size:.78rem;padding:7px 8px;margin:8px 0;cursor:pointer;";
+function accordionAperto(key, def){
+  try{ var v = localStorage.getItem(key); return v === null ? def : (v === "1"); }catch(e){ return def; }
+}
+function accordionToggle(boxId, btnId, key){
+  var box = document.getElementById(boxId); if(!box) return;
+  var btn = document.getElementById(btnId);
+  var n = box.getAttribute("data-count") || "";
+  var apri = box.getAttribute("data-open") !== "1";
+  if(apri){
+    box.style.maxHeight = box.scrollHeight + "px";
+    box.setAttribute("data-open", "1");
+    setTimeout(function(){ if(box.getAttribute("data-open") === "1") box.style.maxHeight = "none"; }, 360);
+  } else {
+    box.style.maxHeight = box.scrollHeight + "px";
+    void box.offsetHeight;                       // forza reflow prima di collassare
+    requestAnimationFrame(function(){ box.style.maxHeight = "0px"; });
+    box.setAttribute("data-open", "0");
+  }
+  if(btn) btn.innerHTML = apri ? "▾ Nascondi le voci precedenti" : ("▸ Mostra le altre " + n + " voci");
+  try{ localStorage.setItem(key, apri ? "1" : "0"); }catch(e){}
 }
 
 // toast informativo non-bloccante (auto-dismiss)
@@ -65,6 +102,17 @@ function toastInfo(msg){
       setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 300);
     }, 2600);
   }catch(e){}
+}
+
+// ── NUDGE PROMEMORIA CHIUSURA (banner "registro multi-mese") ──
+var _nudgeDismiss = {};   // per-sessione: chiave → true
+function registroMultiMese(righe, campoData){
+  var mesi = {};
+  (righe||[]).forEach(function(r){
+    var d = r[campoData]; if(!d) return;
+    mesi[String(d).slice(0,7)] = true;   // "YYYY-MM"
+  });
+  return Object.keys(mesi).length > 1;
 }
 
 // ── HELPER SALDI (net-balance, valuta base) ──

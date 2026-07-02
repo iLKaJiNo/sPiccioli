@@ -11,14 +11,14 @@
   background:var(--br-bg2);border-bottom:1px solid var(--br-line);
   position:sticky;top:0;z-index:50;
 }
-.btn-back{background:none;border:none;color:var(--br-cyan);font-size:1.6rem;font-weight:800;cursor:pointer;line-height:1;padding:0 4px;flex-shrink:0;}
+.btn-back{background:none;border:none;color:var(--th-accent);font-size:1.6rem;font-weight:800;cursor:pointer;line-height:1;padding:0 4px;flex-shrink:0;}
 .cassa-htitoli{flex:1;min-width:0;display:flex;align-items:center;gap:8px;}
 .cassa-htitoli .ch-emoji{font-size:1.5rem;line-height:1;}
 .cassa-htitoli h1{font-size:1.15rem;font-weight:800;color:var(--br-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .cassa-hazioni{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
 .btn-invita{background:rgba(255,255,255,.07);border:1px solid var(--br-line);border-radius:10px;color:var(--br-dim);font-family:'Baloo 2',cursive;font-size:.72rem;font-weight:700;padding:5px 10px;cursor:pointer;}
 .cassa-sync-wrap{display:flex;align-items:center;gap:5px;}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--br-cyan);flex-shrink:0;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--th-accent);flex-shrink:0;}
 .sync-dot:not(.ok):not(.err){animation:syncPulse 1s ease-in-out infinite;}
 .sync-dot.ok{background:#6FCF5A;} .sync-dot.err{background:#E05A4A;}
 @keyframes syncPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
@@ -42,9 +42,9 @@
 /* ── BOTTONE NUOVA SPESA ── */
 .btn-nuova-spesa{
   display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:54px;
-  border:none;border-radius:16px;background:linear-gradient(135deg,var(--br-cyan),#00b8d4);
-  color:#06232a;font-family:'Baloo 2',cursive;font-size:1.05rem;font-weight:800;cursor:pointer;
-  box-shadow:0 6px 20px rgba(0,229,255,.22);transition:transform .12s;
+  border:none;border-radius:16px;background:linear-gradient(135deg,var(--th-accent),var(--th-accent-dark));
+  color:var(--th-on-accent);font-family:'Baloo 2',cursive;font-size:1.05rem;font-weight:800;cursor:pointer;
+  box-shadow:0 6px 20px var(--th-accent-glow);transition:transform .12s;
 }
 .btn-nuova-spesa:active{transform:scale(.98);}
 
@@ -55,7 +55,7 @@
 .mv-main{flex:1;min-width:0;}
 .mv-desc{font-size:1rem;font-weight:700;color:var(--br-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mv-meta{font-size:.74rem;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;margin-top:2px;}
-.mv-imp{font-size:1.05rem;font-weight:800;color:var(--br-yellow);flex-shrink:0;}
+.mv-imp{font-size:1.05rem;font-weight:800;color:var(--th-accent2);flex-shrink:0;}
 .mv-del{background:none;border:none;color:var(--br-dim);font-size:1.5rem;line-height:1;cursor:pointer;padding:0 2px;flex-shrink:0;}
 .mv-del:hover{color:#FF8A80;}
 .mv-empty{text-align:center;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;padding:26px 10px;line-height:1.6;}
@@ -72,20 +72,20 @@
 .riga-debito:last-child{border-bottom:none;}
 .rd-txt{flex:1;font-size:.92rem;color:var(--br-text);font-family:'Nunito',sans-serif;font-weight:600;line-height:1.4;}
 .rd-txt b{font-weight:800;}
-.btn-salda{flex-shrink:0;background:linear-gradient(135deg,var(--br-cyan),#00b8d4);color:#06232a;border:none;border-radius:10px;font-family:'Baloo 2',cursive;font-size:.82rem;font-weight:800;padding:7px 14px;cursor:pointer;}
+.btn-salda{flex-shrink:0;background:linear-gradient(135deg,var(--th-accent),var(--th-accent-dark));color:var(--th-on-accent);border:none;border-radius:10px;font-family:'Baloo 2',cursive;font-size:.82rem;font-weight:800;padding:7px 14px;cursor:pointer;}
 .btn-salda:active{transform:scale(.97);}
 .mv-settle .mv-desc{color:#6FCF5A;}
 .settle-frase{text-align:center;font-family:'Nunito',sans-serif;font-weight:700;color:var(--br-text);font-size:1.05rem;margin-bottom:16px;}
-.settle-frase b{color:var(--br-cyan);}
+.settle-frase b{color:var(--th-accent);}
 
 /* ── S5a: metodi di divisione ── */
 .split-seg{display:flex;gap:6px;margin-bottom:10px;}
 .split-btn{flex:1;height:38px;border-radius:10px;border:1.5px solid var(--br-line);background:var(--br-card);color:var(--br-dim);font-family:'Baloo 2',cursive;font-size:.82rem;font-weight:700;cursor:pointer;padding:0;}
-.split-btn.attivo{border-color:var(--br-cyan);color:var(--br-cyan);background:rgba(0,229,255,.08);}
+.split-btn.attivo{border-color:var(--th-accent);color:var(--th-accent);background:var(--th-accent-soft);}
 .split-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .split-nome{flex:1;font-family:'Nunito',sans-serif;font-weight:700;font-size:.9rem;color:var(--br-text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .split-inp{width:90px;height:42px;border-radius:10px;border:1.5px solid var(--br-line);background:var(--br-bg);color:#fff;font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;text-align:right;padding:0 10px;outline:none;-webkit-appearance:none;}
-.split-inp:focus{border-color:var(--br-cyan);}
+.split-inp:focus{border-color:var(--th-accent);}
 .split-unit{width:42px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.82rem;color:var(--br-dim);}
 .split-info{font-family:'Nunito',sans-serif;font-weight:700;font-size:.8rem;color:var(--br-dim);text-align:center;margin-top:6px;min-height:18px;}
 .split-info.ok{color:#6FCF5A;} .split-info.warn{color:#FFB74D;}
@@ -95,7 +95,7 @@
 .mv-item{cursor:pointer;}
 .det-top{text-align:center;margin-bottom:18px;}
 .det-titolo{font-size:1.25rem;font-weight:800;color:var(--br-text);line-height:1.2;}
-.det-imp{font-size:1.6rem;font-weight:800;color:var(--br-yellow);margin-top:6px;}
+.det-imp{font-size:1.6rem;font-weight:800;color:var(--th-accent2);margin-top:6px;}
 .det-data{font-size:.78rem;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;margin-top:2px;}
 .det-sez{margin-bottom:14px;}
 .det-sez-h{font-family:'Nunito',sans-serif;font-weight:700;color:var(--br-dim);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
@@ -107,8 +107,8 @@
 .m-row .split-inp{width:90px;flex:none;}
 
 /* ── S5b: toggle più paganti + cambio nel dettaglio ── */
-.mini-toggle{float:right;font-family:'Nunito',sans-serif;font-weight:700;font-size:.74rem;color:var(--br-cyan);cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-transform:none;letter-spacing:0;}
-.mini-toggle input{width:auto;height:auto;-webkit-appearance:auto;appearance:auto;accent-color:var(--br-cyan);}
+.mini-toggle{float:right;font-family:'Nunito',sans-serif;font-weight:700;font-size:.74rem;color:var(--th-accent);cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-transform:none;letter-spacing:0;}
+.mini-toggle input{width:auto;height:auto;-webkit-appearance:auto;appearance:auto;accent-color:var(--th-accent);}
 .det-cambio{font-size:.74rem;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:600;margin-top:6px;}
 
 /* ── S6: tab nav + membri + grezza ── */
@@ -118,28 +118,28 @@
 .cassa-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--br-bg2);border-top:1px solid var(--br-line);padding-bottom:env(safe-area-inset-bottom);z-index:60;}
 .cassa-nav button{flex:1;background:none;border:none;color:var(--br-dim);font-family:'Baloo 2',cursive;font-weight:700;font-size:.7rem;padding:10px 0 9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .cassa-nav button .nav-ico{font-size:1.3rem;line-height:1;}
-.cassa-nav button.attiva{color:var(--br-cyan);}
+.cassa-nav button.attiva{color:var(--th-accent);}
 
 .mb-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--br-line);}
 .mb-row:last-child{border-bottom:none;}
 .mb-info{min-width:0;}
 .mb-nome{font-weight:700;font-size:1rem;color:var(--br-text);display:flex;align-items:center;gap:8px;}
-.cassa-badge-tu{font-size:.6rem;background:var(--br-cyan);color:#06232a;font-family:'Nunito',sans-serif;font-weight:800;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;}
+.cassa-badge-tu{font-size:.6rem;background:var(--th-accent);color:var(--th-on-accent);font-family:'Nunito',sans-serif;font-weight:800;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;}
 .mb-stato{font-family:'Nunito',sans-serif;font-weight:600;font-size:.8rem;margin-top:2px;}
 .mb-pari{color:var(--br-dim);} .mb-cred{color:#6FCF5A;} .mb-deb{color:#FF8A80;}
 .mb-azioni{display:flex;gap:6px;flex-shrink:0;}
 .mb-btn{background:rgba(255,255,255,.06);border:1px solid var(--br-line);border-radius:8px;font-size:.95rem;padding:5px 9px;cursor:pointer;line-height:1;}
-.codice-big{font-size:1.8rem;font-weight:800;color:var(--br-yellow);letter-spacing:4px;text-align:center;padding:6px 0 12px;}
+.codice-big{font-size:1.8rem;font-weight:800;color:var(--th-accent2);letter-spacing:4px;text-align:center;padding:6px 0 12px;}
 .mb-azione-btn{width:100%;height:44px;border-radius:12px;border:1.5px solid var(--br-line);background:var(--br-card);color:var(--br-text);font-family:'Baloo 2',cursive;font-weight:700;font-size:.92rem;cursor:pointer;}
 .mb-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 14px;}
 .mb-toggle-row span{display:flex;flex-direction:column;font-weight:700;color:var(--br-text);font-size:.95rem;}
 .mb-toggle-row small{font-family:'Nunito',sans-serif;font-weight:600;color:var(--br-dim);font-size:.74rem;margin-top:2px;}
-.mb-toggle-row input{width:auto;-webkit-appearance:auto;appearance:auto;accent-color:var(--br-cyan);transform:scale(1.3);flex-shrink:0;}
+.mb-toggle-row input{width:auto;-webkit-appearance:auto;appearance:auto;accent-color:var(--th-accent);transform:scale(1.3);flex-shrink:0;}
 .mb-danger{width:100%;height:46px;border-radius:12px;border:1.5px solid rgba(224,90,74,.5);background:rgba(224,90,74,.12);color:#FF8A80;font-family:'Baloo 2',cursive;font-weight:800;font-size:.95rem;cursor:pointer;margin-top:8px;}
 
 .grezza-box{text-align:center;padding:6px 0;}
 .grezza-frase{font-family:'Nunito',sans-serif;font-weight:700;font-size:1.05rem;color:var(--br-text);line-height:1.5;}
-.grezza-frase b{color:var(--br-cyan);}
+.grezza-frase b{color:var(--th-accent);}
 .grezza-nota{font-family:'Nunito',sans-serif;font-weight:600;font-size:.76rem;color:var(--br-dim);margin-top:8px;}
 
 .elimina-warn{font-family:'Nunito',sans-serif;font-weight:600;font-size:.85rem;color:#FF8A80;line-height:1.5;margin-bottom:14px;}
@@ -160,14 +160,14 @@
 
 /* ── S7c: archivio / chiusura mensile ── */
 .arch-sum{font-family:'Nunito',sans-serif;font-weight:700;font-size:.9rem;color:var(--br-text);margin-bottom:12px;line-height:1.5;}
-.btn-chiudi-mese{width:100%;height:50px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--br-cyan),#00b8d4);color:#06232a;font-family:'Baloo 2',cursive;font-weight:800;font-size:1rem;cursor:pointer;}
+.btn-chiudi-mese{width:100%;height:50px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--th-accent),var(--th-accent-dark));color:var(--th-on-accent);font-family:'Baloo 2',cursive;font-weight:800;font-size:1rem;cursor:pointer;}
 .btn-chiudi-mese:active{transform:scale(.98);}
 .arch-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--br-line);cursor:pointer;}
 .arch-row:last-child{border-bottom:none;}
 .arch-main{flex:1;min-width:0;}
 .arch-titolo{font-weight:700;font-size:1rem;color:var(--br-text);}
 .arch-meta{font-family:'Nunito',sans-serif;font-weight:600;font-size:.78rem;color:var(--br-dim);margin-top:2px;}
-.btn-ripristina{flex-shrink:0;background:rgba(255,255,255,.06);border:1px solid var(--br-line);border-radius:10px;color:var(--br-cyan);font-family:'Baloo 2',cursive;font-weight:700;font-size:.8rem;padding:6px 12px;cursor:pointer;}
+.btn-ripristina{flex-shrink:0;background:rgba(255,255,255,.06);border:1px solid var(--br-line);border-radius:10px;color:var(--th-accent);font-family:'Baloo 2',cursive;font-weight:700;font-size:.8rem;padding:6px 12px;cursor:pointer;}
 .mv-lock{font-size:1.1rem;line-height:1;flex-shrink:0;padding:0 4px;opacity:.8;}
 
 /* ── S7d: toast informativo on-access ── */
@@ -180,3 +180,93 @@
   pointer-events:none;
 }
 .toast-info.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ── S7d: banner promemoria ricorrenti manuali ── */
+.ric-banner{display:flex;align-items:center;gap:8px;background:rgba(255,234,0,.10);border:1px solid rgba(255,234,0,.35);border-radius:14px;padding:11px 14px;margin-bottom:12px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:.88rem;color:var(--br-text);}
+.ric-banner-go{margin-left:auto;color:var(--th-accent2);font-weight:800;font-size:.82rem;}
+
+/* ── S8c: Silly mode ── */
+.silly-stage{display:inline-flex;align-items:center;gap:4px;margin-left:6px;vertical-align:middle;}
+.silly-pig{line-height:1;transition:font-size .5s ease;}
+.silly-inatt{font-size:1.05rem;line-height:1;}
+.silly-tetto-inp{width:96px;height:38px;border-radius:10px;border:1.5px solid var(--br-line);background:var(--br-bg);color:#fff;font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;text-align:right;padding:0 10px;outline:none;-webkit-appearance:none;flex-shrink:0;}
+.silly-tetto-inp:focus{border-color:var(--th-accent);}
+.silly-confetti{position:fixed;inset:0;pointer-events:none;z-index:3000;overflow:hidden;}
+.silly-confetti span{position:absolute;top:-32px;animation:sillyFall 2.4s linear forwards;}
+@keyframes sillyFall{to{transform:translateY(112vh) rotate(380deg);opacity:0;}}
+@media (prefers-reduced-motion: reduce){
+  .silly-confetti{display:none!important;}
+  .silly-pig{transition:none;}
+}
+
+/* ── S9b — Tab Lista (bacheca note + lista spesa) ── */
+.bacheca-card, .lista-card{ margin-bottom:14px; }
+.vuoto-hint{ color:var(--br-dim); font-size:.9rem; text-align:center; padding:14px 0; }
+.btn-accent{ border:none; border-radius:12px; background:linear-gradient(135deg,var(--th-accent),var(--th-accent-dark)); color:var(--th-on-accent); font-family:'Baloo 2',cursive; font-weight:800; cursor:pointer; transition:transform .12s; }
+.btn-accent:active{ transform:scale(.97); }
+.btn-ghost{ border:1px solid var(--br-line); border-radius:12px; background:var(--br-bg2); color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; cursor:pointer; }
+.btn-ghost:active{ transform:scale(.97); }
+.btn-mini{ padding:7px 12px; font-size:.85rem; }
+.nota-composer{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+.nota-textarea{ width:100%; box-sizing:border-box; resize:none; min-height:44px; border:1px solid var(--br-line); border-radius:12px; background:var(--br-bg2); color:var(--br-text); padding:10px 12px; font-family:'Nunito',sans-serif; font-size:.95rem; line-height:1.35; }
+.nota-textarea:focus{ outline:none; border-color:var(--th-accent); }
+.btn-nota-add{ align-self:flex-end; padding:9px 16px; font-size:.9rem; }
+.nota-item{ border:1px solid var(--br-line); border-radius:14px; background:var(--br-card); padding:10px 12px; margin-bottom:8px; }
+.nota-item.in-edit{ background:var(--br-bg2); }
+.nota-testo{ color:var(--br-text); font-size:.95rem; line-height:1.4; white-space:pre-wrap; word-break:break-word; }
+.nota-foot{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; }
+.nota-meta{ color:var(--br-dim); font-size:.75rem; }
+.nota-azioni{ display:flex; gap:4px; }
+.nota-ico{ border:none; background:transparent; cursor:pointer; font-size:.95rem; padding:2px 4px; border-radius:8px; }
+.nota-ico:active{ transform:scale(.9); }
+.nota-edit-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
+.lista-input-row{ display:flex; gap:8px; margin-bottom:12px; }
+.lista-inp-testo{ flex:1; min-width:0; }
+.lista-inp-qty{ width:64px; flex:none; }
+.lista-inp-testo, .lista-inp-qty{ box-sizing:border-box; border:1px solid var(--br-line); border-radius:12px; background:var(--br-bg2); color:var(--br-text); padding:10px 12px; font-family:'Nunito',sans-serif; font-size:.95rem; }
+.lista-inp-testo:focus, .lista-inp-qty:focus{ outline:none; border-color:var(--th-accent); }
+.btn-add-lista{ width:44px; flex:none; font-size:1.4rem; line-height:1; }
+.lista-check-all-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+.lista-item{ display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid var(--br-line); }
+.lista-item:last-child{ border-bottom:none; }
+.lista-check{ border:none; background:transparent; font-size:1.15rem; cursor:pointer; line-height:1; padding:2px; }
+.lista-item-body{ flex:1; min-width:0; display:flex; align-items:center; gap:8px; }
+.lista-qty{ flex:none; font-size:.72rem; font-weight:700; color:var(--th-accent); background:var(--th-accent-soft); border-radius:8px; padding:2px 7px; }
+.lista-item .lista-testo{ color:var(--br-text); font-size:.95rem; word-break:break-word; }
+.lista-item.completata .lista-testo{ text-decoration:line-through; color:var(--br-dim); }
+.lista-del{ border:none; background:transparent; color:var(--br-dim); font-size:1rem; cursor:pointer; padding:2px 6px; flex:none; }
+.lista-del:active{ transform:scale(.9); }
+.lista-sep{ font-size:.75rem; font-weight:700; color:var(--br-dim); text-transform:uppercase; letter-spacing:.4px; margin:10px 0 4px; }
+.lista-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+.svuota-confirm{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; padding:10px; border:1px solid var(--br-line); border-radius:12px; background:var(--br-bg2); font-size:.85rem; color:var(--br-text); }
+
+/* ── S9a — Grafici (overlay) ── */
+.grafico-tabs{ display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 14px; }
+.gr-tab{ flex:1; min-width:0; padding:8px 6px; border:1px solid var(--br-line); border-radius:10px; background:var(--br-bg2); color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; font-size:.8rem; cursor:pointer; white-space:nowrap; }
+.gr-tab.attivo{ border-color:var(--th-accent); color:var(--th-accent); background:var(--th-accent-soft); }
+.grafico-body{ min-height:220px; }
+.grafico-vuoto{ color:var(--br-dim); text-align:center; padding:40px 10px; font-size:.9rem; }
+.grafico-donut-wrap{ display:flex; justify-content:center; padding:8px 0 14px; }
+.grafico-barre-wrap{ padding:8px 0; }
+.grafico-legenda{ display:flex; flex-direction:column; gap:6px; }
+.gr-leg-item{ display:flex; align-items:center; gap:8px; font-size:.85rem; color:var(--br-text); }
+.gr-leg-dot{ width:12px; height:12px; border-radius:4px; flex:none; }
+.gr-leg-nome{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gr-leg-val{ flex:none; color:var(--br-dim); font-weight:700; }
+.gr-leg-tot{ border-top:1px solid var(--br-line); padding-top:6px; margin-top:2px; }
+.gr-leg-tot .gr-leg-nome{ color:var(--br-dim); }
+
+/* ── Gruppo terminato — banner ── */
+.cassa-banner:empty{ display:none; }
+.cassa-terminata-banner{ background:var(--br-bg2); border:1px solid var(--br-line); color:var(--br-text); border-radius:12px; padding:10px 14px; margin:0 0 12px; text-align:center; font-family:'Nunito',sans-serif; font-weight:700; font-size:.9rem; }
+
+/* ── Report finale gruppo terminato ── */
+.report-finale{ border:1px solid var(--th-accent-soft); }
+.report-sub{ color:var(--br-dim); font-size:.9rem; margin:2px 0 14px; }
+.report-metriche{ display:flex; gap:10px; margin-bottom:14px; }
+.report-metrica{ flex:1; min-width:0; background:var(--br-bg2); border:1px solid var(--br-line); border-radius:12px; padding:10px 8px; text-align:center; }
+.rm-val{ display:block; font-family:'Baloo 2',cursive; font-weight:800; color:var(--br-text); font-size:1.05rem; word-break:break-word; }
+.rm-lab{ display:block; color:var(--br-dim); font-size:.72rem; margin-top:2px; }
+.report-sez-tit{ font-size:.78rem; font-weight:700; color:var(--br-dim); text-transform:uppercase; letter-spacing:.4px; margin:6px 0 8px; }
+.report-saldo-row{ display:flex; align-items:center; justify-content:space-between; padding:7px 2px; border-bottom:1px solid var(--br-line); font-size:.92rem; color:var(--br-text); }
+.report-saldo-row:last-of-type{ border-bottom:none; }

@@ -1,7 +1,7 @@
-const CACHE_NAME = 'spiccioli-v20';
+const CACHE_NAME = 'spiccioli-v38';
 const ASSETS = [
-  './','./index.html','./auth.css','./cassa.css',
-  './utils.js','./pwa.js','./api.js','./cassa.js','./auth.js','./solo.js','./app.js',
+  './','./index.html','./auth.css','./cassa.css','./temi.css',
+  './utils.js','./pwa.js','./api.js','./cassa.js','./lista.js','./grafici.js','./auth.js','./welcome.js','./solo.js','./ricorrenti.js','./silly.js','./app.js',
   './manifest.json','./spiccioli.svg','./icon-192.png','./icon-512.png',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',
   'https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700&display=swap'
@@ -10,7 +10,10 @@ self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))));
+  e.waitUntil(
+    caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
 });
 self.addEventListener('fetch', e => {
   var u = e.request.url;

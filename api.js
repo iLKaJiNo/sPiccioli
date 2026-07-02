@@ -16,8 +16,11 @@ function dotC(cls, txt){
 async function apriCassa(id){
   cassaCorrente = CASSE.find(function(c){ return c.id === id; });
   if(!cassaCorrente) return;
+  document.body.setAttribute("data-tema", cassaCorrente.tema || "salvadanaio");
   mostraSchermata("cassa-screen");
   intestaCassa();
+  var _br = document.getElementById("btn-ricorrenti-cassa");
+  if(_br) _br.style.display = (cassaCorrente.tipo === "coppia") ? "block" : "none";
   if(cassaCorrente.tipo === "coppia" && navigator.onLine){
     try{
       var rmat = await sb.rpc("materializza_ricorrenti_cassa", { p_cassa_id: cassaCorrente.id });
@@ -58,6 +61,7 @@ async function caricaCassa(){
 
     var rcat = await sb.from("categorie").select("*")
       .eq("cassa_id", cassaCorrente.id).order("ordine").order("nome");
+    if(rcat.error) return gestisciErroreCassa(rcat.error);
     categorieCassa = rcat.data || [];
 
     if(cassaCorrente.tipo === "coppia"){
@@ -68,6 +72,18 @@ async function caricaCassa(){
     } else {
       chiusureCassa = [];
     }
+
+    var rlista = await sb.from("lista_cassa").select("*")
+      .eq("cassa_id", cassaCorrente.id).order("creata_il", { ascending: true });
+    if(rlista.error) return gestisciErroreCassa(rlista.error);
+    S.lista = rlista.data || [];
+
+    var rnote = await sb.from("note_cassa").select("*")
+      .eq("cassa_id", cassaCorrente.id).order("creata_il", { ascending: false });
+    if(rnote.error) return gestisciErroreCassa(rnote.error);
+    S.note = rnote.data || [];
+
+    await caricaRicorrentiCassa();
 
     dotC("ok", "Sincronizzata");
     aggiornaBadgeCoda();
@@ -96,12 +112,18 @@ function errDiRete(err){
 var _rtCassa = null, _rtTimer = null;
 function initRealtimeCassa(){
   chiudiRealtimeCassa();
-  _rtCassa = sb.channel("cassa-" + cassaCorrente.id)
-    .on("postgres_changes", { event: "*", schema: "public" }, function(){
-      clearTimeout(_rtTimer);
-      _rtTimer = setTimeout(function(){ if(cassaCorrente) caricaCassa(); }, 700);
-    })
-    .subscribe();
+  var rid = cassaCorrente.id;
+  var ricarica = function(){
+    clearTimeout(_rtTimer);
+    _rtTimer = setTimeout(function(){ if(cassaCorrente) caricaCassa(); }, 700);
+  };
+  var ch = sb.channel("cassa-" + rid);
+  ["movimenti","membri","categorie","chiusure_coppia","ricorrenti","lista_cassa","note_cassa"].forEach(function(tab){
+    ch.on("postgres_changes",
+      { event: "*", schema: "public", table: tab, filter: "cassa_id=eq." + rid },
+      ricarica);
+  });
+  _rtCassa = ch.subscribe();
 }
 function chiudiRealtimeCassa(){
   if(_rtCassa){ sb.removeChannel(_rtCassa); _rtCassa = null; }
@@ -122,6 +144,32 @@ async function runAction(p){
     case "deleteMovimento":
       r = await sb.from("movimenti").delete().eq("id", p.id);
       break;
+    case "addListaItem":
+      r = await sb.from("lista_cassa").insert({ id:p.id, cassa_id:p.cassa_id, testo:p.testo, quantita:p.quantita||null, autore:p.autore });
+      break;
+    case "toggleListaItem":
+      r = await sb.from("lista_cassa").update({ completata:p.completata }).eq("id", p.id);
+      break;
+    case "checkAllLista":
+      r = await sb.from("lista_cassa").update({ completata:p.completata }).eq("cassa_id", p.cassa_id).eq("completata", !p.completata);
+      break;
+    case "deleteListaItem":
+      r = await sb.from("lista_cassa").delete().eq("id", p.id);
+      break;
+    case "clearListaItems":
+      var _q = sb.from("lista_cassa").delete().eq("cassa_id", p.cassa_id);
+      if(p.soloCompletate) _q = _q.eq("completata", true);
+      r = await _q;
+      break;
+    case "addNota":
+      r = await sb.from("note_cassa").insert({ id:p.id, cassa_id:p.cassa_id, testo:p.testo, autore:p.autore });
+      break;
+    case "editNota":
+      r = await sb.from("note_cassa").update({ testo:p.testo, aggiornata_il:new Date().toISOString() }).eq("id", p.id);
+      break;
+    case "deleteNota":
+      r = await sb.from("note_cassa").delete().eq("id", p.id);
+      break;
     default:
       return "ok";
   }
@@ -136,7 +184,7 @@ async function post(payload){
     if(errDiRete(e)){
       accodaOperazione(payload);
       dotC("err", "Offline — in attesa");
-      throw e;
+      return "queued";
     }
     if(((e && e.message) || "").indexOf("JWT") > -1){
       sb.auth.signOut().then(function(){ location.reload(); });

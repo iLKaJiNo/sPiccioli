@@ -16,6 +16,7 @@
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="./auth.css">
 <link rel="stylesheet" href="./cassa.css">
+<link rel="stylesheet" href="./temi.css">
 <script>
 if("serviceWorker" in navigator){
   window.addEventListener('load', function(){
@@ -54,6 +55,7 @@ if("serviceWorker" in navigator){
   <div class="casse-top">
     <img src="./spiccioli.svg" alt="sPiccioli!">
     <div class="ct-titoli"><h1>Le tue casse</h1><p>Ciao, <span id="casse-nome-utente">…</span></p></div>
+    <button class="btn-tema-utente" onclick="apriTemaUtente()" title="Tema" aria-label="Tema">🎨</button>
     <button class="btn-esci" onclick="logout()">Esci</button>
   </div>
   <div class="casse-body">
@@ -79,21 +81,27 @@ if("serviceWorker" in navigator){
     <div class="cassa-htitoli">
       <span class="ch-emoji" id="cassa-emoji">💰</span>
       <h1 id="cassa-titolo">Cassa</h1>
+      <span id="silly-stage" class="silly-stage"></span>
     </div>
     <div class="cassa-hazioni">
+      <button class="btn-invita" onclick="apriGrafici()" title="Grafici">📊</button>
       <button class="btn-invita" onclick="invitaCassa()">🔑 Invita</button>
       <div class="cassa-sync-wrap"><span class="sync-dot" id="cassa-dot"></span><span class="cassa-sync-txt" id="cassa-sync">…</span></div>
     </div>
   </div>
 
   <div class="cassa-body">
+    <div id="cassa-banner" class="cassa-banner"></div>
     <!-- TAB CONTI -->
     <div class="cassa-tab attiva" data-tab="conti">
+      <div id="report-gruppo"></div>
       <div class="card">
         <div class="card-titolo" id="saldi-titolo">I conti</div>
         <div id="saldi-list"></div>
       </div>
       <div id="settle-extra"></div>
+      <div id="ric-banner-cassa"></div>
+      <button id="btn-ricorrenti-cassa" class="mb-azione-btn" style="display:none;margin-bottom:12px;" onclick="apriRicorrenti('cassa')">🔁 Fisse e previste</button>
       <button class="btn-nuova-spesa" onclick="apriNuovaSpesa()">➕ Nuova spesa</button>
       <div>
         <div class="card-titolo" style="margin-bottom:8px;">Movimenti</div>
@@ -108,10 +116,15 @@ if("serviceWorker" in navigator){
     <div class="cassa-tab" data-tab="archivio">
       <div id="archivio-body"></div>
     </div>
+    <!-- TAB LISTA -->
+    <div class="cassa-tab" data-tab="lista">
+      <div id="lista-content"></div>
+    </div>
   </div>
 
   <nav class="cassa-nav">
     <button data-tab="conti" class="attiva" onclick="switchCassaTab('conti')"><span class="nav-ico">💰</span><span>Conti</span></button>
+    <button data-tab="lista" onclick="switchCassaTab('lista')"><span class="nav-ico">🧺</span><span>Lista</span></button>
     <button data-tab="archivio" id="nav-archivio" style="display:none;" onclick="switchCassaTab('archivio')"><span class="nav-ico">📆</span><span>Archivio</span></button>
     <button data-tab="membri" onclick="switchCassaTab('membri')"><span class="nav-ico">👥</span><span>Membri</span></button>
   </nav>
@@ -125,9 +138,12 @@ if("serviceWorker" in navigator){
       <span class="ch-emoji">🐷</span>
       <h1>Il mio Solo</h1>
     </div>
+    <button class="btn-invita" onclick="apriRicorrenti('solo')" title="Fisse e previste">🔁 Fisse</button>
     <button class="btn-invita" onclick="apriArchivioSolo()" title="Archivio mesi">📆 Archivio</button>
   </div>
   <div class="solo-body">
+    <div id="solo-banner"></div>
+    <div id="ric-banner-solo"></div>
     <div class="card solo-saldo-card">
       <div class="card-titolo">Saldo</div>
       <div class="solo-saldo-val pos" id="solo-saldo">0,00&nbsp;€</div>
@@ -207,6 +223,81 @@ if("serviceWorker" in navigator){
   </div>
 </div>
 
+<!-- OVERLAY — RICORRENTI (lista) -->
+<div class="modal-overlay" id="ricorrenti-overlay" onclick="if(event.target===this)chiudiRicorrenti()">
+  <div class="br-modal">
+    <h2>🔁 Fisse e previste</h2>
+    <div id="ricorrenti-body"></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiRicorrenti()">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- OVERLAY — GRAFICI -->
+<div class="modal-overlay" id="modal-grafico" onclick="if(event.target===this)chiudiGrafici()">
+  <div class="br-modal">
+    <h2>📊 Grafici</h2>
+    <div id="grafico-tabs" class="grafico-tabs"></div>
+    <div id="grafico-body" class="grafico-body"></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiGrafici()">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- MODALE — FORM RICORRENTE -->
+<div class="modal-overlay" id="modal-ricorrente" onclick="if(event.target===this)chiudiFormRicorrente()">
+  <div class="br-modal">
+    <h2 id="modal-ricorrente-titolo">Nuova fissa / prevista</h2>
+    <div class="m-row"><label>📝 Nome</label><input type="text" id="ric-nome" placeholder="es. Netflix, Affitto"></div>
+    <div class="m-row"><label>💰 Importo (EUR)</label><input type="number" id="ric-importo" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal"></div>
+    <div class="m-row"><label>🏷️ Categoria</label><select id="ric-categoria"></select></div>
+    <div class="m-row" id="ric-tipo-row"><label>Tipo</label>
+      <div class="split-seg" id="ric-tipo-seg">
+        <button class="split-btn" data-v="uscita" onclick="setRicTipo('uscita')">Uscita</button>
+        <button class="split-btn" data-v="entrata" onclick="setRicTipo('entrata')">Entrata</button>
+      </div>
+    </div>
+    <div class="m-row" id="ric-pagante-row"><label>🙂 Paga sempre</label><select id="ric-pagante"></select></div>
+    <div class="m-row"><label>Registrazione</label>
+      <div class="split-seg" id="ric-auto-seg">
+        <button class="split-btn" data-v="auto" onclick="setRicAuto(true)">⚡ Automatica</button>
+        <button class="split-btn" data-v="man" onclick="setRicAuto(false)">✋ Manuale</button>
+      </div>
+    </div>
+    <div class="m-row"><label>Frequenza</label>
+      <div class="split-seg" id="ric-ripeti-seg">
+        <button class="split-btn" data-v="si" onclick="setRicRipeti(true)">🔁 Ricorrente</button>
+        <button class="split-btn" data-v="no" onclick="setRicRipeti(false)">📌 Una-tantum</button>
+      </div>
+    </div>
+    <div id="ric-ricorrenza">
+      <div class="m-row"><label>Ogni</label>
+        <div style="display:flex;gap:8px;">
+          <input type="number" id="ric-ogni" min="1" step="1" value="1" style="width:80px;flex:none;">
+          <select id="ric-unita" style="flex:1;">
+            <option value="giorni">giorni</option><option value="settimane">settimane</option>
+            <option value="mesi" selected>mesi</option><option value="anni">anni</option>
+          </select>
+        </div>
+      </div>
+      <div class="m-row" id="ric-limite-wrap"><label>Fine</label>
+        <div class="split-seg" id="ric-limite-seg">
+          <button class="split-btn" data-v="nessuno" onclick="setRicLimite('nessuno')">Nessun limite</button>
+          <button class="split-btn" data-v="data" onclick="setRicLimite('data')">Fino a</button>
+          <button class="split-btn" data-v="volte" onclick="setRicLimite('volte')">N volte</button>
+        </div>
+        <div id="ric-fine-wrap" style="margin-top:8px;"><input type="date" id="ric-fine-data"></div>
+        <div id="ric-volte-wrap" style="margin-top:8px;"><input type="number" id="ric-volte" min="1" step="1" placeholder="quante volte"></div>
+      </div>
+    </div>
+    <div class="m-row"><label>📅 Prima scadenza</label><input type="date" id="ric-scadenza"></div>
+    <div class="modal-error" id="ric-form-error"></div>
+    <div class="m-btns">
+      <button class="m-annulla" onclick="chiudiFormRicorrente()">Annulla</button>
+      <button class="m-conferma" onclick="salvaRicorrente()">Salva</button>
+    </div>
+    <button class="mb-danger" id="ric-elimina-btn" style="display:none;margin-top:10px;" onclick="eliminaRicorrente()">🗑️ Elimina</button>
+  </div>
+</div>
+
 <!-- MODALE — CREA CASSA -->
 <div class="modal-overlay" id="modal-crea" onclick="if(event.target===this)closeCreaCassa()">
   <div class="br-modal">
@@ -229,9 +320,9 @@ if("serviceWorker" in navigator){
     </div>
     <div class="m-row"><label>🎨 Tema</label>
       <select id="crea-tema">
-        <option value="orsi">🐻 Orsi</option><option value="pesci">🐟 Pesci</option>
-        <option value="west">🤠 West</option><option value="alieni">👽 Alieni</option>
-        <option value="jungle">🦜 Jungle</option><option value="flamingo">🦩 Flamingo</option>
+        <option value="salvadanaio">🐷 Salvadanaio</option>
+        <option value="pesci">🐟 Pesci</option>
+        <option value="west">🤠 West</option>
       </select>
     </div>
     <div class="m-row"><label>🙂 Il tuo nome in questa cassa</label><input type="text" id="crea-nome-membro" placeholder="Lascia vuoto per usare il tuo nome"></div>
@@ -255,6 +346,16 @@ if("serviceWorker" in navigator){
       <button class="m-annulla" onclick="closeUnisci()">Annulla</button>
       <button class="m-conferma" id="unisci-btn" onclick="confermaUnisci()">Entra</button>
     </div>
+  </div>
+</div>
+
+<!-- OVERLAY — TEMA UTENTE -->
+<div class="modal-overlay" id="modal-tema-utente" onclick="if(event.target===this)chiudiTemaUtente()">
+  <div class="br-modal">
+    <h2>🎨 Il tuo tema</h2>
+    <p class="tema-utente-hint">Vale per la Home e il tuo Solo. Ogni cassa ha il suo tema.</p>
+    <div id="tema-utente-body" class="tema-utente-grid"></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiTemaUtente()">Chiudi</button></div>
   </div>
 </div>
 
@@ -406,13 +507,54 @@ if("serviceWorker" in navigator){
 <div id="info-overlay" class="info-overlay">
   <button class="info-close" onclick="chiudiInfo()" aria-label="Chiudi">×</button>
   <div class="info-content">
-    <img src="./spiccioli.svg" class="info-logo" alt="">
+    <img src="./spiccioli.svg" class="info-logo" alt="" onclick="apriCrawl()" style="cursor:pointer;">
     <div class="info-title">sPiccioli!</div>
     <p class="info-manifesto">Al mondo d'oggi abbiamo controllo solo sulle piccole cose. Ma spesso da piccole cose nascono grandi amori, grandi litigi, problemi o situazioni fantastiche.</p>
     <p class="info-manifesto">sPiccioli! ti aiuta a tenere da conto le piccole Spese, i <i>Piccioli</i> — che tu sia da solo, in due, o in un gruppo scellerato di persone.</p>
     <p class="info-manifesto">L'importante è rimanere <b>Silly</b>, per dare il giusto peso alle cose piccole ma importanti.</p>
-    <div class="info-tagline">Resta Silly 🐷</div>
+    <div class="info-tagline">Resta Silly <span onclick="apriCrawl()" style="cursor:pointer;">🐷</span></div>
+    <div class="info-faq">
+      <div class="info-faq-titolo">Domande frequenti</div>
+      <button id="faq1-btn" class="faq-q" onclick="faqToggle('faq1-box','faq1-btn')">▸ Come divido una spesa?</button>
+      <div id="faq1-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: aggiungi una spesa, scegli chi ha pagato e come dividerla (equo, per importi, percentuale o quote).</p></div>
+      <button id="faq2-btn" class="faq-q" onclick="faqToggle('faq2-box','faq2-btn')">▸ Che differenza c'è tra Solo, Coppia e Gruppo?</button>
+      <div id="faq2-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: Solo per le tue spese, Coppia con ciclo mensile, Gruppo per spese condivise fra più persone.</p></div>
+      <button id="faq3-btn" class="faq-q" onclick="faqToggle('faq3-box','faq3-btn')">▸ Cos'è la modalità Silly?</button>
+      <div id="faq3-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: un tocco di leggerezza per la cassa, attivabile dall'admin.</p></div>
+      <button id="faq4-btn" class="faq-q" onclick="faqToggle('faq4-box','faq4-btn')">▸ I miei dati sono privati?</button>
+      <div id="faq4-box" data-open="0" style="overflow:hidden;transition:max-height .35s ease;max-height:0px;"><p class="faq-a">Segnaposto: vedi solo le casse di cui fai parte; ogni cassa è isolata dalle altre.</p></div>
+    </div>
     <button class="info-cta" onclick="chiudiInfo()">Ho capito!</button>
+  </div>
+</div>
+
+<!-- OVERLAY — BENVENUTO (first-run) -->
+<div id="welcome-overlay" class="info-overlay" ontouchstart="_welcomeTouchStart(event)" ontouchend="_welcomeTouchEnd(event)">
+  <div class="info-content welcome-content">
+    <button class="welcome-salta" onclick="welcomeFine()">Salta</button>
+    <div id="welcome-body" class="welcome-body"></div>
+    <div id="welcome-dots" class="welcome-dots"></div>
+    <div class="welcome-nav">
+      <button id="welcome-indietro" class="welcome-back" onclick="welcomeIndietro()">← Indietro</button>
+      <button id="welcome-avanti" class="info-cta" onclick="welcomeAvanti()">Avanti</button>
+    </div>
+  </div>
+</div>
+
+<div id="crawl-overlay" class="crawl-overlay" onclick="chiudiCrawl()">
+  <button class="crawl-close" onclick="event.stopPropagation();chiudiCrawl()" aria-label="Chiudi">×</button>
+  <div class="crawl-intro" id="crawl-intro">Tanto tempo fa, in una cassa molto, molto lontana…</div>
+  <div class="crawl-mask">
+    <div class="crawl-text" id="crawl-text">
+      <p class="crawl-ep">EPISODIO 🐷</p>
+      <h2 class="crawl-h">sPiccioli!<br>La minaccia della spesa</h2>
+      <p>È un'epoca di grandi cene e piccoli rancori. Gruppi di amici scellerati vagano per il mondo dividendo conti, dimenticando puntualmente chi ha pagato la pizza.</p>
+      <p>Nell'ombra veglia un eroe silenzioso: il <b>Saldo</b>, forza misteriosa che sa sempre chi è in pari e chi è in debito. Nessuno sfugge alla sua bilancia.</p>
+      <p>Dai un nome alla tua cassa — da solo, in due, o in un gruppo scellerato — registra i tuoi <b>Piccioli</b>, e lascia che il Salvadanaio 🐷 cresca pasciuto fino al giorno della resa dei conti.</p>
+      <p>Ma ricorda, giovane risparmiatore: il vero potere non è avere tutti i soldi. È restare <b>Silly</b> mentre li dividi.</p>
+      <p class="crawl-end">Che il saldo sia con te.</p>
+      <p class="crawl-end">— Resta Silly 🐷</p>
+    </div>
   </div>
 </div>
 
@@ -421,8 +563,13 @@ if("serviceWorker" in navigator){
 <script src="./pwa.js"></script>
 <script src="./api.js"></script>
 <script src="./cassa.js"></script>
+<script src="./lista.js"></script>
+<script src="./grafici.js"></script>
 <script src="./solo.js"></script>
+<script src="./ricorrenti.js"></script>
+<script src="./silly.js"></script>
 <script src="./auth.js"></script>
+<script src="./welcome.js"></script>
 <script src="./app.js"></script>
 </body>
 </html>

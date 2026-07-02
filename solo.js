@@ -41,6 +41,7 @@ async function caricaSolo(){
   soloCategorie = rc.data || [];
   var rch = await sb.from("solo_chiusure").select("*").order("seq", { ascending: false });
   soloChiusure = rch.data || [];
+  await caricaRicorrentiSolo();
   renderSolo();
 }
 
@@ -53,6 +54,15 @@ function iconaSoloCat(nome){
 
 // ── RENDER ──
 function renderSolo(){
+  var _ban = document.getElementById("solo-banner");
+  if(_ban){
+    _ban.innerHTML = (registroMultiMese(soloVoci, "data") && !_nudgeDismiss["solo"])
+      ? '<div class="cassa-terminata-banner">📆 Il registro abbraccia più mesi. '
+        + '<button class="btn-mini btn-accent" onclick="confermaChiudiMeseSolo()">Archivia</button> '
+        + '<button class="btn-mini btn-ghost" onclick="_nudgeDismiss[\'solo\']=true;renderSolo()">Più tardi</button></div>'
+      : "";
+  }
+
   // saldo = entrate − uscite
   var saldo = 0;
   (soloVoci || []).forEach(function(v){
@@ -317,11 +327,11 @@ function renderArchivioSolo(){
   } else {
     html += ch.map(function(c, idx){
       var ripr = (idx === 0)
-        ? '<button class="btn-ripristina" onclick="event.stopPropagation();confermaRipristinoSolo()">↩︎ Ripristina</button>' : '';
+        ? '<button class="btn-ripristina" onclick="event.stopPropagation();ripristinaSolo()">↩︎ Ripristina</button>' : '';
       var sd = parseFloat(c.saldo)||0;
       return '<div class="arch-row" onclick="apriDettaglioChiusuraSolo(\'' + c.id + '\')">'
-        + '<div class="arch-main"><div class="arch-titolo">Chiusura #' + c.seq + '</div>'
-        + '<div class="arch-meta">' + fmtLong(c.chiusa_il) + ' · saldo ' + (sd<0?"−":"") + eur(sd) + '</div></div>'
+        + '<div class="arch-main"><div class="arch-titolo">' + escapeHtml(etichettaChiusura(c)) + '</div>'
+        + '<div class="arch-meta">#' + c.seq + ' · ' + fmtLong(c.chiusa_il) + ' · saldo ' + (sd<0?"−":"") + eur(sd) + '</div></div>'
         + ripr + '<div class="cassa-freccia">›</div></div>';
     }).join("");
   }
@@ -343,27 +353,21 @@ async function confermaChiudiMeseSolo(){
   renderArchivioSolo();
 }
 
-async function confermaRipristinoSolo(){
-  if(!navigator.onLine){ alert("Serve una connessione per ripristinare."); return; }
-  if(!confirm("Ripristinare l'ultimo mese chiuso?\nLe voci archiviate tornano nel registro e quell'archivio viene rimosso.")) return;
-  var r = await sb.rpc("ripristina_mese_solo");
-  if(r.error){
-    var m = r.error.message || "";
-    if(m.indexOf("registro corrente ha") > -1){
-      alert("Il registro corrente non è vuoto: svuotalo prima di ripristinare (il ripristino lo sovrascriverebbe).");
-    } else { alert("Errore nel ripristino: " + m); }
-    return;
-  }
-  await caricaSolo();
-  renderArchivioSolo();
+async function ripristinaSolo(){
+  if(soloVoci.length){ toastInfo("Il registro corrente non è vuoto: svuotalo o chiudilo prima."); return; }
+  if(!confirm("Ripristinare l'ultimo mese chiuso?")) return;
+  var r = await sb.rpc("ripristina_solo");
+  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  await caricaSolo(); toastInfo("Mese ripristinato ♻️");
 }
 
 function apriDettaglioChiusuraSolo(id){
   var c = (soloChiusure || []).find(function(x){ return String(x.id) === String(id); });
   if(!c) return;
   var voci = c.voci || [];
-  var html = '<div class="det-top"><div class="det-titolo">Chiusura #' + c.seq + '</div>'
-    + '<div class="det-data">' + fmtLong(c.chiusa_il) + '</div></div>';
+  var html = '<div class="det-top"><div class="det-titolo">' + escapeHtml(etichettaChiusura(c))
+    + ' <button class="nota-ico" onclick="rinominaChiusuraSolo(\'' + c.id + '\')">✏️</button></div>'
+    + '<div class="det-data">#' + c.seq + ' · ' + fmtLong(c.chiusa_il) + '</div></div>';
   html += '<div class="det-sez">';
   html += '<div class="det-riga"><span>Entrate</span><span class="voce-entrata">+ ' + eur(parseFloat(c.tot_entrate)||0) + '</span></div>';
   html += '<div class="det-riga"><span>Uscite</span><span class="voce-uscita">− ' + eur(parseFloat(c.tot_uscite)||0) + '</span></div>';
@@ -385,3 +389,15 @@ function apriDettaglioChiusuraSolo(id){
   document.getElementById("modal-dettaglio-chiusura-solo").classList.add("attivo");
 }
 function chiudiDettaglioChiusuraSolo(){ document.getElementById("modal-dettaglio-chiusura-solo").classList.remove("attivo"); }
+
+async function rinominaChiusuraSolo(id){
+  var c = (soloChiusure || []).find(function(x){ return x.id === id; }); if(!c) return;
+  var nuovo = prompt("Nome della chiusura (vuoto = automatico):", c.nome || "");
+  if(nuovo === null) return;
+  var r = await sb.rpc("rinomina_chiusura_solo", { p_id:id, p_nome:nuovo });
+  if(r.error){ toastInfo("Errore: "+r.error.message); return; }
+  c.nome = nuovo.trim() || null;
+  renderArchivioSolo();
+  apriDettaglioChiusuraSolo(id);
+  toastInfo("Rinominata ✏️");
+}

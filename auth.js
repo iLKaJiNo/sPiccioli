@@ -69,17 +69,36 @@ function traduciErroreAuth(m){
 }
 function logout(){ sb.auth.signOut().then(function(){ location.reload(); }); }
 
+// ── TEMA UTENTE (picker in home: vale per Home + Solo) ──
+function apriTemaUtente(){
+  var wrap = document.getElementById("tema-utente-body");
+  if(wrap) wrap.innerHTML = THEMES.map(function(t){
+    return '<button class="split-btn '+((profiloUtente&&profiloUtente.tema)===t.k?"attivo":"")+'" onclick="cambiaTemaUtente(\''+t.k+'\')">'+t.e+' '+t.n+'</button>';
+  }).join("");
+  document.getElementById("modal-tema-utente").classList.add("attivo");
+}
+function chiudiTemaUtente(){ document.getElementById("modal-tema-utente").classList.remove("attivo"); }
+async function cambiaTemaUtente(t){
+  if(!profiloUtente || t === profiloUtente.tema) return;
+  var r = await sb.from("profili").update({ tema: t }).eq("id", profiloUtente.id);
+  if(r.error){ alert("Errore nel cambio tema: " + r.error.message); return; }
+  profiloUtente.tema = t;
+  document.body.setAttribute("data-tema", t);   // siamo su home → applica subito
+  apriTemaUtente();                              // rinfresca evidenziazione
+}
+
 async function caricaProfilo(){
   var u = (await sb.auth.getUser()).data.user;
   if(!u) return;
-  var p = await sb.from("profili").select("nome").eq("id", u.id).maybeSingle();
-  profiloUtente = { id: u.id, email: u.email, nome: (p.data && p.data.nome) || "" };
+  var p = await sb.from("profili").select("nome, tema").eq("id", u.id).maybeSingle();
+  profiloUtente = { id: u.id, email: u.email, nome: (p.data && p.data.nome) || "", tema: (p.data && p.data.tema) || "salvadanaio" };
 }
 
 // ── LE TUE CASSE ──
 async function vaiAlleCasse(){
   mostraSchermata("casse-screen");
   await caricaCasse();
+  maybeWelcome();
 }
 async function caricaCasse(){
   var lista = document.getElementById("casse-list");
@@ -119,7 +138,7 @@ function renderCasse(){
   }).join("");
 }
 function emojiTema(t){
-  var m = { orsi:"🐻", pesci:"🐟", west:"🤠", alieni:"👽", jungle:"🦜", flamingo:"🦩" };
+  var m = { salvadanaio:"🐷", orsi:"🐻", pesci:"🐟", west:"🤠", alieni:"👽", jungle:"🦜", flamingo:"🦩" };
   return m[t] || "💰";
 }
 
@@ -199,3 +218,22 @@ function tornaAlleCasse(){
 // Overlay riusabile: per ora dal login, in futuro slide (S10) e crawl Silly (S8).
 function apriInfo(){ document.getElementById("info-overlay").classList.add("attivo"); }
 function chiudiInfo(){ document.getElementById("info-overlay").classList.remove("attivo"); }
+
+// ── S8d: crawl easter egg ──
+function apriCrawl(){
+  var ov = document.getElementById("crawl-overlay");
+  if(!ov) return;
+  ov.classList.add("attivo");
+  // restart pulito delle animazioni (intro + testo) a ogni apertura
+  ["crawl-intro","crawl-text"].forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.animation = "none";
+    void el.offsetHeight;        // forza reflow
+    el.style.animation = "";     // riparte dalla regola CSS
+  });
+}
+function chiudiCrawl(){
+  var ov = document.getElementById("crawl-overlay");
+  if(ov) ov.classList.remove("attivo");
+}

@@ -147,3 +147,49 @@ body{
 .info-tagline{font-family:'Baloo 2',cursive;font-weight:800;font-size:1.15rem;color:var(--br-yellow);margin:8px 0 28px;}
 .info-cta{height:50px;padding:0 32px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--br-cyan),#00b8d4);color:#06232a;font-family:'Baloo 2',cursive;font-weight:800;font-size:1.05rem;cursor:pointer;box-shadow:0 6px 20px rgba(0,229,255,.22);}
 .info-cta:active{transform:scale(.97);}
+
+/* ── S8d: crawl easter egg ── */
+.crawl-overlay{display:none;position:fixed;inset:0;z-index:1200;background:#000;overflow:hidden;}
+.crawl-overlay.attivo{display:block;}
+.crawl-close{position:fixed;top:max(14px,env(safe-area-inset-top));right:16px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;z-index:3;}
+.crawl-intro{position:absolute;top:42%;width:88%;max-width:480px;left:50%;transform:translateX(-50%);text-align:center;color:#4FD1E0;font-family:'Nunito',sans-serif;font-weight:700;font-size:1.05rem;opacity:0;animation:crawlIntro 5s ease forwards;}
+.crawl-mask{position:absolute;inset:0;perspective:340px;overflow:hidden;}
+.crawl-mask::after{content:'';position:absolute;top:0;left:0;right:0;height:46%;background:linear-gradient(to bottom,#000 0%,transparent 100%);pointer-events:none;z-index:2;}
+.crawl-text{position:absolute;top:100%;left:50%;width:90%;max-width:520px;transform:translateX(-50%) rotateX(26deg);transform-origin:50% 100%;color:#FFEA00;font-family:'Baloo 2',cursive;font-weight:800;text-align:center;line-height:1.5;animation:crawlScroll 48s linear 4.5s forwards;}
+.crawl-text p{margin:0 0 18px;font-size:1.15rem;}
+.crawl-text b{color:#fff;}
+.crawl-ep{font-size:1rem !important;letter-spacing:1px;opacity:.85;}
+.crawl-h{font-size:1.9rem;line-height:1.15;margin:0 0 26px;}
+.crawl-end{font-style:italic;}
+@keyframes crawlIntro{0%{opacity:0;}20%{opacity:1;}80%{opacity:1;}100%{opacity:0;}}
+@keyframes crawlScroll{0%{top:100%;}100%{top:-260%;}}
+@media (prefers-reduced-motion: reduce){
+  .crawl-intro{animation:none;opacity:1;position:static;transform:none;margin:70px auto 10px;}
+  .crawl-mask{perspective:none;overflow:auto;}
+  .crawl-mask::after{display:none;}
+  .crawl-text{animation:none;position:static;transform:none;top:auto;left:auto;margin:0 auto;padding:20px 0 80px;}
+}
+
+/* ── S10 — Slide benvenuto (first-run) ── */
+.welcome-content{ display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:48px 28px; }
+.welcome-salta{ position:fixed; top:max(14px,env(safe-area-inset-top)); right:16px; background:transparent; border:none; color:var(--br-dim); font-family:'Nunito',sans-serif; font-weight:700; font-size:.9rem; cursor:pointer; z-index:2; }
+.welcome-body{ min-height:230px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.welcome-emoji{ font-size:4rem; margin-bottom:18px; }
+.welcome-titolo{ font-family:'Baloo 2',cursive; font-weight:800; font-size:1.6rem; color:var(--br-text); margin-bottom:10px; }
+.welcome-testo{ color:var(--br-dim); font-size:1rem; line-height:1.5; max-width:340px; }
+.welcome-dots{ display:flex; gap:8px; margin:22px 0; }
+.welcome-dot{ width:8px; height:8px; border-radius:50%; background:var(--br-line); transition:all .2s; }
+.welcome-dot.attivo{ background:var(--br-cyan); width:22px; border-radius:4px; }
+.welcome-nav{ display:flex; align-items:center; gap:12px; width:100%; max-width:340px; }
+.welcome-back{ background:transparent; border:none; color:var(--br-dim); font-family:'Nunito',sans-serif; font-weight:700; cursor:pointer; padding:8px; }
+.welcome-nav .info-cta{ flex:1; }
+/* ── S10 — FAQ a fisarmonica dentro info-overlay ── */
+.info-faq{ text-align:left; margin:24px 0 8px; }
+.info-faq-titolo{ font-family:'Baloo 2',cursive; font-weight:800; color:var(--br-text); font-size:1.05rem; margin-bottom:10px; text-align:center; }
+.faq-q{ display:block; width:100%; text-align:left; background:var(--br-card); border:1px solid var(--br-line); border-radius:10px; color:var(--br-text); font-family:'Nunito',sans-serif; font-weight:700; font-size:.9rem; padding:10px 12px; margin:6px 0; cursor:pointer; }
+.faq-a{ color:var(--br-dim); font-size:.88rem; line-height:1.45; padding:6px 12px 10px; margin:0; }
+
+/* ── Tema utente (picker in home) ── */
+.btn-tema-utente{ background:transparent; border:none; font-size:1.3rem; cursor:pointer; padding:4px 8px; line-height:1; }
+.tema-utente-hint{ color:var(--br-dim); font-size:.85rem; margin:2px 0 14px; }
+.tema-utente-grid{ display:flex; flex-direction:column; gap:8px; }
