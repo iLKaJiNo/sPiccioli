@@ -65,17 +65,28 @@ function skeletonsCassa(){
   document.getElementById("saldi-list").innerHTML = '<div class="sk"></div><div class="sk"></div>';
   document.getElementById("movimenti-list").innerHTML = '<div class="sk"></div><div class="sk"></div><div class="sk"></div>';
 }
-function invitaCassa(){
-  document.getElementById("invito-codice-txt").textContent = cassaCorrente.codice_invito;
-  document.getElementById("modal-invito").classList.add("attivo");
-}
-function chiudiInvito(){ document.getElementById("modal-invito").classList.remove("attivo"); }
 function copiaCodiceInvito(){
   var codice = cassaCorrente.codice_invito;
   if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(codice).then(function(){ toastInfo("Codice copiato 📋"); }).catch(function(){});
+    navigator.clipboard.writeText(codice).then(function(){ toastInfo("Copiato! 📋"); }).catch(function(){});
   }
 }
+// v42: il testo sync è visibile solo quando lo stato non è ok (classe .warn sul wrap).
+// dotC/aggiornaBadgeCoda vivono in api.js (intoccabile): li avvolgiamo qui.
+var _dotCBase = dotC;
+dotC = function(cls, txt){
+  _dotCBase(cls, txt);
+  var w = document.querySelector("#cassa-screen .cassa-sync-wrap");
+  if(w) w.classList.toggle("warn", cls !== "ok");
+};
+var _badgeCodaBase = aggiornaBadgeCoda;
+aggiornaBadgeCoda = function(){
+  _badgeCodaBase();
+  if(getCoda().length){
+    var w = document.querySelector("#cassa-screen .cassa-sync-wrap");
+    if(w) w.classList.add("warn");
+  }
+};
 function switchCassaTab(tab){
   document.querySelectorAll("#cassa-screen .cassa-tab").forEach(function(t){
     t.classList.toggle("attiva", t.getAttribute("data-tab") === tab);
@@ -326,6 +337,34 @@ function chiudiDettaglio(){ document.getElementById("modal-dettaglio").classList
 // ════════════════════════════════════════════════════════
 //  TAB MEMBRI — gestione
 // ════════════════════════════════════════════════════════
+// ── v42: sezioni richiudibili (pattern accordion, stato per cassa+sezione) ──
+function _mbSezKey(sez){ return "spiccioli_mbsez_" + cassaCorrente.id + "_" + sez; }
+function mbSez(sez, titolo, contenuto, defAperta, sempreChiusa){
+  var ap = sempreChiusa ? false : accordionAperto(_mbSezKey(sez), defAperta);
+  return '<div class="mb-sez' + (ap ? " aperta" : "") + '" id="mb-sez-' + sez + '">'
+    + '<button type="button" class="mb-sez-h" onclick="mbSezToggle(\'' + sez + '\')">'
+    +   '<span>' + titolo + '</span><span class="freccia">▸</span></button>'
+    + '<div id="mb-sez-w-' + sez + '" style="overflow:hidden;transition:max-height .35s ease;max-height:' + (ap ? "none" : "0px") + ';">'
+    +   '<div class="mb-sez-b">' + contenuto + '</div></div>'
+    + '</div>';
+}
+function mbSezToggle(sez){
+  var box  = document.getElementById("mb-sez-" + sez);
+  var wrap = document.getElementById("mb-sez-w-" + sez);
+  if(!box || !wrap) return;
+  var apri = !box.classList.contains("aperta");
+  box.classList.toggle("aperta", apri);
+  if(apri){
+    wrap.style.maxHeight = wrap.scrollHeight + "px";
+    setTimeout(function(){ if(box.classList.contains("aperta")) wrap.style.maxHeight = "none"; }, 360);
+  } else {
+    wrap.style.maxHeight = wrap.scrollHeight + "px";
+    void wrap.offsetHeight;                      // forza reflow prima di collassare
+    requestAnimationFrame(function(){ wrap.style.maxHeight = "0px"; });
+  }
+  try{ localStorage.setItem(_mbSezKey(sez), apri ? "1" : "0"); }catch(e){}
+}
+
 function renderMembri(){
   var nomi  = nomiMembri();
   var saldi = calcolaSaldi();
@@ -351,19 +390,40 @@ function renderMembri(){
       + '<div class="mb-azioni">' + az + '</div></div>';
   }).join("");
 
+  // 1. Card membri — sempre aperta
   var html = '<div class="card"><div class="card-titolo">Membri (' + membriCorrente.length + ')</div>' + righe + '</div>';
 
-  html += '<div class="card"><div class="card-titolo">Codice cassa</div>'
-    + '<div class="codice-big">' + escapeHtml(cassaCorrente.codice_invito) + '</div>'
-    + (admin ? '<button class="mb-azione-btn" onclick="rigeneraCodice()">🔄 Rigenera codice</button>' : '')
+  // 2. 🔑 Invita — aperta di default finché si è in meno di due
+  var inv = '<div class="codice-big">' + escapeHtml(cassaCorrente.codice_invito) + '</div>'
+    + '<div style="display:flex;gap:8px;align-items:center;">'
+    + '<button class="mb-azione-btn" style="flex:1;" onclick="copiaCodiceInvito()">📋 Copia codice</button>'
+    + (admin ? '<button class="mb-btn" onclick="rigeneraCodice()" title="Rigenera codice">🔄</button>' : '')
     + '</div>';
+  html += mbSez("invita", "🔑 Invita", inv, membriCorrente.length < 2);
 
   if(admin){
-    var set = '';
+    // 3. 🎨 Aspetto — tema + silly + tetto
+    var asp = '<div class="mb-toggle-row"><span>Tema<small>L\'aspetto della cassa</small></span></div>';
+    asp += '<div class="split-seg mb-tema-row" style="margin-bottom:14px;">'
+      + THEMES.map(function(t){
+          return '<button class="split-btn ' + (cassaCorrente.tema===t.k?"attivo":"") + '" '
+            + 'onclick="cambiaTema(\'' + t.k + '\')">' + t.e + ' ' + t.n + '</button>';
+        }).join('')
+      + '</div>';
+    asp += '<label class="mb-toggle-row"><span>Silly mode<small>Reazioni e animazioni sceme</small></span>'
+      + '<input type="checkbox" ' + (cassaCorrente.silly?"checked":"") + ' onchange="toggleSilly(this.checked)"></label>';
+    if(cassaCorrente.silly){
+      asp += '<div class="mb-toggle-row mb-tetto-row"><span>Tetto salvadanaio 🐷<small>Il 🐷 è enorme a questa cifra</small></span>'
+        + '<input type="number" class="silly-tetto-inp" min="100" step="50" value="' + (parseFloat(cassaCorrente.silly_tetto)||1000) + '" onchange="salvaTettoSilly(this.value)"></div>';
+    }
+    html += mbSez("aspetto", "🎨 Aspetto", asp, false);
+
+    // 4. ⚖️ Calcolo — modalità (coppia) + grezza (regole invariate)
+    var calc = '';
     if(cassaCorrente.tipo === "coppia"){
-      set += '<div class="mb-toggle-row"><span>Modalità di calcolo'
+      calc += '<div class="mb-toggle-row"><span>Modalità di calcolo'
         + '<small>Bilancia o debiti diretti — cambiala quando vuoi</small></span></div>';
-      set += '<div class="split-seg" style="margin-bottom:14px;">'
+      calc += '<div class="split-seg" style="margin-bottom:14px;">'
         + '<button class="split-btn ' + (cassaCorrente.modalita==="comune"?"attivo":"") + '" '
         + 'onclick="switchModalita(\'comune\')">⚖️ Bilancia</button>'
         + '<button class="split-btn ' + (cassaCorrente.modalita==="diretti"?"attivo":"") + '" '
@@ -371,29 +431,20 @@ function renderMembri(){
         + '</div>';
     }
     if(cassaCorrente.modalita === "comune" && membriCorrente.length === 2){
-      set += '<label class="mb-toggle-row"><span>Modalità grezza<small>Mostra il divario di spesa invece del saldo</small></span>'
+      calc += '<label class="mb-toggle-row"><span>Modalità grezza<small>Mostra il divario di spesa invece del saldo</small></span>'
         + '<input type="checkbox" ' + (cassaCorrente.grezza ? "checked" : "") + ' onchange="toggleGrezza(this.checked)"></label>';
     }
-    set += '<div class="mb-toggle-row"><span>Tema<small>L\'aspetto della cassa</small></span></div>';
-    set += '<div class="split-seg mb-tema-row" style="margin-bottom:14px;">'
-      + THEMES.map(function(t){
-          return '<button class="split-btn ' + (cassaCorrente.tema===t.k?"attivo":"") + '" '
-            + 'onclick="cambiaTema(\'' + t.k + '\')">' + t.e + ' ' + t.n + '</button>';
-        }).join('')
-      + '</div>';
-    set += '<label class="mb-toggle-row"><span>Silly mode<small>Reazioni e animazioni sceme</small></span>'
-      + '<input type="checkbox" ' + (cassaCorrente.silly?"checked":"") + ' onchange="toggleSilly(this.checked)"></label>';
-    if(cassaCorrente.silly){
-      set += '<div class="mb-toggle-row mb-tetto-row"><span>Tetto salvadanaio 🐷<small>Il 🐷 è enorme a questa cifra</small></span>'
-        + '<input type="number" class="silly-tetto-inp" min="100" step="50" value="' + (parseFloat(cassaCorrente.silly_tetto)||1000) + '" onchange="salvaTettoSilly(this.value)"></div>';
-    }
+    if(calc) html += mbSez("calcolo", "⚖️ Calcolo", calc, false);
+
+    // 5. ⚠️ Zona delicata — sempre chiusa di default
+    var zona = '';
     if(cassaCorrente.tipo === "gruppo"){
-      set += (cassaCorrente.stato === "terminata")
+      zona += (cassaCorrente.stato === "terminata")
         ? '<button class="mb-azione-btn" onclick="riattivaGruppo()">♻️ Riattiva gruppo</button>'
         : '<button class="mb-azione-btn" onclick="terminaGruppo()">🏁 Termina gruppo</button>';
     }
-    set += '<button class="mb-danger" onclick="apriEliminaCassa()">🗑️ Elimina cassa</button>';
-    html += '<div class="card"><div class="card-titolo">Impostazioni</div>' + set + '</div>';
+    zona += '<button class="mb-danger" onclick="apriEliminaCassa()">🗑️ Elimina cassa</button>';
+    html += mbSez("delicata", "⚠️ Zona delicata", zona, false, true);
   }
 
   document.getElementById("membri-body").innerHTML = html;

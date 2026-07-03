@@ -85,8 +85,7 @@ if("serviceWorker" in navigator){
     </div>
     <div class="cassa-hazioni">
       <button class="btn-invita" onclick="apriGrafici()" title="Grafici">📊</button>
-      <button class="btn-invita" onclick="invitaCassa()">🔑 Invita</button>
-      <div class="cassa-sync-wrap"><span class="sync-dot" id="cassa-dot"></span><span class="cassa-sync-txt" id="cassa-sync">…</span></div>
+      <div class="cassa-sync-wrap"><span class="sync-dot" id="cassa-dot"></span><span class="cassa-sync-txt" id="cassa-sync"></span></div>
     </div>
   </div>
 
@@ -202,7 +201,7 @@ if("serviceWorker" in navigator){
     </div>
     <div class="modal-error" id="solocat-error"></div>
     <div class="m-btns">
-      <button class="m-conferma" onclick="chiudiSoloCat()">Chiudi</button>
+      <button class="m-annulla" onclick="chiudiSoloCat()">Chiudi</button>
     </div>
   </div>
 </div>
@@ -212,7 +211,7 @@ if("serviceWorker" in navigator){
   <div class="br-modal">
     <h2>📆 Archivio Solo</h2>
     <div id="solo-archivio-body"></div>
-    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiArchivioSolo()">Chiudi</button></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-annulla" onclick="chiudiArchivioSolo()">Chiudi</button></div>
   </div>
 </div>
 
@@ -229,7 +228,7 @@ if("serviceWorker" in navigator){
   <div class="br-modal">
     <h2>🔁 Fisse e previste</h2>
     <div id="ricorrenti-body"></div>
-    <div class="m-btns" style="margin-top:16px;"><button class="m-conferma" onclick="chiudiRicorrenti()">Chiudi</button></div>
+    <div class="m-btns" style="margin-top:16px;"><button class="m-annulla" onclick="chiudiRicorrenti()">Chiudi</button></div>
   </div>
 </div>
 
@@ -369,19 +368,6 @@ if("serviceWorker" in navigator){
   </div>
 </div>
 
-<!-- MODALE — INVITA (codice cassa) -->
-<div class="modal-overlay" id="modal-invito" onclick="if(event.target===this)chiudiInvito()">
-  <div class="br-modal">
-    <h2>🔑 Invita nella cassa</h2>
-    <p>Condividi questo codice per far entrare qualcuno.</p>
-    <div class="codice-big" id="invito-codice-txt"></div>
-    <div class="m-btns">
-      <button class="m-annulla" onclick="chiudiInvito()">Chiudi</button>
-      <button class="m-conferma" onclick="copiaCodiceInvito()">📋 Copia</button>
-    </div>
-  </div>
-</div>
-
 <!-- MODALE — SCHERZO (scherzi.js) -->
 <div class="modal-overlay" id="modal-scherzo" onclick="if(event.target===this)chiudiScherzoPicker()">
   <div class="br-modal">
@@ -467,7 +453,7 @@ if("serviceWorker" in navigator){
     </div>
     <div class="modal-error" id="cat-error"></div>
     <div class="m-btns">
-      <button class="m-conferma" onclick="chiudiCategorie()">Chiudi</button>
+      <button class="m-annulla" onclick="chiudiCategorie()">Chiudi</button>
     </div>
   </div>
 </div>

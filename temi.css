@@ -9,6 +9,19 @@
    salvadanaio = baseline brand (solo accenti).
    ════════════════════════════════════════════════════════ */
 :root{
+  /* ── v42 · TOKEN DI SISTEMA ──
+     tipografia: 6 fermate — unici font-size ammessi d'ora in poi */
+  --t-display:1.5rem;  /* saldi grandi, codice invito */
+  --t-title:1.15rem;   /* h1 header schermata */
+  --t-card:1rem;       /* titoli card */
+  --t-body:.95rem;     /* testo, righe, input, bottoni */
+  --t-label:.82rem;    /* label, tab, chip, badge */
+  --t-meta:.74rem;     /* meta, timestamp, note */
+  /* raggi: 3 fermate */
+  --r-lg:16px;  /* card, modali */
+  --r-md:12px;  /* bottoni, input, mv-item */
+  --r-sm:8px;   /* chip, mini-bottoni */
+
   --th-accent: var(--br-cyan); --th-accent-dark:#00b8d4;
   --th-accent2: var(--br-yellow); --th-accent-soft: rgba(0,229,255,.08);
   --th-on-accent:#06232a; --th-accent-glow: rgba(0,229,255,.22);
