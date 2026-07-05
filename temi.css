@@ -260,3 +260,198 @@ body[data-tema="salvadanaio"][data-lum="scuro"] .cassa-decor{
     radial-gradient(ellipse 50% 40% at 6% 96%, rgba(241,181,58,.06), transparent 66%);
   background-size:auto, 64px 64px, 64px 64px, auto, auto;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   LOTTO 2 · I MONDI — 7 temi, ognuno CHIARO (default) + SCURO (toggle)
+   Additivo: nessuna riga esistente modificata. In coda a temi.css.
+   Non tocca logica/gate/api. auth (senza data-tema) resta brand.
+   ═══════════════════════════════════════════════════════════ */
+
+/* — fondazione (ridondante con Lotto 1: innocua) — */
+:root{ --r-xl:22px; --sh-soft:0 2px 8px rgba(0,0,0,.06); --sh-card:0 4px 18px rgba(0,0,0,.10); }
+
+/* ── LINGUAGGIO COMUNE A TUTTI I MONDI (dentro cassa: body[data-tema]) ── */
+/* card calda: barra-accento + ombra + raggio ampio */
+body[data-tema] .card{ position:relative; background:var(--br-card); border:1px solid var(--br-line); border-radius:var(--r-xl); box-shadow:var(--sh-card); overflow:hidden; }
+body[data-tema] .card::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--th-accent),var(--th-accent-dark)); }
+body[data-tema] .card-titolo{ color:var(--th-accent); letter-spacing:2px; }
+/* movimenti: filo d'identità + ombra morbida */
+body[data-tema] .mv-item{ background:var(--br-card); border:1px solid var(--br-line); border-left:4px solid var(--th-accent); border-radius:var(--r-md); box-shadow:var(--sh-soft); }
+/* numeri/titoli in Baloo */
+body[data-tema] .sm-nome, body[data-tema] .sm-val, body[data-tema] .mv-desc, body[data-tema] .mv-imp{ font-family:'Baloo 2', cursive; }
+body[data-tema] .mv-imp{ color:var(--br-text); }
+/* Solo: saldo a scala hero */
+body[data-tema] .solo-saldo-val{ font-size:var(--t-hero, 2.4rem); }
+
+/* ── TILE COMUNE: pinstripe + 2 glow (via var) · glyph a tema in ::before ── */
+body[data-tema] .cassa-decor > span{ display:none !important; }
+body[data-tema] .cassa-decor{
+  background-image:
+    repeating-linear-gradient(45deg, var(--tile-line, rgba(0,0,0,.02)) 0 1px, transparent 1px 9px),
+    radial-gradient(ellipse 55% 40% at 93% 4%, var(--tile-glow, transparent), transparent 66%),
+    radial-gradient(ellipse 45% 40% at 6% 96%, var(--tile-glow2, transparent), transparent 66%);
+}
+body[data-tema] .cassa-decor::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-repeat:repeat; background-size:120px 120px; background-position:center;
+  background-image: var(--tile-glyph, none);
+  opacity:.05;
+}
+body[data-tema][data-lum="scuro"] .cassa-decor::before{ opacity:.06; }
+
+/* ═══════════════════════ 🐷 SALVADANAIO ═══════════════════════ */
+/* (palette da Lotto 1) — qui solo tile glyph + var */
+body[data-tema="salvadanaio"]{
+  --tile-line:rgba(38,25,14,.025); --tile-glow:rgba(14,124,144,.08); --tile-glow2:rgba(196,135,14,.055);
+  --tile-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ctext y='74' font-size='52'%3E%F0%9F%AA%99%3C/text%3E%3C/svg%3E");
+}
+body[data-tema="salvadanaio"][data-lum="scuro"]{
+  --tile-line:rgba(255,255,255,.02); --tile-glow:rgba(44,198,224,.10); --tile-glow2:rgba(241,181,58,.06);
+}
+
+/* ═══════════════════════ 🐟 PESCI ═══════════════════════ */
+/* CHIARO (default) — override della base scura originale */
+body[data-tema="pesci"]{
+  --br-bg:#EEF6FA; --br-bg2:#E2EFF5; --br-card:#FFFFFF; --br-line:#D3E6EE;
+  --br-text:#123441; --br-dim:#5E7C88;
+  --th-accent:#1479A8; --th-accent-dark:#0F5E85; --th-accent2:#FF8A5B;
+  --th-accent-soft:rgba(20,121,168,.10); --th-on-accent:#FFFFFF; --th-accent-glow:rgba(20,121,168,.22);
+  --br-pos:#1E9E5A; --br-neg:#E5533D;
+  --tile-line:rgba(18,52,65,.03); --tile-glow:rgba(20,121,168,.08); --tile-glow2:rgba(255,138,91,.06);
+  --tile-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ctext y='74' font-size='52'%3E%F0%9F%AB%A7%3C/text%3E%3C/svg%3E");
+}
+/* SCURO (toggle) — palette originale del tema */
+body[data-tema="pesci"][data-lum="scuro"]{
+  --br-bg:#04141F; --br-bg2:#0A2230; --br-card:#10303F; --br-line:rgba(77,208,255,.16);
+  --br-text:#EAF6FB; --br-dim:rgba(198,229,241,.62);
+  --th-accent:#4DD0FF; --th-accent-dark:#1E9CD7; --th-accent2:#FFC24D;
+  --th-accent-soft:rgba(77,208,255,.12); --th-on-accent:#02222E; --th-accent-glow:rgba(77,208,255,.30);
+  --br-pos:#5FD08A; --br-neg:#FF8A80;
+  --tile-line:rgba(255,255,255,.02); --tile-glow:rgba(77,208,255,.10); --tile-glow2:rgba(255,194,77,.06);
+}
+
+/* ═══════════════════════ 🤠 WEST ═══════════════════════ */
+body[data-tema="west"]{
+  --br-bg:#FBF1E0; --br-bg2:#F3E6CE; --br-card:#FFFDF6; --br-line:#EAD9BE;
+  --br-text:#3A2410; --br-dim:#8C6E4A;
+  --th-accent:#C15A18; --th-accent-dark:#9E4712; --th-accent2:#A9822A;
+  --th-accent-soft:rgba(193,90,24,.10); --th-on-accent:#FFFFFF; --th-accent-glow:rgba(193,90,24,.22);
+  --br-pos:#1E9E5A; --br-neg:#D14226;
+  --tile-line:rgba(58,36,16,.03); --tile-glow:rgba(193,90,24,.08); --tile-glow2:rgba(169,130,42,.06);
+  --tile-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ctext y='74' font-size='52'%3E%F0%9F%8C%B5%3C/text%3E%3C/svg%3E");
+}
+body[data-tema="west"][data-lum="scuro"]{
+  --br-bg:#1C1108; --br-bg2:#291A0D; --br-card:#332314; --br-line:rgba(255,158,61,.17);
+  --br-text:#FBEFDD; --br-dim:rgba(238,213,180,.62);
+  --th-accent:#FF9E3D; --th-accent-dark:#D97420; --th-accent2:#FFD84D;
+  --th-accent-soft:rgba(255,158,61,.13); --th-on-accent:#2B1500; --th-accent-glow:rgba(255,158,61,.30);
+  --br-pos:#6FCF5A; --br-neg:#FF8A80;
+  --tile-line:rgba(255,255,255,.02); --tile-glow:rgba(255,158,61,.10); --tile-glow2:rgba(255,216,77,.06);
+}
+
+/* ═══════════════════════ 🐻 ORSI (omaggio Tana) ═══════════════════════ */
+body[data-tema="orsi"]{
+  --br-bg:#FDF3E7; --br-bg2:#F3E7D3; --br-card:#FFFDF8; --br-line:#ECDCC4;
+  --br-text:#2E1A08; --br-dim:#8A6F4E;
+  --th-accent:#C77D0A; --th-accent-dark:#A5670A; --th-accent2:#4A7C40;
+  --th-accent-soft:rgba(199,125,10,.10); --th-on-accent:#FFFFFF; --th-accent-glow:rgba(199,125,10,.22);
+  --br-pos:#3E7C34; --br-neg:#C0492B;
+  --tile-line:rgba(46,26,8,.03); --tile-glow:rgba(199,125,10,.08); --tile-glow2:rgba(74,124,64,.06);
+  --tile-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ctext y='74' font-size='50'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E");
+}
+body[data-tema="orsi"][data-lum="scuro"]{
+  --br-bg:#131A11; --br-bg2:#1C2618; --br-card:#243020; --br-line:rgba(255,200,87,.15);
+  --br-text:#F2F5EA; --br-dim:rgba(216,226,199,.62);
+  --th-accent:#FFC857; --th-accent-dark:#DBA32E; --th-accent2:#9BD65B;
+  --th-accent-soft:rgba(255,200,87,.12); --th-on-accent:#2A1F00; --th-accent-glow:rgba(255,200,87,.28);
+  --br-pos:#6FCF5A; --br-neg:#FF8A80;
+  --tile-line:rgba(255,255,255,.02); --tile-glow:rgba(255,200,87,.10); --tile-glow2:rgba(155,214,91,.06);
+}
+
+/* ═══════════════════════ 👽 ALIENI ═══════════════════════ */
+body[data-tema="alieni"]{
+  --br-bg:#F2F0FA; --br-bg2:#E7E2F4; --br-card:#FFFFFF; --br-line:#E0DAF0;
+  --br-text:#241A38; --br-dim:#6E6390;
+  --th-accent:#6B3FD4; --th-accent-dark:#5730B0; --th-accent2:#2E9E2A;
+  --th-accent-soft:rgba(107,63,212,.10); --th-on-accent:#FFFFFF; --th-accent-glow:rgba(107,63,212,.22);
+  --br-pos:#2E9E2A; --br-neg:#E5533D;
+  --tile-line:rgba(36,26,56,.03); --tile-glow:rgba(107,63,212,.08); --tile-glow2:rgba(46,158,42,.06);
+  --tile-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ctext y='74' font-size='50'%3E%F0%9F%9B%B8%3C/text%3E%3C/svg%3E");
+}
+body[data-tema="alieni"][data-lum="scuro"]{
+  --br-bg:#0B0714; --br-bg2:#150E24; --br-card:#1D1531; --br-line:rgba(124,255,107,.15);
+  --br-text:#F1EDFB; --br-dim:rgba(206,196,233,.62);
+  --th-accent:#7CFF6B; --th-accent-dark:#45D338; --th-accent2:#C77DFF;
+  --th-accent-soft:rgba(124,255,107,.10); --th-on-accent:#04230B; --th-accent-glow:rgba(124,255,107,.30);
+  --br-pos:#6FCF5A; --br-neg:#FF8A80;
+  --tile-line:rgba(255,255,255,.02); --tile-glow:rgba(124,255,107,.10); --tile-glow2:rgba(199,125,255,.06);
+}
+
+/* ═══════════════════════ 🦜 JUNGLE ═══════════════════════ */
+/* CHIARO già esistente in temi.css — qui solo tile */
+body[data-tema="jungle"]{
+  --tile-line:rgba(29,51,36,.03); --tile-glow:rgba(31,138,76,.08); --tile-glow2:rgba(232,100,31,.06);
+  --tile-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ctext y='74' font-size='50'%3E%F0%9F%8C%B4%3C/text%3E%3C/svg%3E");
+}
+/* SCURO (nuovo) */
+body[data-tema="jungle"][data-lum="scuro"]{
+  --br-bg:#0E1A12; --br-bg2:#16271A; --br-card:#17271B; --br-line:rgba(79,211,122,.16);
+  --br-text:#EAF3E4; --br-dim:rgba(200,220,196,.60);
+  --th-accent:#4FD37A; --th-accent-dark:#2E9E56; --th-accent2:#FF8A3D;
+  --th-accent-soft:rgba(79,211,122,.12); --th-on-accent:#04230F; --th-accent-glow:rgba(79,211,122,.28);
+  --br-pos:#6FCF5A; --br-neg:#FF8A80;
+  --tile-line:rgba(255,255,255,.02); --tile-glow:rgba(79,211,122,.10); --tile-glow2:rgba(255,138,61,.06);
+}
+/* riparazioni scuro: input/placeholder/bottoni chiari */
+body[data-tema="jungle"][data-lum="scuro"] .br-inp::placeholder{ color:rgba(255,255,255,.3); }
+body[data-tema="jungle"][data-lum="scuro"] .btn-esci,
+body[data-tema="jungle"][data-lum="scuro"] .btn-invita,
+body[data-tema="jungle"][data-lum="scuro"] .mb-btn{ background:rgba(255,255,255,.05); }
+
+/* ═══════════════════════ 🦩 FLAMINGO ═══════════════════════ */
+body[data-tema="flamingo"]{
+  --tile-line:rgba(58,34,48,.03); --tile-glow:rgba(232,68,122,.08); --tile-glow2:rgba(15,156,151,.06);
+  --tile-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ctext y='74' font-size='50'%3E%F0%9F%AA%A9%3C/text%3E%3C/svg%3E");
+}
+body[data-tema="flamingo"][data-lum="scuro"]{
+  --br-bg:#1A0E16; --br-bg2:#260C1A; --br-card:#2A1420; --br-line:rgba(255,111,160,.18);
+  --br-text:#FCE9F0; --br-dim:rgba(233,200,214,.60);
+  --th-accent:#FF6FA0; --th-accent-dark:#D84E86; --th-accent2:#2CD0C9;
+  --th-accent-soft:rgba(255,111,160,.12); --th-on-accent:#2A0A18; --th-accent-glow:rgba(255,111,160,.30);
+  --br-pos:#6FCF5A; --br-neg:#FF8A80;
+  --tile-line:rgba(255,255,255,.02); --tile-glow:rgba(255,111,160,.10); --tile-glow2:rgba(44,208,201,.06);
+}
+body[data-tema="flamingo"][data-lum="scuro"] .br-inp::placeholder{ color:rgba(255,255,255,.3); }
+body[data-tema="flamingo"][data-lum="scuro"] .btn-esci,
+body[data-tema="flamingo"][data-lum="scuro"] .btn-invita,
+body[data-tema="flamingo"][data-lum="scuro"] .mb-btn{ background:rgba(255,255,255,.05); }
+
+/* ── RIPARAZIONI temi chiari NUOVI (pesci/west/orsi/alieni) — come jungle/flamingo ── */
+body[data-tema="pesci"] .br-inp, body[data-tema="pesci"] .m-row input, body[data-tema="pesci"] .m-row select, body[data-tema="pesci"] .split-inp, body[data-tema="pesci"] .silly-tetto-inp,
+body[data-tema="west"] .br-inp, body[data-tema="west"] .m-row input, body[data-tema="west"] .m-row select, body[data-tema="west"] .split-inp, body[data-tema="west"] .silly-tetto-inp,
+body[data-tema="orsi"] .br-inp, body[data-tema="orsi"] .m-row input, body[data-tema="orsi"] .m-row select, body[data-tema="orsi"] .split-inp, body[data-tema="orsi"] .silly-tetto-inp,
+body[data-tema="alieni"] .br-inp, body[data-tema="alieni"] .m-row input, body[data-tema="alieni"] .m-row select, body[data-tema="alieni"] .split-inp, body[data-tema="alieni"] .silly-tetto-inp{ color:var(--br-text); }
+body[data-tema="pesci"] .br-inp::placeholder, body[data-tema="west"] .br-inp::placeholder, body[data-tema="orsi"] .br-inp::placeholder, body[data-tema="alieni"] .br-inp::placeholder{ color:rgba(0,0,0,.32); }
+body[data-tema="pesci"][data-lum="scuro"] .br-inp::placeholder, body[data-tema="west"][data-lum="scuro"] .br-inp::placeholder, body[data-tema="orsi"][data-lum="scuro"] .br-inp::placeholder, body[data-tema="alieni"][data-lum="scuro"] .br-inp::placeholder{ color:rgba(255,255,255,.3); }
+body[data-tema="pesci"] .btn-esci, body[data-tema="pesci"] .btn-invita, body[data-tema="pesci"] .mb-btn,
+body[data-tema="west"] .btn-esci, body[data-tema="west"] .btn-invita, body[data-tema="west"] .mb-btn,
+body[data-tema="orsi"] .btn-esci, body[data-tema="orsi"] .btn-invita, body[data-tema="orsi"] .mb-btn,
+body[data-tema="alieni"] .btn-esci, body[data-tema="alieni"] .btn-invita, body[data-tema="alieni"] .mb-btn{ background:rgba(0,0,0,.05); }
+body[data-tema="pesci"][data-lum="scuro"] .btn-esci, body[data-tema="pesci"][data-lum="scuro"] .btn-invita, body[data-tema="pesci"][data-lum="scuro"] .mb-btn,
+body[data-tema="west"][data-lum="scuro"] .btn-esci, body[data-tema="west"][data-lum="scuro"] .btn-invita, body[data-tema="west"][data-lum="scuro"] .mb-btn,
+body[data-tema="orsi"][data-lum="scuro"] .btn-esci, body[data-tema="orsi"][data-lum="scuro"] .btn-invita, body[data-tema="orsi"][data-lum="scuro"] .mb-btn,
+body[data-tema="alieni"][data-lum="scuro"] .btn-esci, body[data-tema="alieni"][data-lum="scuro"] .btn-invita, body[data-tema="alieni"][data-lum="scuro"] .mb-btn{ background:rgba(255,255,255,.05); }
+body[data-tema="pesci"] .sk, body[data-tema="west"] .sk, body[data-tema="orsi"] .sk, body[data-tema="alieni"] .sk{ background:linear-gradient(90deg,var(--br-card),var(--br-bg2),var(--br-card)); background-size:200% 100%; }
+/* semantici pos/neg su chiaro */
+body[data-tema="pesci"] .sm-val.credito, body[data-tema="pesci"] .mb-cred, body[data-tema="pesci"] .saldi-pari, body[data-tema="pesci"] .solo-saldo-val.pos, body[data-tema="pesci"] .mv-settle .mv-desc, body[data-tema="pesci"] .split-info.ok,
+body[data-tema="west"] .sm-val.credito, body[data-tema="west"] .mb-cred, body[data-tema="west"] .saldi-pari, body[data-tema="west"] .solo-saldo-val.pos, body[data-tema="west"] .mv-settle .mv-desc, body[data-tema="west"] .split-info.ok,
+body[data-tema="orsi"] .sm-val.credito, body[data-tema="orsi"] .mb-cred, body[data-tema="orsi"] .saldi-pari, body[data-tema="orsi"] .solo-saldo-val.pos, body[data-tema="orsi"] .mv-settle .mv-desc, body[data-tema="orsi"] .split-info.ok,
+body[data-tema="alieni"] .sm-val.credito, body[data-tema="alieni"] .mb-cred, body[data-tema="alieni"] .saldi-pari, body[data-tema="alieni"] .solo-saldo-val.pos, body[data-tema="alieni"] .mv-settle .mv-desc, body[data-tema="alieni"] .split-info.ok{ color:var(--br-pos); }
+body[data-tema="pesci"] .sm-val.debito, body[data-tema="pesci"] .mb-deb, body[data-tema="pesci"] .solo-saldo-val.neg, body[data-tema="pesci"] .auth-error, body[data-tema="pesci"] .modal-error, body[data-tema="pesci"] .elimina-warn, body[data-tema="pesci"] .mb-danger, body[data-tema="pesci"] .mv-del:hover,
+body[data-tema="west"] .sm-val.debito, body[data-tema="west"] .mb-deb, body[data-tema="west"] .solo-saldo-val.neg, body[data-tema="west"] .auth-error, body[data-tema="west"] .modal-error, body[data-tema="west"] .elimina-warn, body[data-tema="west"] .mb-danger, body[data-tema="west"] .mv-del:hover,
+body[data-tema="orsi"] .sm-val.debito, body[data-tema="orsi"] .mb-deb, body[data-tema="orsi"] .solo-saldo-val.neg, body[data-tema="orsi"] .auth-error, body[data-tema="orsi"] .modal-error, body[data-tema="orsi"] .elimina-warn, body[data-tema="orsi"] .mb-danger, body[data-tema="orsi"] .mv-del:hover,
+body[data-tema="alieni"] .sm-val.debito, body[data-tema="alieni"] .mb-deb, body[data-tema="alieni"] .solo-saldo-val.neg, body[data-tema="alieni"] .auth-error, body[data-tema="alieni"] .modal-error, body[data-tema="alieni"] .elimina-warn, body[data-tema="alieni"] .mb-danger, body[data-tema="alieni"] .mv-del:hover{ color:var(--br-neg); }
+body[data-tema="pesci"] .voce-entrata, body[data-tema="west"] .voce-entrata, body[data-tema="orsi"] .voce-entrata, body[data-tema="alieni"] .voce-entrata{ color:var(--br-pos)!important; }
+body[data-tema="pesci"] .voce-uscita, body[data-tema="west"] .voce-uscita, body[data-tema="orsi"] .voce-uscita, body[data-tema="alieni"] .voce-uscita{ color:var(--br-neg)!important; }
+body[data-tema="pesci"] .sync-dot.ok, body[data-tema="west"] .sync-dot.ok, body[data-tema="orsi"] .sync-dot.ok, body[data-tema="alieni"] .sync-dot.ok{ background:var(--br-pos); }
+

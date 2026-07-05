@@ -122,9 +122,10 @@ function sillyCheck(){
   var size  = (0.9 + scala*1.7).toFixed(2);   // 0.9rem → 2.6rem
 
   // 6 · oltre il tetto: 🐷 → 🐗
-  var pigEmoji = oltreTetto ? "🐗" : "🐷";
+  var OLTRE_TETTO = { salvadanaio:"🐗", pesci:"🐋", west:"🌵", orsi:"🐻", alieni:"🛸", jungle:"🦍", flamingo:"🦩" };
+  var pigEmoji = oltreTetto ? (OLTRE_TETTO[tema] || "🐗") : "🐷";
   var pigTitle = oltreTetto
-    ? "Il maialino si è fatto selvatico. Archiviare per addomesticarlo."
+    ? "Oltre il tetto! La bestia del mondo si è scatenata. Archiviare per placarla."
     : "Speso " + eur(tot) + " su " + eur(tetto);
 
   // dorme/morto (letargo orsi 🐻💤 al posto di 😴)
