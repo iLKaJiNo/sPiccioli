@@ -136,3 +136,127 @@ body[data-tema="flamingo"] .mb-danger, body[data-tema="flamingo"] .mv-del:hover
 body[data-tema="flamingo"] .voce-entrata{ color:var(--br-pos)!important; }
 body[data-tema="flamingo"] .voce-uscita{ color:var(--br-neg)!important; }
 body[data-tema="flamingo"] .sync-dot.ok{ background:var(--br-pos); }
+
+/* ═══════════════════════════════════════════════════════════
+   LOTTO 1 · RIFONDAZIONE LINGUAGGIO — mondo SALVADANAIO (chiaro)
+   Additivo: nessuna riga esistente modificata. Vince perché in
+   coda al file e più specifico. Non tocca logica/gate/api.
+   ═══════════════════════════════════════════════════════════ */
+
+/* — Token di fondazione (nomi nuovi: non rompono nulla) — */
+:root{
+  --t-hero:2.4rem;                 /* saldo/hero, sopra --t-display */
+  --r-xl:22px;                     /* card-mondo, hero */
+  --sh-soft:0 2px 8px rgba(58,30,10,.07);
+  --sh-card:0 4px 18px rgba(58,30,10,.11);
+  --sh-hero:0 12px 30px rgba(58,30,10,.26);
+}
+
+/* ── SALVADANAIO · palette CHIARO-CALDO (default del mondo) ── */
+body[data-tema="salvadanaio"]{
+  --br-bg:#F6F0E6; --br-bg2:#EFE7D9; --br-card:#FFFDF9;
+  --br-line:#E7DCCB;
+  --br-text:#26190E; --br-dim:#8A7862;
+  --th-accent:#0E7C90; --th-accent-dark:#0A606F;
+  --th-accent2:#C4870E; --th-accent-soft:rgba(14,124,144,.10);
+  --th-on-accent:#FFFFFF; --th-accent-glow:rgba(14,124,144,.22);
+  --br-pos:#1E9E5A; --br-neg:#DB4B33;
+  /* tono profondo del mondo — pronto per il blocco hero (PR successiva) */
+  --th-deep:#0B4653; --th-deep2:#07343D; --th-deep-ink:#EAF9FC; --th-deep-accent:#2CC6E0;
+}
+
+/* — Riparazioni tema chiaro (come jungle/flamingo: auth/cassa.css intatti) — */
+body[data-tema="salvadanaio"] .br-inp,
+body[data-tema="salvadanaio"] .m-row input,
+body[data-tema="salvadanaio"] .m-row select,
+body[data-tema="salvadanaio"] .split-inp,
+body[data-tema="salvadanaio"] .silly-tetto-inp{ color:var(--br-text); }
+body[data-tema="salvadanaio"] .br-inp::placeholder{ color:rgba(38,25,14,.34); }
+body[data-tema="salvadanaio"] .btn-esci,
+body[data-tema="salvadanaio"] .btn-invita,
+body[data-tema="salvadanaio"] .mb-btn{ background:rgba(38,25,14,.05); }
+body[data-tema="salvadanaio"] .sk{
+  background:linear-gradient(90deg,var(--br-card),var(--br-bg2),var(--br-card));
+  background-size:200% 100%;
+}
+body[data-tema="salvadanaio"] .sm-val.credito,
+body[data-tema="salvadanaio"] .mb-cred,
+body[data-tema="salvadanaio"] .saldi-pari,
+body[data-tema="salvadanaio"] .solo-saldo-val.pos,
+body[data-tema="salvadanaio"] .mv-settle .mv-desc,
+body[data-tema="salvadanaio"] .split-info.ok{ color:var(--br-pos); }
+body[data-tema="salvadanaio"] .sm-val.debito,
+body[data-tema="salvadanaio"] .mb-deb,
+body[data-tema="salvadanaio"] .solo-saldo-val.neg,
+body[data-tema="salvadanaio"] .auth-error,
+body[data-tema="salvadanaio"] .modal-error,
+body[data-tema="salvadanaio"] .elimina-warn,
+body[data-tema="salvadanaio"] .mb-danger,
+body[data-tema="salvadanaio"] .mv-del:hover{ color:var(--br-neg); }
+body[data-tema="salvadanaio"] .voce-entrata{ color:var(--br-pos)!important; }
+body[data-tema="salvadanaio"] .voce-uscita{ color:var(--br-neg)!important; }
+body[data-tema="salvadanaio"] .sync-dot.ok{ background:var(--br-pos); }
+
+/* ── ANATOMIA CARD calda: barra-accento + ombra + raggio ampio ── */
+body[data-tema="salvadanaio"] .card{
+  position:relative; background:var(--br-card);
+  border:1px solid var(--br-line); border-radius:var(--r-xl);
+  box-shadow:var(--sh-card); overflow:hidden;
+}
+body[data-tema="salvadanaio"] .card::before{
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg,var(--th-accent),var(--th-accent-dark));
+}
+body[data-tema="salvadanaio"] .card-titolo{
+  color:var(--th-accent); letter-spacing:2px;
+}
+body[data-tema="salvadanaio"] .sm-nome,
+body[data-tema="salvadanaio"] .sm-val{ font-family:'Baloo 2',cursive; }
+
+/* movimenti: filo d'identità a sinistra + ombra morbida */
+body[data-tema="salvadanaio"] .mv-item{
+  background:var(--br-card); border:1px solid var(--br-line);
+  border-left:4px solid var(--th-accent); border-radius:var(--r-lg);
+  box-shadow:var(--sh-soft);
+}
+body[data-tema="salvadanaio"] .mv-desc{ font-family:'Baloo 2',cursive; }
+body[data-tema="salvadanaio"] .mv-imp{ font-family:'Baloo 2',cursive; color:var(--br-text); }
+
+/* Solo: saldo a scala hero */
+body[data-tema="salvadanaio"] .solo-saldo-val{ font-size:var(--t-hero); }
+
+/* ── TEXTURE del mondo: via le emoji sparse, tile stile Tana ── */
+body[data-tema="salvadanaio"] .cassa-decor > span{ display:none!important; }
+body[data-tema="salvadanaio"] .cassa-decor{
+  background-image:
+    repeating-linear-gradient(45deg, rgba(58,30,10,.020) 0 1px, transparent 1px 9px),
+    radial-gradient(circle at 20% 26%, rgba(196,135,14,.05) 0 3px, transparent 4px),
+    radial-gradient(circle at 68% 72%, rgba(196,135,14,.05) 0 3px, transparent 4px),
+    radial-gradient(ellipse 60% 40% at 92% 4%, rgba(14,124,144,.07), transparent 66%),
+    radial-gradient(ellipse 50% 40% at 6% 96%, rgba(196,135,14,.05), transparent 66%);
+  background-size:auto, 64px 64px, 64px 64px, auto, auto;
+}
+
+/* ═══ SALVADANAIO · interruttore SCURO (scaffold; toggle UX nel Lotto 3) ═══ */
+body[data-tema="salvadanaio"][data-lum="scuro"]{
+  --br-bg:#0A1417; --br-bg2:#0F1E22; --br-card:#13262B;
+  --br-line:rgba(44,198,224,.14);
+  --br-text:#EAF6F8; --br-dim:rgba(198,229,235,.60);
+  --th-accent:#2CC6E0; --th-accent-dark:#1596B0;
+  --th-accent2:#F1B53A; --th-accent-soft:rgba(44,198,224,.12);
+  --th-on-accent:#04222A; --th-accent-glow:rgba(44,198,224,.30);
+  --br-pos:#5FD08A; --br-neg:#FF8A80;
+}
+body[data-tema="salvadanaio"][data-lum="scuro"] .btn-esci,
+body[data-tema="salvadanaio"][data-lum="scuro"] .btn-invita,
+body[data-tema="salvadanaio"][data-lum="scuro"] .mb-btn{ background:rgba(255,255,255,.05); }
+body[data-tema="salvadanaio"][data-lum="scuro"] .br-inp::placeholder{ color:rgba(255,255,255,.3); }
+body[data-tema="salvadanaio"][data-lum="scuro"] .cassa-decor{
+  background-image:
+    repeating-linear-gradient(48deg, rgba(255,255,255,.020) 0 1px, transparent 1px 9px),
+    radial-gradient(circle at 20% 26%, rgba(44,198,224,.06) 0 3px, transparent 4px),
+    radial-gradient(circle at 68% 72%, rgba(44,198,224,.06) 0 3px, transparent 4px),
+    radial-gradient(ellipse 60% 40% at 92% 4%, rgba(44,198,224,.10), transparent 66%),
+    radial-gradient(ellipse 50% 40% at 6% 96%, rgba(241,181,58,.06), transparent 66%);
+  background-size:auto, 64px 64px, 64px 64px, auto, auto;
+}
