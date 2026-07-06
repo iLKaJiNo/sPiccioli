@@ -455,3 +455,18 @@ body[data-tema="pesci"] .voce-entrata, body[data-tema="west"] .voce-entrata, bod
 body[data-tema="pesci"] .voce-uscita, body[data-tema="west"] .voce-uscita, body[data-tema="orsi"] .voce-uscita, body[data-tema="alieni"] .voce-uscita{ color:var(--br-neg)!important; }
 body[data-tema="pesci"] .sync-dot.ok, body[data-tema="west"] .sync-dot.ok, body[data-tema="orsi"] .sync-dot.ok, body[data-tema="alieni"] .sync-dot.ok{ background:var(--br-pos); }
 
+
+/* ── LOTTO 3 · tile polish: due misure + leggera rotazione (traccia alla Tana) ── */
+body[data-tema] .cassa-decor{ overflow:hidden; }
+body[data-tema] .cassa-decor::before{
+  inset:-25%;
+  transform:rotate(-8deg);
+  transform-origin:center;
+  background-repeat:repeat, repeat;
+  background-image: var(--tile-glyph, none), var(--tile-glyph, none);
+  background-size: 132px 132px, 92px 92px;
+  background-position: 0 0, 66px 46px;
+  opacity:.055;
+}
+body[data-tema][data-lum="scuro"] .cassa-decor::before{ opacity:.07; }
+

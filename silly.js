@@ -240,6 +240,7 @@ async function toggleSilly(on){
   var r = await sb.from("casse").update({ silly: on }).eq("id", cassaCorrente.id);
   if(r.error){ await alertBrand("Errore: "+r.error.message); return; }
   cassaCorrente.silly = on;
+  if(on){ try{ if(!localStorage.getItem("spiccioli_silly_hint")){ localStorage.setItem("spiccioli_silly_hint","1"); await alertBrand("🐷 Silly acceso!\nDà personalità al mondo: emoji a tema, sorprese e il maialino che combina guai.\nNon tocca un centesimo — i conti restano seri."); } }catch(e){} }
   renderCassa(); renderMembri();
 }
 async function salvaTettoSilly(v){
