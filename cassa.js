@@ -404,17 +404,39 @@ function renderMembri(){
   if(admin){
     // 3. 🎨 Aspetto — tema + silly + tetto
     var asp = '<div class="mb-toggle-row"><span>Tema<small>L\'aspetto della cassa</small></span></div>';
-    asp += '<div class="split-seg mb-tema-row" style="margin-bottom:14px;">'
+    asp += '<div class="tema-grid">'
       + THEMES.map(function(t){
-          return '<button class="split-btn ' + (cassaCorrente.tema===t.k?"attivo":"") + '" '
-            + 'onclick="cambiaTema(\'' + t.k + '\')">' + t.e + ' ' + t.n + '</button>';
+          var dp = THEME_DEEP[t.k] || THEME_DEEP.salvadanaio;
+          return '<button class="tema-cell ' + (cassaCorrente.tema===t.k?"attivo":"") + '" '
+            + 'onclick="cambiaTema(\'' + t.k + '\')" title="' + t.n + '">'
+            + '<span class="tema-cell-sw" style="background:linear-gradient(150deg,' + dp[0] + ',' + dp[1] + ')">' + t.e + '</span>'
+            + '<span class="tema-cell-nm">' + t.n + '</span>'
+            + '</button>';
         }).join('')
       + '</div>';
-    asp += '<label class="mb-toggle-row"><span>Silly mode<small>Reazioni e animazioni sceme</small></span>'
+    asp += '<div class="mb-toggle-row" style="margin-top:12px;"><span>Luminosità<small>Chiaro o scuro, su questo dispositivo</small></span></div>'
+      + '<div class="split-seg lum-seg" style="margin-bottom:14px;">'
+      + '<button class="split-btn ' + (_lumCorrente()!=="scuro"?"attivo":"") + '" onclick="cambiaLum(\'chiaro\')">☀️ Chiaro</button>'
+      + '<button class="split-btn ' + (_lumCorrente()==="scuro"?"attivo":"") + '" onclick="cambiaLum(\'scuro\')">🌙 Scuro</button>'
+      + '</div>';
+    asp += '<label class="mb-toggle-row"><span>Silly mode<small>Dà personalità al mondo · non tocca i conti</small></span>'
       + '<input type="checkbox" ' + (cassaCorrente.silly?"checked":"") + ' onchange="toggleSilly(this.checked)"></label>';
     if(cassaCorrente.silly){
-      asp += '<div class="mb-toggle-row mb-tetto-row"><span>Tetto salvadanaio 🐷<small>Il 🐷 è enorme a questa cifra</small></span>'
-        + '<input type="number" class="silly-tetto-inp" min="100" step="50" value="' + (parseFloat(cassaCorrente.silly_tetto)||1000) + '" onchange="salvaTettoSilly(this.value)"></div>';
+      var _tetto = parseFloat(cassaCorrente.silly_tetto)||1000;
+      var _speso = (typeof _sillyTotaleSpeso==="function") ? _sillyTotaleSpeso() : 0;
+      var _pct = Math.max(0, Math.min(100, Math.round(_speso/Math.max(1,_tetto)*100)));
+      var _beast = OLTRE_TETTO_UI[cassaCorrente.tema] || "🐗";
+      asp += '<div class="tetto-box">'
+        + '<div class="tetto-head"><span class="tetto-lbl">Tetto</span><span class="tetto-val">' + eur(_tetto) + '</span></div>'
+        + '<div class="tetto-sub">Oltre questa spesa totale, il 🐷 si trasforma nella bestia del mondo.</div>'
+        + '<div class="tetto-bar"><div class="tetto-fill" style="width:' + _pct + '%"></div></div>'
+        + '<div class="tetto-foot"><span>Speso ' + eur(_speso) + '</span><span class="tetto-morph">🐷 <b>→</b> ' + _beast + '</span></div>'
+        + '<div class="tetto-step">'
+        +   '<button type="button" class="tetto-btn" onclick="stepTetto(-50)">−</button>'
+        +   '<input type="number" class="silly-tetto-inp" min="100" step="50" value="' + _tetto + '" onchange="salvaTettoSilly(this.value)">'
+        +   '<button type="button" class="tetto-btn" onclick="stepTetto(50)">+</button>'
+        + '</div>'
+        + '</div>';
     }
     html += mbSez("aspetto", "🎨 Aspetto", asp, false);
 
@@ -422,7 +444,7 @@ function renderMembri(){
     var calc = '';
     if(cassaCorrente.tipo === "coppia"){
       calc += '<div class="mb-toggle-row"><span>Modalità di calcolo'
-        + '<small>Bilancia o debiti diretti — cambiala quando vuoi</small></span></div>';
+        + '<small>Bilancia = saldi personali · Debiti = solo chi deve a chi</small></span></div>';
       calc += '<div class="split-seg" style="margin-bottom:14px;">'
         + '<button class="split-btn ' + (cassaCorrente.modalita==="comune"?"attivo":"") + '" '
         + 'onclick="switchModalita(\'comune\')">⚖️ Bilancia</button>'
@@ -431,7 +453,7 @@ function renderMembri(){
         + '</div>';
     }
     if(cassaCorrente.modalita === "comune" && membriCorrente.length === 2){
-      calc += '<label class="mb-toggle-row"><span>Modalità grezza<small>Mostra il divario di spesa invece del saldo</small></span>'
+      calc += '<label class="mb-toggle-row"><span>Modalità grezza<small>Nessun rimborso: si pareggia spendendo di più</small></span>'
         + '<input type="checkbox" ' + (cassaCorrente.grezza ? "checked" : "") + ' onchange="toggleGrezza(this.checked)"></label>';
     }
     if(calc) html += mbSez("calcolo", "⚖️ Calcolo", calc, false);
@@ -517,6 +539,13 @@ async function switchModalita(nuova){
   cassaCorrente.modalita = nuova;
   renderCassa();
 }
+
+var THEME_DEEP = { salvadanaio:["#0B4653","#07333D"], pesci:["#07303F","#031F2A"], west:["#2B1A0B","#1A0F06"], orsi:["#4A2A0F","#33200C"], alieni:["#1A1030","#0E0820"], jungle:["#123D24","#0A2716"], flamingo:["#3A1228","#260C1A"] };
+var OLTRE_TETTO_UI = { salvadanaio:"🐗", pesci:"🐋", west:"🌵", orsi:"🐻", alieni:"🛸", jungle:"🦍", flamingo:"🦩" };
+function _lumCorrente(){ try{ return localStorage.getItem("spiccioli_lum")==="scuro" ? "scuro" : "chiaro"; }catch(e){ return "chiaro"; } }
+function applicaLum(){ try{ if(_lumCorrente()==="scuro") document.body.setAttribute("data-lum","scuro"); else document.body.removeAttribute("data-lum"); }catch(e){} }
+function cambiaLum(l){ try{ localStorage.setItem("spiccioli_lum", l==="scuro"?"scuro":"chiaro"); }catch(e){} applicaLum(); renderMembri(); }
+function stepTetto(d){ var cur = parseFloat((cassaCorrente&&cassaCorrente.silly_tetto))||1000; salvaTettoSilly(Math.max(100, cur + d)); }
 
 // ── CAMBIA TEMA (admin: aggiorna casse.tema + palette dal vivo) ──
 async function cambiaTema(t){
