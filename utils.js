@@ -31,6 +31,7 @@ function mostraSchermata(id){
   } else {
     document.body.removeAttribute("data-tema");   // auth-screen → brand
   }
+  if(typeof aggiornaThemeColor === "function") aggiornaThemeColor();
 }
 
 // ── HELPER DI FORMATO ──────────────────────────────────
@@ -122,6 +123,7 @@ function promptBrand(opts){
     document.getElementById("brand-testo").innerHTML = opts.testo || "";
     document.getElementById("brand-input-wrap").style.display = "";
     var inp = document.getElementById("brand-input");
+    inp.type = opts.tipo || "text";
     inp.placeholder = opts.placeholder || "";
     inp.value = opts.valore || "";
     var cta = document.getElementById("brand-cta");
@@ -150,6 +152,29 @@ function alertBrand(testo, titolo){
     ann.style.display = "none";
     document.getElementById("modal-brand").classList.add("attivo");
   });
+}
+
+// Esc chiude la modale in cima (l'ultima nel DOM tra le attive = quella sopra).
+// Tutte le chiudiX() si limitano a togliere .attivo, quindi è equivalente;
+// solo il modal-brand deve risolvere la sua Promise (come il tap sullo sfondo).
+document.addEventListener("keydown", function(e){
+  if(e.key !== "Escape") return;
+  var aperte = document.querySelectorAll(".modal-overlay.attivo");
+  if(!aperte.length) return;
+  var ov = aperte[aperte.length - 1];
+  if(ov.id === "modal-brand"){ _brandClose(null); return; }
+  ov.classList.remove("attivo");
+});
+
+// theme-color della barra di sistema allineato allo sfondo corrente
+// (tema della cassa + luminosità); chiamato da mostraSchermata/cambiaTema/applicaLum.
+function aggiornaThemeColor(){
+  try{
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if(!meta) return;
+    var bg = getComputedStyle(document.body).backgroundColor;
+    if(bg) meta.setAttribute("content", bg);
+  }catch(e){}
 }
 
 // toast informativo non-bloccante (auto-dismiss)

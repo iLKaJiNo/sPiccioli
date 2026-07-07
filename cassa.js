@@ -177,12 +177,13 @@ function renderSaldi(){
   titolo.textContent = "I conti";
   if(tuttiPari){ wrap.innerHTML = '<div class="saldi-pari">'+flavorTema().pari+'</div>'; return; }
   var nomi = nomiMembri();
+  var reMese = sillyReMese();   // calcolato una volta, non per ogni membro
   wrap.innerHTML = membriCorrente.map(function(m){
     var s   = saldi[m.id] || 0;
     var cls = s > 0.005 ? "credito" : (s < -0.005 ? "debito" : "pari");
     var lbl = s > 0.005 ? "in credito" : (s < -0.005 ? "in debito" : "in pari");
     var seg = s > 0.005 ? "+" : (s < -0.005 ? "−" : "");
-    return '<div class="saldo-membro"><span class="sm-nome">' + escapeHtml(nomi[m.id]) + (sillyReMese()===m.id ? " 👑" : "") + '</span>'
+    return '<div class="saldo-membro"><span class="sm-nome">' + escapeHtml(nomi[m.id]) + (reMese===m.id ? " 👑" : "") + '</span>'
       + '<span class="sm-val ' + cls + '">' + seg + eur(Math.abs(s)) + '<small>' + lbl + '</small></span></div>';
   }).join("");
 
@@ -548,7 +549,7 @@ async function switchModalita(nuova){
 var THEME_DEEP = { salvadanaio:["#0B4653","#07333D"], pesci:["#07303F","#031F2A"], west:["#2B1A0B","#1A0F06"], orsi:["#4A2A0F","#33200C"], alieni:["#1A1030","#0E0820"], jungle:["#123D24","#0A2716"], flamingo:["#3A1228","#260C1A"] };
 var OLTRE_TETTO_UI = { salvadanaio:"🐗", pesci:"🐋", west:"🌵", orsi:"🐻", alieni:"🛸", jungle:"🦍", flamingo:"🦩" };
 function _lumCorrente(){ try{ return localStorage.getItem("spiccioli_lum")==="scuro" ? "scuro" : "chiaro"; }catch(e){ return "chiaro"; } }
-function applicaLum(){ try{ if(_lumCorrente()==="scuro") document.body.setAttribute("data-lum","scuro"); else document.body.removeAttribute("data-lum"); }catch(e){} }
+function applicaLum(){ try{ if(_lumCorrente()==="scuro") document.body.setAttribute("data-lum","scuro"); else document.body.removeAttribute("data-lum"); }catch(e){} aggiornaThemeColor(); }
 function cambiaLum(l){ try{ localStorage.setItem("spiccioli_lum", l==="scuro"?"scuro":"chiaro"); }catch(e){} applicaLum(); renderMembri(); }
 function stepTetto(d){ var cur = parseFloat((cassaCorrente&&cassaCorrente.silly_tetto))||1000; salvaTettoSilly(Math.max(100, cur + d)); }
 
@@ -559,6 +560,7 @@ async function cambiaTema(t){
   if(r.error){ await alertBrand("Errore nel cambio tema: " + r.error.message); return; }
   cassaCorrente.tema = t;
   document.body.setAttribute("data-tema", t);
+  aggiornaThemeColor();
   intestaCassa();   // aggiorna emoji header
   renderMembri();   // aggiorna evidenziazione selettore
   renderFlavorDecor();
