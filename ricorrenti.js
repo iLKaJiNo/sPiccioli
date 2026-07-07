@@ -72,10 +72,10 @@ function renderRicorrentiLista(){
 }
 
 async function confermaManuale(id){
-  if(!navigator.onLine){ alert("Serve una connessione."); return; }
+  if(!navigator.onLine){ await alertBrand("Serve una connessione."); return; }
   var fn = _ricScope === "cassa" ? "conferma_ricorrente_cassa" : "conferma_ricorrente_solo";
   var r = await sb.rpc(fn, { p_id: id });
-  if(r.error){ alert("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
   if(_ricScope === "cassa") await caricaCassa(); else await caricaSolo();
   renderRicorrentiLista();
 }
@@ -183,7 +183,12 @@ async function salvaRicorrente(){
 
 async function eliminaRicorrente(){
   if(!_ricEditId) return;
-  if(!confirm("Eliminare questa fissa/prevista?\nLe voci già registrate restano.")) return;
+  var ok = await confermaBrand({
+    titolo: "Eliminare questa fissa/prevista?",
+    testo: "Le voci già registrate restano.",
+    cta: "🗑️ Elimina", danger: true
+  });
+  if(!ok) return;
   var r = await sb.from("ricorrenti").delete().eq("id", _ricEditId);
   if(r.error){ ricFormErrore("Errore: " + r.error.message); return; }
   chiudiFormRicorrente();

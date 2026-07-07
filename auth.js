@@ -64,10 +64,58 @@ function traduciErroreAuth(m){
   if(m.indexOf("invalid login")>-1 || m.indexOf("credentials")>-1) return "Email o password errati.";
   if(m.indexOf("already registered")>-1 || m.indexOf("already been")>-1) return "Email già registrata. Prova ad accedere.";
   if(m.indexOf("password")>-1 && m.indexOf("least")>-1) return "Password troppo corta (min. 6 caratteri).";
+  if(m.indexOf("security purposes")>-1 || m.indexOf("once every")>-1) return "Hai appena fatto una richiesta: aspetta un minuto e riprova.";
   if(m.indexOf("fetch")>-1 || m.indexOf("network")>-1) return "Errore di rete. Riprova.";
   return "Errore: " + m;
 }
-function logout(){ sb.auth.signOut().then(function(){ location.reload(); }); }
+
+// ── RECUPERO PASSWORD ──
+async function apriResetPw(){
+  var email = await promptBrand({
+    titolo: "Recupera password",
+    testo: "Ti mando un'email con il link per sceglierne una nuova.",
+    placeholder: "La tua email",
+    valore: document.getElementById("auth-email").value.trim(),
+    cta: "📮 Invia"
+  });
+  if(email === null) return;
+  email = (email || "").trim();
+  if(!email || email.indexOf("@") < 0){ await alertBrand("Inserisci un'email valida."); return; }
+  var r = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+  if(r.error){ await alertBrand(traduciErroreAuth(r.error.message)); return; }
+  await alertBrand("Fatto! Controlla la posta: se l'email è registrata trovi il link per la nuova password.\nOcchio anche allo spam.");
+}
+// Al rientro dal link dell'email supabase-js emette PASSWORD_RECOVERY.
+sb.auth.onAuthStateChange(function(event){
+  if(event === "PASSWORD_RECOVERY") _gestisciRecovery();
+});
+async function _gestisciRecovery(){
+  var pw = await promptBrand({
+    titolo: "Scegli la nuova password",
+    testo: "Minimo 6 caratteri.",
+    placeholder: "Nuova password", tipo: "password", cta: "Salva"
+  });
+  if(pw === null) return;
+  if(pw.length < 6){ await alertBrand("Password troppo corta (min. 6 caratteri)."); return _gestisciRecovery(); }
+  var r = await sb.auth.updateUser({ password: pw });
+  if(r.error){ await alertBrand(traduciErroreAuth(r.error.message)); return _gestisciRecovery(); }
+  await alertBrand("Password aggiornata! 🎉 D'ora in poi entri con quella nuova.");
+}
+async function logout(){
+  // la coda offline non deve sopravvivere al cambio utente (privacy su dispositivi condivisi)
+  var nCoda = getCoda().length;
+  if(nCoda){
+    var ok = await confermaBrand({
+      titolo: "Uscire adesso?",
+      testo: "Hai " + nCoda + (nCoda===1 ? " operazione salvata offline" : " operazioni salvate offline")
+        + " non ancora sincronizzate: se esci ora vanno perse.",
+      cta: "Esci comunque", danger: true
+    });
+    if(!ok) return;
+  }
+  setCoda([]);
+  sb.auth.signOut().then(function(){ location.reload(); });
+}
 
 // ── TEMA UTENTE (picker in home: vale per Home + Solo) ──
 function apriTemaUtente(){
@@ -84,6 +132,7 @@ async function cambiaTemaUtente(t){
   if(r.error){ await alertBrand("Errore nel cambio tema: " + r.error.message); return; }
   profiloUtente.tema = t;
   document.body.setAttribute("data-tema", t);   // siamo su home → applica subito
+  aggiornaThemeColor();
   apriTemaUtente();                              // rinfresca evidenziazione
 }
 

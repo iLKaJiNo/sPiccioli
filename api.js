@@ -38,52 +38,52 @@ async function apriCassa(id){
 async function caricaCassa(){
   dotC("", "Carico…");
   try{
+    // Query indipendenti in parallelo: su rete mobile dimezza il tempo di sync.
     // TUTTI i membri: gli attivi servono ai calcoli, i rimossi a mostrare i nomi nello storico
-    var rm = await sb.from("membri").select("*, profili(nome)")
-      .eq("cassa_id", cassaCorrente.id)
-      .order("created_at", { ascending: true });
+    var q = await Promise.all([
+      sb.from("membri").select("*, profili(nome)")
+        .eq("cassa_id", cassaCorrente.id)
+        .order("created_at", { ascending: true }),
+      sb.from("movimenti")
+        .select("*, movimento_paganti(*), movimento_quote(*)")
+        .eq("cassa_id", cassaCorrente.id)
+        .order("data", { ascending: false })
+        .order("created_at", { ascending: false }),
+      sb.from("categorie").select("*")
+        .eq("cassa_id", cassaCorrente.id).order("ordine").order("nome"),
+      (cassaCorrente.tipo === "coppia")
+        ? sb.from("chiusure_coppia").select("*")
+            .eq("cassa_id", cassaCorrente.id)
+            .order("seq", { ascending: false })
+        : Promise.resolve({ data: [] }),
+      sb.from("lista_cassa").select("*")
+        .eq("cassa_id", cassaCorrente.id).order("creata_il", { ascending: true }),
+      sb.from("note_cassa").select("*")
+        .eq("cassa_id", cassaCorrente.id).order("creata_il", { ascending: false }),
+      caricaRicorrentiCassa()
+    ]);
+    var rm = q[0], rmov = q[1], rcat = q[2], rch = q[3], rlista = q[4], rnote = q[5];
     if(rm.error) return gestisciErroreCassa(rm.error);
     membriTutti    = rm.data || [];
     membriCorrente = membriTutti.filter(function(m){ return m.attivo; });
 
-    var rmov = await sb.from("movimenti")
-      .select("*, movimento_paganti(*), movimento_quote(*)")
-      .eq("cassa_id", cassaCorrente.id)
-      .order("data", { ascending: false })
-      .order("created_at", { ascending: false });
     if(rmov.error) return gestisciErroreCassa(rmov.error);
-
     S.movimenti = (rmov.data || []).map(function(m){
       m.paganti = m.movimento_paganti || [];
       m.quote   = m.movimento_quote   || [];
       return m;
     });
 
-    var rcat = await sb.from("categorie").select("*")
-      .eq("cassa_id", cassaCorrente.id).order("ordine").order("nome");
     if(rcat.error) return gestisciErroreCassa(rcat.error);
     categorieCassa = rcat.data || [];
 
-    if(cassaCorrente.tipo === "coppia"){
-      var rch = await sb.from("chiusure_coppia").select("*")
-        .eq("cassa_id", cassaCorrente.id)
-        .order("seq", { ascending: false });
-      chiusureCassa = rch.data || [];
-    } else {
-      chiusureCassa = [];
-    }
+    chiusureCassa = rch.data || [];
 
-    var rlista = await sb.from("lista_cassa").select("*")
-      .eq("cassa_id", cassaCorrente.id).order("creata_il", { ascending: true });
     if(rlista.error) return gestisciErroreCassa(rlista.error);
     S.lista = rlista.data || [];
 
-    var rnote = await sb.from("note_cassa").select("*")
-      .eq("cassa_id", cassaCorrente.id).order("creata_il", { ascending: false });
     if(rnote.error) return gestisciErroreCassa(rnote.error);
     S.note = rnote.data || [];
-
-    await caricaRicorrentiCassa();
 
     dotC("ok", "Sincronizzata");
     aggiornaBadgeCoda();
@@ -213,6 +213,8 @@ async function flushCoda(){
     catch(e){
       if(errDiRete(e)){ aggiornaBadgeCoda(); return; }
       console.error("Operazione scartata:", coda[0].action, e);
+      var _desc = coda[0].descrizione ? " («" + coda[0].descrizione + "»)" : "";
+      toastInfo("⚠️ Un'operazione salvata offline" + _desc + " non è passata ed è stata scartata.");
       coda.shift(); setCoda(coda);
     }
   }

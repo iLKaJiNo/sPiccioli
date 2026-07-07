@@ -160,6 +160,13 @@ function sillyCheck(){
   stage.innerHTML = '<span class="silly-pig" style="font-size:'+size+'rem" title="'+pigTitle+'" onclick="sillyTapPig(this)">'+pigEmoji+'</span>'
     + inatt + fissa + virtuosa + notturno + _streak + _meteoB + _stag;
 
+  // su touch il tooltip non esiste: tap sul badge → toast col suo testo
+  stage.querySelectorAll("span[title]").forEach(function(el){
+    if(el.classList.contains("silly-pig")) return;   // il 🐷 ha già il tap-moneta
+    el.style.cursor = "pointer";
+    el.onclick = function(){ toastInfo(el.getAttribute("title") || ""); };
+  });
+
   // 1 · cambio record: shake trofeo + toast (solo sul reale cambiamento, non al primo check)
   var trofeoId = sillyTrofeoMovId();
   var cid = cassaCorrente.id;

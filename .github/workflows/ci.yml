@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Syntax check (node --check)
+        run: |
+          for f in *.js; do node --check "$f"; done
+
+      - name: Unit test motore conti
+        run: node test/conti.test.js
+
+      - name: ESLint (regole di correttezza)
+        run: npx --yes eslint "*.js" "test/*.js"
