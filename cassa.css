@@ -389,3 +389,21 @@ button{ white-space:normal; }
 .tetto-step .silly-tetto-inp{flex:1;text-align:center;min-width:0;}
 @media (prefers-reduced-motion: reduce){ .tetto-fill{transition:none;} }
 
+
+/* ══════════ LOTTO 4-7 · badge silly · tap-coin · scherzi a tema · saluto ══════════ */
+.silly-pig{ cursor:pointer; }
+.silly-badge{ font-size:1rem; margin-left:3px; vertical-align:middle; }
+.silly-coin-pop{ position:fixed; transform:translate(-50%,0); font-size:1.4rem; pointer-events:none; z-index:9999; animation:sillyCoinPop .9s ease-out forwards; }
+@keyframes sillyCoinPop{ 0%{opacity:0;transform:translate(-50%,0) scale(.6);} 20%{opacity:1;} 100%{opacity:0;transform:translate(-50%,-46px) scale(1);} }
+.silly-greet{ position:fixed; left:50%; top:38%; transform:translate(-50%,-50%); font-size:4.2rem; pointer-events:none; z-index:9998; animation:sillyGreet 1.3s ease-out forwards; }
+@keyframes sillyGreet{ 0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-8deg);} 25%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(4deg);} 70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0);} 100%{opacity:0;transform:translate(-50%,-58%) scale(1);} }
+.scherzo-wave{ position:fixed; left:50%; bottom:-10%; transform:translateX(-50%); font-size:9rem; pointer-events:none; z-index:9998; animation:scherzoWave 1.3s ease-out forwards; }
+@keyframes scherzoWave{ 0%{opacity:0;bottom:-30%;} 30%{opacity:1;} 100%{opacity:0;bottom:60%;} }
+.scherzo-abduct{ animation:scherzoAbduct 1.3s ease-in-out; }
+@keyframes scherzoAbduct{ 0%{transform:none;} 40%{transform:translateY(-8px) scale(.99);} 60%{transform:translateY(-4px) rotate(.4deg);} 100%{transform:none;} }
+.scherzo-disco{ animation:scherzoDisco 1.6s steps(1) 3; }
+@keyframes scherzoDisco{ 0%{filter:none;} 25%{filter:hue-rotate(90deg) saturate(1.4);} 50%{filter:hue-rotate(180deg) saturate(1.4);} 75%{filter:hue-rotate(270deg) saturate(1.4);} 100%{filter:none;} }
+@media (prefers-reduced-motion: reduce){
+  .silly-coin-pop,.silly-greet,.scherzo-wave{ animation:none; opacity:0; }
+  .scherzo-abduct,.scherzo-disco{ animation:none; }
+}
