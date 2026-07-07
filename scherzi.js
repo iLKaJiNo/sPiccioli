@@ -47,7 +47,7 @@ function apriScherzoPicker(uid){
   _scherzoTargetUid = uid;
   var body = document.getElementById("scherzo-body");
   if(body){
-    body.innerHTML = SCHERZI.map(function(s){
+    body.innerHTML = scherziPerTema().map(function(s){
       return '<button class="scherzo-btn" onclick="inviaScherzo(\'' + s.k + '\')">'
         + '<span class="scherzo-btn-e">' + s.e + '</span>' + escapeHtml(s.n) + '</button>';
     }).join("");
@@ -75,7 +75,7 @@ function _riceviScherzo(p){
   if(!p || !p.tipo) return;
   if(!profiloUtente || p.aUid !== profiloUtente.id) return;   // non è per me
   if(!sillyAttivo() || cassaBloccata()) return;
-  var def = SCHERZI.find(function(x){ return x.k === p.tipo; });
+  var def = scherziPerTema().find(function(x){ return x.k === p.tipo; });
   if(!def) return;
   var da = escapeHtml(p.da || "Qualcuno");
   if(_reducedMotion()){ toastInfo(da + " ti ha mandato uno scherzo " + def.e); return; }
@@ -86,6 +86,12 @@ function _riceviScherzo(p){
     case "tromba": _scherzoTromba(); break;
     case "snail":  _scherzoSnail(); break;
     case "dance":  _scherzoDance(); break;
+    case "cactus": _scherzoSpawn("scherzo-fish","🌵",900); break;
+    case "onda":   _scherzoWave(); break;
+    case "ufo":    _scherzoUfo(); break;
+    case "disco":  _scherzoDisco(); break;
+    case "banana": _scherzoSpawn("scherzo-fish","🍌",900); break;
+    case "miele":  _scherzoSpawn("scherzo-boo","🍯",1000); break;
   }
 }
 
@@ -121,4 +127,29 @@ function _scherzoSnail(){
 }
 function _scherzoDance(){
   _scherzoSpawn("scherzo-dance", "🐷", 4000);
+}
+
+
+// ══════════ LOTTO 6 · scherzi per-mondo (stesso motore realtime) ══════════
+var THEME_SCHERZI = {
+  west:     [{ k:"cactus", e:"🌵", n:"Rotolacampo" }],
+  pesci:    [{ k:"onda",   e:"🌊", n:"Onda" }],
+  alieni:   [{ k:"ufo",    e:"🛸", n:"Raggio traente" }],
+  flamingo: [{ k:"disco",  e:"🪩", n:"Discoteca" }],
+  jungle:   [{ k:"banana", e:"🍌", n:"Buccia di banana" }],
+  orsi:     [{ k:"miele",  e:"🍯", n:"Vaso di miele" }]
+};
+function scherziPerTema(){
+  var t=(cassaCorrente&&cassaCorrente.tema)||"salvadanaio";
+  return SCHERZI.concat(THEME_SCHERZI[t]||[]);
+}
+function _scherzoWave(){ _scherzoSpawn("scherzo-wave","🌊",1300); }
+function _scherzoUfo(){
+  var el=document.getElementById("cassa-screen");
+  if(el){ el.classList.add("scherzo-abduct"); setTimeout(function(){ el.classList.remove("scherzo-abduct"); },1300); }
+  _scherzoSpawn("scherzo-boo","🛸",1300);
+}
+function _scherzoDisco(){
+  document.body.classList.add("scherzo-disco");
+  setTimeout(function(){ document.body.classList.remove("scherzo-disco"); },1600);
 }

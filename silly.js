@@ -114,6 +114,7 @@ function sillyCheck(){
   if(!stage) return;
   if(!sillyAttivo()){ stage.innerHTML=""; _sillyEraInPari=null; return; }
 
+  if(_sillyGreetSeen !== cassaCorrente.id){ _sillyGreetSeen = cassaCorrente.id; _sillyGreeting(); }
   var tema  = (cassaCorrente && cassaCorrente.tema) || "salvadanaio";
   var tot   = _sillyTotaleSpeso();
   var tetto = parseFloat(cassaCorrente.silly_tetto)||1000;
@@ -152,8 +153,12 @@ function sillyCheck(){
   var notturnoEmoji = (tema==="alieni") ? "🛸" : "🦉";
   var notturno = _sillyNotturno() ? '<span class="silly-notturno" title="Spese notturne in corso">'+notturnoEmoji+'</span>' : "";
 
-  stage.innerHTML = '<span class="silly-pig" style="font-size:'+size+'rem" title="'+pigTitle+'">'+pigEmoji+'</span>'
-    + inatt + fissa + virtuosa + notturno;
+  var _streak = _sillyStreak()>=3 ? '<span class="silly-badge" title="'+_sillyStreak()+' giorni di fila">🔥</span>' : "";
+  var _meteo  = _sillyMeteo();
+  var _meteoB = _meteo ? '<span class="silly-badge" title="Meteo del mese">'+_meteo+'</span>' : "";
+  var _stag   = _sillyStagione();
+  stage.innerHTML = '<span class="silly-pig" style="font-size:'+size+'rem" title="'+pigTitle+'" onclick="sillyTapPig(this)">'+pigEmoji+'</span>'
+    + inatt + fissa + virtuosa + notturno + _streak + _meteoB + _stag;
 
   // 1 · cambio record: shake trofeo + toast (solo sul reale cambiamento, non al primo check)
   var trofeoId = sillyTrofeoMovId();
@@ -166,7 +171,7 @@ function sillyCheck(){
       var mov = (S.movimenti||[]).find(function(m){ return m.id === trofeoId; });
       if(mov){
         var v = (parseFloat(mov.importo)||0)*(parseFloat(mov.tasso_cambio)||1);
-        var extra = { west:" 🌵", jungle:" 🦍" }[tema] || "";
+        var extra = { salvadanaio:" 🪙", pesci:" 🐋", west:" 🌵", orsi:" 🐻", alieni:" 🛸", jungle:" 🦍", flamingo:" 🦩" }[tema] || "";
         toastInfo("🏆 Nuovo record! " + eur(v) + " di gloria." + extra);
         _pulseClass(document.getElementById("mv-trofeo-cur"), "silly-shake", 1000);
       }
@@ -187,13 +192,23 @@ function sillyCheck(){
     }
   }
 
+  var _u2 = _sillyMovValidi()[0];
+  if(_u2){
+    if(_sillyTondaSeen[cid]===undefined){ _sillyTondaSeen[cid]=_u2.id; }
+    else if(_sillyTondaSeen[cid]!==_u2.id){
+      _sillyTondaSeen[cid]=_u2.id;
+      var _vt=(parseFloat(_u2.importo)||0);
+      if(_vt>=10 && _vt%10===0){ toastInfo("🎯 Cifra tonda: "+eur(_vt)+" spaccati!"); }
+    }
+  }
+
   // 5 · compleanno (una tantum)
   _sillyCompleanno();
 
   // una-tantum: coriandoli sul passaggio a "in pari"
   var saldi = calcolaSaldi();
   var inPari = membriCorrente.length>0 && membriCorrente.every(function(m){ return Math.abs(saldi[m.id]||0) < 0.005; });
-  if(_sillyEraInPari===false && inPari) sillyCoriandoli();
+  if(_sillyEraInPari===false && inPari){ sillyCoriandoli(); _sillyLampo(); }
   _sillyEraInPari = inPari;
 }
 function sillyCoriandoli(){
@@ -201,7 +216,8 @@ function sillyCoriandoli(){
   var box=document.createElement("div");
   box.className="silly-confetti";
   var em=["🎉","🎊"].concat(flavorTema().conf || []);
-  for(var i=0;i<28;i++){
+  var nConf=_sillyN(28, 56);
+  for(var i=0;i<nConf;i++){
     var s=document.createElement("span");
     s.textContent=em[i%em.length];
     s.style.left=(Math.random()*100)+"%";
@@ -224,7 +240,8 @@ function sillyPioggiaMonete(btn){
   box.style.width  = r.width + "px";
   box.style.height = r.height + "px";
   var em = ["💰","🪙"];
-  for(var i=0;i<10;i++){
+  var nCoin = _sillyN(10, 20);
+  for(var i=0;i<nCoin;i++){
     var s = document.createElement("span");
     s.textContent = em[i%em.length];
     s.style.left = (Math.random()*100)+"%";
@@ -250,4 +267,92 @@ async function salvaTettoSilly(v){
   if(r.error){ await alertBrand("Errore: "+r.error.message); return; }
   cassaCorrente.silly_tetto = n;
   renderCassa();
+}
+
+
+// ══════════ LOTTO 4-7 · livelli · reazioni · stagioni (client-side, no DB) ══════════
+var _sillyTondaSeen = {};
+var _sillyGreetSeen = null;
+function sillyLivello(){
+  if(!sillyAttivo()) return "off";
+  try{ return localStorage.getItem("spiccioli_silly_liv")==="sopra" ? "sopra" : "elegante"; }catch(e){ return "elegante"; }
+}
+function _sillyN(elegante, sopra){ return sillyLivello()==="sopra" ? sopra : elegante; }
+function _sillyLivSeg(withOff){
+  var on=!!(cassaCorrente&&cassaCorrente.silly), liv="elegante";
+  try{ if(localStorage.getItem("spiccioli_silly_liv")==="sopra") liv="sopra"; }catch(e){}
+  var s='<div class="split-seg" style="margin-bottom:14px;">';
+  if(withOff) s+='<button class="split-btn '+(!on?"attivo":"")+'" onclick="setSilly(\'off\')">Off</button>';
+  s+='<button class="split-btn '+((on&&liv==="elegante")?"attivo":"")+'" onclick="setSilly(\'elegante\')">✨ Elegante</button>';
+  s+='<button class="split-btn '+((on&&liv==="sopra")?"attivo":"")+'" title="Sopra le righe" onclick="setSilly(\'sopra\')">🎉 Sopra</button>';
+  return s+'</div>';
+}
+async function setSilly(mode){
+  if(mode==="off"){ if(cassaCorrente&&cassaCorrente.silly){ await toggleSilly(false); } else { renderMembri(); } return; }
+  try{ localStorage.setItem("spiccioli_silly_liv", mode==="sopra"?"sopra":"elegante"); }catch(e){}
+  if(cassaCorrente&&!cassaCorrente.silly){ await toggleSilly(true); }
+  else { renderCassa(); renderMembri(); }
+}
+function _sillyDayKey(d){ return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate(); }
+function _sillyStreak(){
+  var movs=_sillyMovValidi(); if(!movs.length) return 0;
+  var days={}; movs.forEach(function(m){ var d=new Date(m.data); if(!isNaN(d)) days[_sillyDayKey(d)]=1; });
+  var cur=new Date(), streak=0;
+  if(!days[_sillyDayKey(cur)]){ cur.setDate(cur.getDate()-1); if(!days[_sillyDayKey(cur)]) return 0; }
+  while(days[_sillyDayKey(cur)]){ streak++; cur.setDate(cur.getDate()-1); }
+  return streak;
+}
+function _sillyMeteo(){
+  var movs=_sillyMovValidi(); if(movs.length<3) return "";
+  var now=Date.now(), t30=0, tPrev=0;
+  movs.forEach(function(m){
+    var v=(parseFloat(m.importo)||0)*(parseFloat(m.tasso_cambio)||1);
+    var d=new Date(m.data).getTime(); if(isNaN(d)) return;
+    var age=now-d;
+    if(age<=2592000000) t30+=v; else if(age<=5184000000) tPrev+=v;
+  });
+  if(tPrev<=0) return "";
+  var r=t30/tPrev;
+  if(r>1.25) return "⛈️"; if(r>0.9) return "🌦️"; return "☀️";
+}
+function sillyReMese(){
+  if(!sillyAttivo()) return null;
+  var now=new Date(), y=now.getFullYear(), mo=now.getMonth(), tot={};
+  (S.movimenti||[]).forEach(function(m){
+    if(m.tipo==="settle"||m.origine==="apertura") return;
+    var d=new Date(m.data); if(isNaN(d)||d.getFullYear()!==y||d.getMonth()!==mo) return;
+    var t=parseFloat(m.tasso_cambio)||1;
+    (m.paganti||[]).forEach(function(p){ if(p&&p.membro_id) tot[p.membro_id]=(tot[p.membro_id]||0)+(parseFloat(p.importo)||0)*t; });
+  });
+  var best=null, bv=0;
+  Object.keys(tot).forEach(function(k){ if(tot[k]>bv){ bv=tot[k]; best=k; } });
+  return bv>0 ? best : null;
+}
+function _sillyLampo(){
+  if(!sillyAttivo()) return;
+  var u=_sillyMovValidi()[0]; if(!u||!u.created_at) return;
+  if(Date.now()-new Date(u.created_at).getTime() <= 3600000) toastInfo("⚡ Pareggio lampo! Che velocità.");
+}
+function sillyTapPig(el){
+  if(!sillyAttivo()||_reducedMotion()||!el) return;
+  var r=el.getBoundingClientRect();
+  var s=document.createElement("span");
+  s.className="silly-coin-pop"; s.textContent="🪙";
+  s.style.left=(r.left+r.width/2)+"px"; s.style.top=r.top+"px";
+  document.body.appendChild(s);
+  setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); }, 900);
+}
+function _sillyStagione(){
+  var d=new Date(), m=d.getMonth(), day=d.getDate();
+  if(m===11) return '<span class="silly-badge" title="Aria di feste">❄️</span>';
+  if(m===9 && day>=25) return '<span class="silly-badge" title="Halloween">🎃</span>';
+  return "";
+}
+function _sillyGreeting(){
+  if(!sillyAttivo()||_reducedMotion()) return;
+  var tema=(cassaCorrente&&cassaCorrente.tema)||"salvadanaio";
+  var e=({salvadanaio:"🐷",pesci:"🐟",west:"🤠",orsi:"🐻",alieni:"👽",jungle:"🦜",flamingo:"🦩"})[tema]||"🐷";
+  var g=document.createElement("div"); g.className="silly-greet"; g.textContent=e;
+  document.body.appendChild(g);
+  setTimeout(function(){ if(g.parentNode) g.parentNode.removeChild(g); }, 1300);
 }

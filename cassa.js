@@ -182,7 +182,7 @@ function renderSaldi(){
     var cls = s > 0.005 ? "credito" : (s < -0.005 ? "debito" : "pari");
     var lbl = s > 0.005 ? "in credito" : (s < -0.005 ? "in debito" : "in pari");
     var seg = s > 0.005 ? "+" : (s < -0.005 ? "−" : "");
-    return '<div class="saldo-membro"><span class="sm-nome">' + escapeHtml(nomi[m.id]) + '</span>'
+    return '<div class="saldo-membro"><span class="sm-nome">' + escapeHtml(nomi[m.id]) + (sillyReMese()===m.id ? " 👑" : "") + '</span>'
       + '<span class="sm-val ' + cls + '">' + seg + eur(Math.abs(s)) + '<small>' + lbl + '</small></span></div>';
   }).join("");
 
@@ -401,6 +401,12 @@ function renderMembri(){
     + '</div>';
   html += mbSez("invita", "🔑 Invita", inv, membriCorrente.length < 2);
 
+  if(!admin){
+    var aspU = '<div class="mb-toggle-row"><span>Luminosità<small>Chiaro o scuro, su questo dispositivo</small></span></div>'
+      + '<div class="split-seg" style="margin-bottom:14px;"><button class="split-btn '+(_lumCorrente()!=="scuro"?"attivo":"")+'" onclick="cambiaLum(\'chiaro\')">☀️ Chiaro</button><button class="split-btn '+(_lumCorrente()==="scuro"?"attivo":"")+'" onclick="cambiaLum(\'scuro\')">🌙 Scuro</button></div>';
+    if(cassaCorrente.silly){ aspU += '<div class="mb-toggle-row"><span>Intensità Silly<small>Solo su questo dispositivo</small></span></div>' + _sillyLivSeg(false); }
+    html += mbSez("aspetto", "🎨 Aspetto", aspU, false);
+  }
   if(admin){
     // 3. 🎨 Aspetto — tema + silly + tetto
     var asp = '<div class="mb-toggle-row"><span>Tema<small>L\'aspetto della cassa</small></span></div>';
@@ -419,8 +425,7 @@ function renderMembri(){
       + '<button class="split-btn ' + (_lumCorrente()!=="scuro"?"attivo":"") + '" onclick="cambiaLum(\'chiaro\')">☀️ Chiaro</button>'
       + '<button class="split-btn ' + (_lumCorrente()==="scuro"?"attivo":"") + '" onclick="cambiaLum(\'scuro\')">🌙 Scuro</button>'
       + '</div>';
-    asp += '<label class="mb-toggle-row"><span>Silly mode<small>Dà personalità al mondo · non tocca i conti</small></span>'
-      + '<input type="checkbox" ' + (cassaCorrente.silly?"checked":"") + ' onchange="toggleSilly(this.checked)"></label>';
+    asp += '<div class="mb-toggle-row"><span>Silly mode<small>Dà personalità al mondo · non tocca i conti</small></span></div>' + _sillyLivSeg(true);
     if(cassaCorrente.silly){
       var _tetto = parseFloat(cassaCorrente.silly_tetto)||1000;
       var _speso = (typeof _sillyTotaleSpeso==="function") ? _sillyTotaleSpeso() : 0;
