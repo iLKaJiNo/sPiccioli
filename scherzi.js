@@ -43,7 +43,7 @@ function chiudiRealtimeScherzi(){
 
 // ── UI mittente ──
 function apriScherzoPicker(uid){
-  if(!sillyAttivo() || cassaBloccata()) return;
+  if(!uid || !sillyAttivo() || cassaBloccata()) return;
   _scherzoTargetUid = uid;
   var body = document.getElementById("scherzo-body");
   if(body){

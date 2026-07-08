@@ -387,6 +387,7 @@ function renderMembri(){
       : (s > 0 ? '<span class="mb-cred">+' + eur(s) + '</span>' : '<span class="mb-deb">−' + eur(Math.abs(s)) + '</span>');
     var ruolo = m.ruolo === "admin" ? '<span class="cassa-badge-admin">admin</span>' : '';
     var tu    = m.id === mioId ? '<span class="cassa-badge-tu">tu</span>' : '';
+    var fantasma = !m.user_id ? '<span class="cassa-badge-fantasma">👻 senza account</span>' : '';
     var puoiRinominare = true;  // app silly: chiunque puo rinominare chiunque
     var puoiRimuovere  = admin && m.id !== mioId && Math.abs(s) < 0.005;
     var puoiScherzare  = m.id !== mioId && m.user_id && sillyAttivo() && !cassaBloccata();
@@ -395,7 +396,7 @@ function renderMembri(){
     if(puoiRinominare) az += '<button class="mb-btn" onclick="apriRinomina(\'' + m.id + '\')" title="Rinomina">✏️</button>';
     if(puoiRimuovere)  az += '<button class="mb-btn" onclick="rimuoviMembro(\'' + m.id + '\')" title="Rimuovi">🗑️</button>';
     return '<div class="mb-row"><div class="mb-info">'
-      + '<div class="mb-nome">' + escapeHtml(nomi[m.id]) + ' ' + tu + ruolo + '</div>'
+      + '<div class="mb-nome">' + escapeHtml(nomi[m.id]) + ' ' + tu + ruolo + fantasma + '</div>'
       + '<div class="mb-stato">' + stato + '</div></div>'
       + '<div class="mb-azioni">' + az + '</div></div>';
   }).join("");
@@ -409,7 +410,8 @@ function renderMembri(){
     + '<button class="mb-azione-btn" style="flex:1;" onclick="copiaCodiceInvito()">📋 Copia</button>'
     + '<button class="mb-azione-btn" style="flex:1;" onclick="condividiCodiceInvito()">📤 Condividi</button>'
     + (admin ? '<button class="mb-btn" onclick="rigeneraCodice()" title="Rigenera codice">🔄</button>' : '')
-    + '</div>';
+    + '</div>'
+    + (admin ? '<button class="btn-ghost btn-mini" style="margin-top:10px;" onclick="aggiungiFantasma()">➕ Aggiungi senza account</button>' : '');
   html += mbSez("invita", "🔑 Invita", inv, membriCorrente.length < 2);
 
   if(!admin){
@@ -520,6 +522,18 @@ async function rimuoviMembro(id){
   if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
   await caricaCassa();
   renderMembri();
+}
+
+// ── AGGIUNGI MEMBRO FANTASMA (admin, senza account) ──
+async function aggiungiFantasma(){
+  var nome = await promptBrand({ titolo:"Chi partecipa senza telefono?",
+    testo:"Aggiungi una persona senza account: le spese gliele segnate voi.",
+    placeholder:"Nome" });
+  if(nome === null) return;
+  var r = await sb.rpc("aggiungi_membro_fantasma", { p_cassa_id: cassaCorrente.id, p_nome: nome });
+  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  await caricaCassa(); renderCassa(); renderMembri();
+  toastInfo("👻 " + escapeHtml(nome.trim()) + " è dei vostri!");
 }
 
 // ── RIGENERA CODICE (admin) ──
