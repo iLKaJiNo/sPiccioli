@@ -339,7 +339,7 @@ function renderArchivioSolo(){
       var ripr = (idx === 0)
         ? '<button class="btn-ripristina" onclick="event.stopPropagation();ripristinaSolo()">↩︎ Ripristina</button>' : '';
       var sd = parseFloat(c.saldo)||0;
-      return '<div class="arch-row" onclick="apriDettaglioChiusuraSolo(\'' + c.id + '\')">'
+      return '<div class="arch-row" onclick="apriDettaglioChiusuraSolo(\'' + c.id + '\')" tabindex="0" role="button">'
         + '<div class="arch-main"><div class="arch-titolo">' + escapeHtml(etichettaChiusura(c)) + '</div>'
         + '<div class="arch-meta">#' + c.seq + ' · ' + fmtLong(c.chiusa_il) + ' · saldo ' + (sd<0?"−":"") + eur(sd) + '</div></div>'
         + ripr + '<div class="cassa-freccia">›</div></div>';

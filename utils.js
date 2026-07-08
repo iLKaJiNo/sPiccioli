@@ -15,6 +15,7 @@ var cassaCorrente = null;
 var membriTutti = [];       // tutti i membri (anche rimossi) — per i nomi nello storico
 var membriCorrente = [];    // membri ATTIVI — per saldi, form, conteggi
 var S = { movimenti: [] };
+var _movDelPending = {};    // id movimento → eliminazione in attesa di undo (il realtime non deve farla riapparire)
 
 // ── SCHERMATE ──────────────────────────────────────────
 var SCHERMATE = ["auth-screen", "casse-screen", "cassa-screen", "solo-screen"];
@@ -176,6 +177,89 @@ function aggiornaThemeColor(){
     if(bg) meta.setAttribute("content", bg);
   }catch(e){}
 }
+
+// toast con bottone azione (es. «Annulla»): se l'utente non agisce entro ms,
+// scatta onScadenza; se tocca il bottone, scatta onAzione. Usato per l'undo.
+function toastAzione(msg, labelAzione, onAzione, onScadenza, ms){
+  var t = document.createElement("div");
+  t.className = "toast-info toast-azione";
+  var s = document.createElement("span"); s.textContent = msg;
+  var b = document.createElement("button"); b.type = "button"; b.textContent = labelAzione;
+  t.appendChild(s); t.appendChild(b);
+  document.body.appendChild(t);
+  void t.offsetHeight;
+  t.classList.add("show");
+  var chiuso = false;
+  function chiudi(){
+    if(chiuso) return; chiuso = true;
+    t.classList.remove("show");
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 300);
+  }
+  var timer = setTimeout(function(){ chiudi(); if(onScadenza) onScadenza(); }, ms || 5000);
+  b.onclick = function(){ clearTimeout(timer); chiudi(); if(onAzione) onAzione(); };
+}
+
+// ── ACCESSIBILITÀ MODALI ──
+// role/aria sul guscio condiviso, focus dentro all'apertura, Tab intrappolato,
+// focus restituito alla chiusura. Enter/Spazio attivano le righe role="button".
+function _focusabili(box){
+  return Array.prototype.filter.call(
+    box.querySelectorAll('button, input, select, textarea, a[onclick], [tabindex="0"]'),
+    function(el){ return !el.disabled && el.offsetParent !== null; }
+  );
+}
+(function(){
+  if(typeof MutationObserver === "undefined" || !document.querySelectorAll) return;
+  var overlays = document.querySelectorAll(".modal-overlay");
+  overlays.forEach(function(ov){
+    var box = ov.querySelector(".br-modal");
+    if(box){ box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); }
+  });
+  var obs = new MutationObserver(function(muts){
+    muts.forEach(function(mu){
+      var ov = mu.target;
+      var attivo = ov.classList.contains("attivo");
+      var era = (mu.oldValue || "").indexOf("attivo") > -1;
+      if(attivo && !era){
+        ov._prevFocus = document.activeElement;
+        setTimeout(function(){
+          if(!ov.classList.contains("attivo")) return;
+          if(ov.contains(document.activeElement)) return;   // l'open ha già messo il focus su un input
+          var f = _focusabili(ov);
+          if(f.length) f[0].focus();
+        }, 150);
+      } else if(!attivo && era && ov._prevFocus){
+        var prev = ov._prevFocus; ov._prevFocus = null;
+        if(document.body.contains(prev)){ try{ prev.focus(); }catch(e){} }
+      }
+    });
+  });
+  overlays.forEach(function(ov){
+    obs.observe(ov, { attributes: true, attributeFilter: ["class"], attributeOldValue: true });
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "Tab") return;
+    var aperte = document.querySelectorAll(".modal-overlay.attivo");
+    if(!aperte.length) return;
+    var ov = aperte[aperte.length - 1];
+    var f = _focusabili(ov);
+    if(!f.length) return;
+    var prima = f[0], ultima = f[f.length - 1];
+    if(e.shiftKey && (document.activeElement === prima || !ov.contains(document.activeElement))){
+      e.preventDefault(); ultima.focus();
+    } else if(!e.shiftKey && (document.activeElement === ultima || !ov.contains(document.activeElement))){
+      e.preventDefault(); prima.focus();
+    }
+  });
+})();
+document.addEventListener("keydown", function(e){
+  if(e.key !== "Enter" && e.key !== " ") return;
+  var el = e.target;
+  if(el && el.getAttribute && el.getAttribute("role") === "button"
+     && el.tagName !== "BUTTON" && el.tagName !== "INPUT"){
+    e.preventDefault(); el.click();
+  }
+});
 
 // toast informativo non-bloccante (auto-dismiss)
 function toastInfo(msg){

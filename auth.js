@@ -176,7 +176,7 @@ function renderCasse(){
     var modo  = c.modalita === "diretti" ? "Debiti diretti" : "Cassa comune";
     var tipo  = c.tipo === "gruppo" ? "Gruppo" : "Coppia";
     var admin = c.ruolo === "admin" ? '<span class="cassa-badge-admin">admin</span>' : '';
-    return '<div class="cassa-item" onclick="entraInCassa(\''+c.id+'\')">'
+    return '<div class="cassa-item" onclick="entraInCassa(\''+c.id+'\')" tabindex="0" role="button">'
       +   '<div class="cassa-emoji">'+emojiTema(c.tema)+'</div>'
       +   '<div class="cassa-info">'
       +     '<div class="cassa-nome">'+escapeHtml(c.nome)+admin+'</div>'

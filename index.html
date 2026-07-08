@@ -60,7 +60,7 @@ if("serviceWorker" in navigator){
     <button class="btn-esci" onclick="logout()">Esci</button>
   </div>
   <div class="casse-body">
-    <div class="solo-card" onclick="apriSolo()">
+    <div class="solo-card" onclick="apriSolo()" tabindex="0" role="button">
       <div class="solo-card-emoji">🐷</div>
       <div class="cassa-info"><div class="cassa-nome">Il mio Solo</div>
         <div class="cassa-meta">Il tuo bilancio personale</div></div>
@@ -600,6 +600,6 @@ if("serviceWorker" in navigator){
 <script src="./auth.js"></script>
 <script src="./welcome.js"></script>
 <script src="./app.js"></script>
-<script>try{if(localStorage.getItem('spiccioli_lum')==='scuro')document.body.setAttribute('data-lum','scuro');}catch(e){}</script>
+<script>try{var _l=localStorage.getItem('spiccioli_lum');if(_l==='scuro'||((!_l||_l==='auto')&&matchMedia('(prefers-color-scheme: dark)').matches))document.body.setAttribute('data-lum','scuro');}catch(e){}</script>
 </body>
 </html>

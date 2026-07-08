@@ -8,8 +8,9 @@ const path = require('path');
 const assert = require('assert');
 
 // stub minimi per caricare utils.js fuori dal browser
+// (il blocco a11y si disattiva da solo: niente MutationObserver in Node)
 global.supabase = { createClient: function(){ return {}; } };
-global.document = { addEventListener: function(){} };
+global.document = { addEventListener: function(){}, querySelectorAll: function(){ return []; } };
 
 eval(fs.readFileSync(path.join(__dirname, '..', 'utils.js'), 'utf8'));
 

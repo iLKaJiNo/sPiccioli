@@ -62,7 +62,7 @@ function renderRicorrentiLista(){
       var auto = r.automatica ? "⚡" : "✋";
       var due  = (!r.automatica && r.prossima_scadenza <= oggi);
       var conf = due ? '<button class="btn-salda" onclick="event.stopPropagation();confermaManuale(\''+r.id+'\')">✓ Registra</button>' : '';
-      return '<div class="arch-row" onclick="apriFormRicorrente(\''+r.id+'\')">'
+      return '<div class="arch-row" onclick="apriFormRicorrente(\''+r.id+'\')" tabindex="0" role="button">'
         + '<div class="arch-main"><div class="arch-titolo">'+ico+' '+escapeHtml(r.nome)+' '+auto+'</div>'
         + '<div class="arch-meta">'+importoCon(parseFloat(r.importo)||0,"EUR")+' · '+tipoTxt+' · prossima '+fmt(r.prossima_scadenza)+'</div></div>'
         + conf + '<div class="cassa-freccia">›</div></div>';

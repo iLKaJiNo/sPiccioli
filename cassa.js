@@ -71,6 +71,15 @@ function copiaCodiceInvito(){
     navigator.clipboard.writeText(codice).then(function(){ toastInfo("Copiato! 📋"); }).catch(function(){});
   }
 }
+function condividiCodiceInvito(){
+  var testo = "Unisciti alla cassa «" + cassaCorrente.nome + "» su sPiccioli! Codice: "
+    + cassaCorrente.codice_invito + " — " + location.origin + location.pathname;
+  if(navigator.share){
+    navigator.share({ text: testo }).catch(function(){});
+  } else if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(testo).then(function(){ toastInfo("Invito copiato! 📋"); }).catch(function(){});
+  }
+}
 // v42: il testo sync è visibile solo quando lo stato non è ok (classe .warn sul wrap).
 // dotC/aggiornaBadgeCoda vivono in api.js (intoccabile): li avvolgiamo qui.
 var _dotCBase = dotC;
@@ -245,7 +254,7 @@ function renderMovimenti(){
     var del  = isApertura
       ? '<span class="mv-lock" title="Saldo riportato dal mese precedente">🔒</span>'
       : '<button class="mv-del" onclick="event.stopPropagation();eliminaMovimento(\'' + mov.id + '\')" title="Elimina">×</button>';
-    var apri = temp ? "" : ' onclick="apriDettaglio(\'' + mov.id + '\')"';
+    var apri = temp ? "" : ' onclick="apriDettaglio(\'' + mov.id + '\')" tabindex="0" role="button"';
 
     if(mov.tipo === "settle"){
       var da = nomi[(mov.paganti[0] || {}).membro_id] || "?";
@@ -397,14 +406,15 @@ function renderMembri(){
   // 2. 🔑 Invita — aperta di default finché si è in meno di due
   var inv = '<div class="codice-big">' + escapeHtml(cassaCorrente.codice_invito) + '</div>'
     + '<div style="display:flex;gap:8px;align-items:center;">'
-    + '<button class="mb-azione-btn" style="flex:1;" onclick="copiaCodiceInvito()">📋 Copia codice</button>'
+    + '<button class="mb-azione-btn" style="flex:1;" onclick="copiaCodiceInvito()">📋 Copia</button>'
+    + '<button class="mb-azione-btn" style="flex:1;" onclick="condividiCodiceInvito()">📤 Condividi</button>'
     + (admin ? '<button class="mb-btn" onclick="rigeneraCodice()" title="Rigenera codice">🔄</button>' : '')
     + '</div>';
   html += mbSez("invita", "🔑 Invita", inv, membriCorrente.length < 2);
 
   if(!admin){
-    var aspU = '<div class="mb-toggle-row"><span>Luminosità<small>Chiaro o scuro, su questo dispositivo</small></span></div>'
-      + '<div class="split-seg" style="margin-bottom:14px;"><button class="split-btn '+(_lumCorrente()!=="scuro"?"attivo":"")+'" onclick="cambiaLum(\'chiaro\')">☀️ Chiaro</button><button class="split-btn '+(_lumCorrente()==="scuro"?"attivo":"")+'" onclick="cambiaLum(\'scuro\')">🌙 Scuro</button></div>';
+    var aspU = '<div class="mb-toggle-row"><span>Luminosità<small>Su questo dispositivo · Auto segue il sistema</small></span></div>'
+      + _lumSeg();
     if(cassaCorrente.silly){ aspU += '<div class="mb-toggle-row"><span>Intensità Silly<small>Solo su questo dispositivo</small></span></div>' + _sillyLivSeg(false); }
     html += mbSez("aspetto", "🎨 Aspetto", aspU, false);
   }
@@ -421,11 +431,8 @@ function renderMembri(){
             + '</button>';
         }).join('')
       + '</div>';
-    asp += '<div class="mb-toggle-row" style="margin-top:12px;"><span>Luminosità<small>Chiaro o scuro, su questo dispositivo</small></span></div>'
-      + '<div class="split-seg lum-seg" style="margin-bottom:14px;">'
-      + '<button class="split-btn ' + (_lumCorrente()!=="scuro"?"attivo":"") + '" onclick="cambiaLum(\'chiaro\')">☀️ Chiaro</button>'
-      + '<button class="split-btn ' + (_lumCorrente()==="scuro"?"attivo":"") + '" onclick="cambiaLum(\'scuro\')">🌙 Scuro</button>'
-      + '</div>';
+    asp += '<div class="mb-toggle-row" style="margin-top:12px;"><span>Luminosità<small>Su questo dispositivo · Auto segue il sistema</small></span></div>'
+      + _lumSeg();
     asp += '<div class="mb-toggle-row"><span>Silly mode<small>Dà personalità al mondo · non tocca i conti</small></span></div>' + _sillyLivSeg(true);
     if(cassaCorrente.silly){
       var _tetto = parseFloat(cassaCorrente.silly_tetto)||1000;
@@ -548,9 +555,28 @@ async function switchModalita(nuova){
 
 var THEME_DEEP = { salvadanaio:["#0B4653","#07333D"], pesci:["#07303F","#031F2A"], west:["#2B1A0B","#1A0F06"], orsi:["#4A2A0F","#33200C"], alieni:["#1A1030","#0E0820"], jungle:["#123D24","#0A2716"], flamingo:["#3A1228","#260C1A"] };
 var OLTRE_TETTO_UI = { salvadanaio:"🐗", pesci:"🐋", west:"🌵", orsi:"🐻", alieni:"🛸", jungle:"🦍", flamingo:"🦩" };
-function _lumCorrente(){ try{ return localStorage.getItem("spiccioli_lum")==="scuro" ? "scuro" : "chiaro"; }catch(e){ return "chiaro"; } }
+function _lumPref(){ try{ return localStorage.getItem("spiccioli_lum") || "auto"; }catch(e){ return "auto"; } }
+function _lumCorrente(){
+  var p = _lumPref();
+  if(p === "scuro" || p === "chiaro") return p;
+  try{ return window.matchMedia("(prefers-color-scheme: dark)").matches ? "scuro" : "chiaro"; }catch(e){ return "chiaro"; }
+}
 function applicaLum(){ try{ if(_lumCorrente()==="scuro") document.body.setAttribute("data-lum","scuro"); else document.body.removeAttribute("data-lum"); }catch(e){} aggiornaThemeColor(); }
-function cambiaLum(l){ try{ localStorage.setItem("spiccioli_lum", l==="scuro"?"scuro":"chiaro"); }catch(e){} applicaLum(); renderMembri(); }
+function cambiaLum(l){ try{ localStorage.setItem("spiccioli_lum", (l==="scuro"||l==="chiaro") ? l : "auto"); }catch(e){} applicaLum(); renderMembri(); }
+function _lumSeg(){
+  var p = _lumPref();
+  return '<div class="split-seg lum-seg" style="margin-bottom:14px;">'
+    + '<button class="split-btn ' + (p==="auto"?"attivo":"") + '" onclick="cambiaLum(\'auto\')">🌗 Auto</button>'
+    + '<button class="split-btn ' + (p==="chiaro"?"attivo":"") + '" onclick="cambiaLum(\'chiaro\')">☀️ Chiaro</button>'
+    + '<button class="split-btn ' + (p==="scuro"?"attivo":"") + '" onclick="cambiaLum(\'scuro\')">🌙 Scuro</button>'
+    + '</div>';
+}
+// con «Auto», il cambio di tema del sistema si riflette subito
+try{
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){
+    if(_lumPref() === "auto") applicaLum();
+  });
+}catch(e){}
 function stepTetto(d){ var cur = parseFloat((cassaCorrente&&cassaCorrente.silly_tetto))||1000; salvaTettoSilly(Math.max(100, cur + d)); }
 
 // ── CAMBIA TEMA (admin: aggiorna casse.tema + palette dal vivo) ──
@@ -745,6 +771,13 @@ function calcolaPaganti(imp){
 
 // metodi di split
 function setMetodoSplit(m){ metodoSplit = m; renderSplitUI(); }
+// partecipanti selezionati per lo split equo (checkbox nel form; default tutti)
+function _partecipantiEquo(){
+  return membriCorrente.filter(function(m){
+    var el = document.getElementById("e-" + m.id);
+    return !el || el.checked;
+  });
+}
 function renderSplitUI(){
   document.querySelectorAll(".split-btn").forEach(function(b){
     b.classList.toggle("attivo", b.getAttribute("data-m") === metodoSplit);
@@ -752,10 +785,11 @@ function renderSplitUI(){
   var grid = document.getElementById("split-grid");
   var info = document.getElementById("split-info");
   if(metodoSplit === "equo"){
-    grid.innerHTML = "";
-    var n = membriCorrente.length;
-    info.className = "split-info";
-    info.textContent = "Diviso in parti uguali tra " + n + (n === 1 ? " membro" : " membri") + ".";
+    grid.innerHTML = membriCorrente.map(function(m){
+      return '<label class="split-row split-chk"><input type="checkbox" id="e-' + m.id + '" checked onchange="recalcSplit()">'
+        + '<span class="split-nome">' + escapeHtml(nomeDi(m)) + '</span></label>';
+    }).join("");
+    recalcSplit();
     return;
   }
   var unit = metodoSplit === "esatto" ? valutaCorrente : (metodoSplit === "percentuale" ? "%" : "quote");
@@ -767,7 +801,16 @@ function renderSplitUI(){
   recalcSplit();
 }
 function recalcSplit(){
-  if(metodoSplit === "equo") return;
+  if(metodoSplit === "equo"){
+    var infoEq = document.getElementById("split-info");
+    var nEq = _partecipantiEquo().length;
+    if(!nEq){ infoEq.textContent = "Seleziona almeno un partecipante."; infoEq.className = "split-info warn"; }
+    else {
+      infoEq.textContent = "Diviso in parti uguali tra " + nEq + (nEq === 1 ? " partecipante" : " partecipanti") + ".";
+      infoEq.className = "split-info";
+    }
+    return;
+  }
   var imp    = parseFloat(document.getElementById("mv-imp").value) || 0;
   var inputs = leggiInputSplit();
   var somma  = inputs.reduce(function(a,b){ return a+b; }, 0);
@@ -793,10 +836,11 @@ function leggiInputSplit(){
   });
 }
 function calcolaQuote(imp){
-  var n = membriCorrente.length;
   if(metodoSplit === "equo"){
-    var vals = dividiEquo(imp, n);
-    return { quote: membriCorrente.map(function(m, i){ return { membro_id: m.id, importo: vals[i], peso: 1 }; }) };
+    var parte = _partecipantiEquo();
+    if(!parte.length) return { errore: "Seleziona almeno un partecipante." };
+    var vals = dividiEquo(imp, parte.length);
+    return { quote: parte.map(function(m, i){ return { membro_id: m.id, importo: vals[i], peso: 1 }; }) };
   }
   var inputs = leggiInputSplit();
   var somma  = inputs.reduce(function(a,b){ return a+b; }, 0);
@@ -1003,22 +1047,32 @@ async function aggiungiSetComuni(){
   popolaCategoriaSelect();
 }
 
-// ── ELIMINA MOVIMENTO ──
+// ── ELIMINA MOVIMENTO (undo-toast: 5 secondi per ripensarci, poi si elimina davvero) ──
 async function eliminaMovimento(id){
   if(String(id).indexOf("temp-") === 0) return;
-  var mov = (S.movimenti || []).find(function(m){ return m.id === id; });
-  var desc = mov ? (mov.tipo === "settle" ? "Rimborso" : (mov.descrizione || "questa spesa")) : "questa spesa";
-  var ok = await confermaBrand({
-    titolo: "Butto via questa spesa?",
-    testo: "«" + escapeHtml(desc) + "» sparisce dai conti di tutti. Niente ripensamenti.",
-    cta: "🗑️ Elimina", annulla: "Tienila", danger: true
-  });
-  if(!ok) return;
-  var backup = S.movimenti.slice();
-  S.movimenti = S.movimenti.filter(function(m){ return m.id !== id; });
+  var idx = (S.movimenti || []).findIndex(function(m){ return m.id === id; });
+  if(idx < 0) return;
+  var mov = S.movimenti[idx];
+  var desc = mov.tipo === "settle" ? "Rimborso" : (mov.descrizione || "Spesa");
+  var ripristina = function(){
+    delete _movDelPending[id];
+    if(S.movimenti.indexOf(mov) < 0) S.movimenti.splice(Math.min(idx, S.movimenti.length), 0, mov);
+    renderCassa();
+  };
+  _movDelPending[id] = true;
+  S.movimenti.splice(idx, 1);
   renderCassa();
-  try{ await post({ action: "deleteMovimento", id: id }); }
-  catch(e){ if(!errDiRete(e)){ S.movimenti = backup; renderCassa(); await alertBrand("Ops: l'eliminazione non è riuscita. Riprova."); } }
+  toastAzione("🗑️ «" + desc + "» eliminata.", "Annulla", ripristina, async function(){
+    try{ await post({ action: "deleteMovimento", id: id }); }
+    catch(e){
+      if(!errDiRete(e)){
+        ripristina();
+        await alertBrand("Ops: l'eliminazione non è riuscita. Riprova.");
+        return;
+      }
+    }
+    delete _movDelPending[id];
+  }, 5000);
 }
 
 // ════════════════════════════════════════════════════════
@@ -1088,7 +1142,7 @@ function renderArchivio(){
     html += ch.map(function(c, idx){
       var ripr = (idx === 0)
         ? '<button class="btn-ripristina" onclick="event.stopPropagation();ripristinaCoppia()">↩︎ Ripristina</button>' : '';
-      return '<div class="arch-row" onclick="apriDettaglioChiusura(\'' + c.id + '\')">'
+      return '<div class="arch-row" onclick="apriDettaglioChiusura(\'' + c.id + '\')" tabindex="0" role="button">'
         + '<div class="arch-main"><div class="arch-titolo">' + escapeHtml(etichettaChiusura(c)) + '</div>'
         + '<div class="arch-meta">#' + c.seq + ' · ' + fmtLong(c.chiusa_il) + ' · ' + eur(c.totale_speso) + '</div></div>'
         + ripr + '<div class="cassa-freccia">›</div></div>';

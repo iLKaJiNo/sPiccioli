@@ -407,3 +407,10 @@ button{ white-space:normal; }
   .silly-coin-pop,.silly-greet,.scherzo-wave{ animation:none; opacity:0; }
   .scherzo-abduct,.scherzo-disco{ animation:none; }
 }
+
+/* ══════════ LOTTO 9 · partecipanti equo · undo-toast · a11y · condividi ══════════ */
+.split-chk{ cursor:pointer; }
+.split-chk input{ width:19px; height:19px; margin:0 2px 0 0; accent-color:var(--th-accent); flex:none; }
+.toast-azione{ display:flex; align-items:center; gap:12px; pointer-events:auto; }
+.toast-azione button{ background:none; border:none; color:var(--th-accent); font-family:'Baloo 2',cursive; font-weight:800; font-size:var(--t-body); cursor:pointer; padding:4px 6px; flex:none; }
+[role="button"]:focus-visible, .lista-check:focus-visible, .mv-del:focus-visible{ outline:2px solid var(--th-accent); outline-offset:2px; border-radius:var(--r-sm); }
