@@ -129,6 +129,7 @@
 .mb-info{min-width:0;}
 .mb-nome{font-weight:700;font-size:var(--t-card);color:var(--br-text);display:flex;align-items:center;gap:8px;}
 .cassa-badge-tu{font-size:var(--t-meta);background:transparent;color:var(--br-dim);border:1px solid var(--br-line);font-family:'Nunito',sans-serif;font-weight:800;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;}
+.cassa-badge-fantasma{font-size:var(--t-meta);background:transparent;color:var(--br-dim);border:1px solid var(--br-line);font-family:'Nunito',sans-serif;font-weight:800;padding:2px 7px;border-radius:20px;text-transform:none;letter-spacing:.2px;}
 .mb-stato{font-family:'Nunito',sans-serif;font-weight:600;font-size:var(--t-label);margin-top:2px;}
 .mb-pari{color:var(--br-dim);} .mb-cred{color:var(--br-pos);} .mb-deb{color:var(--br-neg);}
 .mb-azioni{display:flex;gap:6px;flex-shrink:0;}
