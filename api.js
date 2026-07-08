@@ -72,7 +72,7 @@ async function caricaCassa(){
       m.paganti = m.movimento_paganti || [];
       m.quote   = m.movimento_quote   || [];
       return m;
-    });
+    }).filter(function(m){ return !_movDelPending[m.id]; });   // undo in corso: non farle riapparire
 
     if(rcat.error) return gestisciErroreCassa(rcat.error);
     categorieCassa = rcat.data || [];
