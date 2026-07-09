@@ -177,7 +177,7 @@ function errDiRete(err){
 }
 
 // ── REALTIME ──
-var _rtCassa = null, _rtTimer = null;
+var _rtCassa = null, _rtTimer = null, _rtTimerCasse = null;
 function initRealtimeCassa(){
   chiudiRealtimeCassa();
   var rid = cassaCorrente.id;
@@ -185,16 +185,42 @@ function initRealtimeCassa(){
     clearTimeout(_rtTimer);
     _rtTimer = setTimeout(function(){ if(cassaCorrente) caricaCassa(); }, 700);
   };
+  var ricaricaCassaRow = function(){
+    clearTimeout(_rtTimerCasse);
+    _rtTimerCasse = setTimeout(function(){ if(cassaCorrente) aggiornaCassaRealtime(cassaCorrente.id); }, 700);
+  };
   var ch = sb.channel("cassa-" + rid);
   ["movimenti","membri","categorie","chiusure_coppia","ricorrenti","lista_cassa","note_cassa"].forEach(function(tab){
     ch.on("postgres_changes",
       { event: "*", schema: "public", table: tab, filter: "cassa_id=eq." + rid },
       ricarica);
   });
+  // "casse" non ha la colonna cassa_id: la riga si filtra sul proprio id, ramo dedicato.
+  ch.on("postgres_changes",
+    { event: "*", schema: "public", table: "casse", filter: "id=eq." + rid },
+    ricaricaCassaRow);
   _rtCassa = ch.subscribe();
 }
 function chiudiRealtimeCassa(){
   if(_rtCassa){ sb.removeChannel(_rtCassa); _rtCassa = null; }
+}
+// Propaga live le impostazioni cassa (tema, silly, silly_livello, grezza, stato, modalita, ...):
+// a differenza delle altre tabelle, caricaCassa() non rifetcha mai la riga "casse", quindi qui
+// va aggiornata a mano cassaCorrente (preservando .ruolo/.nMembri calcolati client-side) + CASSE.
+async function aggiornaCassaRealtime(rid){
+  if(!cassaCorrente || cassaCorrente.id !== rid) return;
+  var r = await sb.from("casse").select("*").eq("id", rid).maybeSingle();
+  if(r.error || !r.data) return;
+  if(!cassaCorrente || cassaCorrente.id !== rid) return;   // la cassa potrebbe essere cambiata durante l'attesa
+  var temaPrima = cassaCorrente.tema;
+  Object.assign(cassaCorrente, r.data);
+  var idx = CASSE.findIndex(function(c){ return c.id === rid; });
+  if(idx > -1) Object.assign(CASSE[idx], r.data);
+  if(cassaCorrente.tema !== temaPrima){
+    document.body.setAttribute("data-tema", cassaCorrente.tema);
+    aggiornaThemeColor();
+  }
+  renderCassa();
 }
 
 // ── MAPPA AZIONI → QUERY ──

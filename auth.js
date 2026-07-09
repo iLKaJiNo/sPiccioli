@@ -296,21 +296,46 @@ async function confermaCreaCassa(){
 function openUnisci(){
   document.getElementById("modal-unisci").classList.add("attivo");
   unisciErrore("");
+  document.getElementById("unisci-fantasma-check").checked = false;
+  toggleUnisciFantasma(false);
   setTimeout(function(){ document.getElementById("unisci-codice").focus(); }, 100);
 }
 function closeUnisci(){ document.getElementById("modal-unisci").classList.remove("attivo"); }
 function unisciErrore(m){ document.getElementById("unisci-error").textContent = m || ""; }
+function toggleUnisciFantasma(on){
+  document.getElementById("unisci-fantasma-row").style.display = on ? "" : "none";
+  if(!on) document.getElementById("unisci-fantasma-nome").value = "";
+}
 async function confermaUnisci(){
-  var codice     = document.getElementById("unisci-codice").value.trim().toUpperCase();
-  var nomeMembro = document.getElementById("unisci-nome-membro").value.trim() || profiloUtente.nome;
+  var codice       = document.getElementById("unisci-codice").value.trim().toUpperCase();
+  var nomeMembro   = document.getElementById("unisci-nome-membro").value.trim() || profiloUtente.nome;
+  var eraFantasma  = document.getElementById("unisci-fantasma-check").checked;
+  var nomeFantasma = document.getElementById("unisci-fantasma-nome").value.trim();
   if(codice.length < 4){ unisciErrore("Inserisci il codice della cassa."); return; }
+  if(eraFantasma && !nomeFantasma){ unisciErrore("Inserisci il nome con cui ti hanno aggiunto."); return; }
   var btn = document.getElementById("unisci-btn"); btn.disabled = true; unisciErrore("");
-  var r = await sb.rpc("unisciti_a_cassa", { p_codice: codice, p_nome_membro: nomeMembro, p_fantasma_id: null });
+
+  var fantasmaId = null;
+  if(eraFantasma){
+    var r1 = await sb.rpc("trova_fantasma", { p_codice: codice, p_nome: nomeFantasma });
+    if(r1.error){ btn.disabled = false; toastInfo(msgErrore(r1.error)); return; }
+    if(!r1.data){
+      btn.disabled = false;
+      toastInfo("Nessun 👻 con questo nome in questa cassa. Controlla il nome o togli la spunta per entrare come nuovo.");
+      return;
+    }
+    fantasmaId = r1.data;
+  }
+
+  var r = await sb.rpc("unisciti_a_cassa", { p_codice: codice, p_nome_membro: nomeMembro, p_fantasma_id: fantasmaId });
   btn.disabled = false;
   if(r.error){ unisciErrore(traduciErroreUnisci(r.error.message)); return; }
   document.getElementById("unisci-codice").value = "";
+  document.getElementById("unisci-fantasma-check").checked = false;
+  toggleUnisciFantasma(false);
   closeUnisci();
   await caricaCasse();
+  if(eraFantasma) toastInfo("Bentornato! Da 👻 a 👤: spese e saldi sono già tuoi.");
 }
 function traduciErroreUnisci(m){
   m = (m||"").toLowerCase();

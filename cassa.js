@@ -80,6 +80,21 @@ function condividiCodiceInvito(){
     navigator.clipboard.writeText(testo).then(function(){ toastInfo("Invito copiato! 📋"); }).catch(function(){});
   }
 }
+// Invita un membro 👻 a reclamare la sua storia: stesso pattern di condividiCodiceInvito(),
+// con l'istruzione per la spunta "Ero già nella cassa" nel flusso Unisciti (auth.js).
+function invitaFantasma(membroId){
+  var m = (membriTutti || []).find(function(x){ return x.id === membroId; });
+  if(!m) return;
+  var nome = nomeDi(m);
+  var testo = "Unisciti alla cassa «" + cassaCorrente.nome + "» su sPiccioli! Codice: " + cassaCorrente.codice_invito
+    + ". Iscriviti, inserisci il codice e spunta «Ero già nella cassa senza account» col nome: " + nome
+    + " — " + location.origin + location.pathname;
+  if(navigator.share){
+    navigator.share({ text: testo }).catch(function(){});
+  } else if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(testo).then(function(){ toastInfo("Invito copiato! 📋"); }).catch(function(){});
+  }
+}
 // v42: il testo sync è visibile solo quando lo stato non è ok (classe .warn sul wrap).
 // dotC/aggiornaBadgeCoda vivono in api.js (intoccabile): li avvolgiamo qui.
 var _dotCBase = dotC;
@@ -403,8 +418,10 @@ function renderMembri(){
     var puoiRinominare = true;  // app silly: chiunque puo rinominare chiunque
     var puoiRimuovere  = admin && m.id !== mioId && Math.abs(s) < 0.005;
     var puoiScherzare  = m.id !== mioId && m.user_id && sillyAttivo() && !cassaBloccata();
+    var puoiInvitare   = admin && !m.user_id;
     var az = '';
     if(puoiScherzare)  az += '<button class="mb-btn" onclick="apriScherzoPicker(\'' + m.user_id + '\')" title="Scherzo">😜</button>';
+    if(puoiInvitare)   az += '<button class="mb-btn" onclick="invitaFantasma(\'' + m.id + '\')" title="Invita 👻">📤</button>';
     if(puoiRinominare) az += '<button class="mb-btn" onclick="apriRinomina(\'' + m.id + '\')" title="Rinomina">✏️</button>';
     if(puoiRimuovere)  az += '<button class="mb-btn" onclick="rimuoviMembro(\'' + m.id + '\')" title="Rimuovi">🗑️</button>';
     return '<div class="mb-row"><div class="mb-info">'
