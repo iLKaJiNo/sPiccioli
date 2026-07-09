@@ -35,20 +35,32 @@ async function apriCassa(id){
   if(getCoda().length) flushCoda();
 }
 
+// ── A3 · PAGINAZIONE MOVIMENTI (gruppi grandi) ──
+// Solo tipo='gruppo' limita alla prima pagina (ULTIMI 200): i gruppi accumulano
+// tanti movimenti e non archiviano a mese. La coppia carica tutto (net-balance
+// esatto: vedi nota su calcolaSaldi più sotto e nel REPORT).
+var MOV_PAGINA = 200;
+function _queryMovimenti(from, to){
+  var q = sb.from("movimenti")
+    .select("*, movimento_paganti(*), movimento_quote(*)")
+    .eq("cassa_id", cassaCorrente.id)
+    .order("data", { ascending: false })          // desc: la vista mostra i più recenti in cima
+    .order("created_at", { ascending: false });
+  if(from != null && to != null) q = q.range(from, to);
+  return q;
+}
+
 async function caricaCassa(){
   dotC("", "Carico…");
   try{
+    var _movLimitata = (cassaCorrente.tipo === "gruppo");
     // Query indipendenti in parallelo: su rete mobile dimezza il tempo di sync.
     // TUTTI i membri: gli attivi servono ai calcoli, i rimossi a mostrare i nomi nello storico
     var q = await Promise.all([
       sb.from("membri").select("*, profili(nome)")
         .eq("cassa_id", cassaCorrente.id)
         .order("created_at", { ascending: true }),
-      sb.from("movimenti")
-        .select("*, movimento_paganti(*), movimento_quote(*)")
-        .eq("cassa_id", cassaCorrente.id)
-        .order("data", { ascending: false })
-        .order("created_at", { ascending: false }),
+      _movLimitata ? _queryMovimenti(0, MOV_PAGINA - 1) : _queryMovimenti(),
       sb.from("categorie").select("*")
         .eq("cassa_id", cassaCorrente.id).order("ordine").order("nome"),
       (cassaCorrente.tipo === "coppia")
@@ -68,7 +80,12 @@ async function caricaCassa(){
     membriCorrente = membriTutti.filter(function(m){ return m.attivo; });
 
     if(rmov.error) return gestisciErroreCassa(rmov.error);
-    S.movimenti = (rmov.data || []).map(function(m){
+    var _movRaw = rmov.data || [];
+    // Il realtime richiama caricaCassa(): ricarica sempre la PRIMA pagina, quindi
+    // eventuali pagine "Carica precedenti" già aperte si richiudono. Accettabile.
+    S.movCaricati       = _movRaw.length;                          // righe grezze già scaricate (offset paginazione)
+    S.movimentiParziali = _movLimitata && (_movRaw.length === MOV_PAGINA);
+    S.movimenti = _movRaw.map(function(m){
       m.paganti = m.movimento_paganti || [];
       m.quote   = m.movimento_quote   || [];
       return m;
@@ -90,6 +107,37 @@ async function caricaCassa(){
     renderCassa();
   }catch(e){
     dotC("err", "Offline");
+  }
+}
+
+// ── A3 · «Carica precedenti»: appende la pagina successiva a S.movimenti ──
+// range 200-399, poi 400-599… partendo dalle righe già scaricate (S.movCaricati).
+var _movPaginaInCorso = false;
+async function caricaAltriMovimenti(){
+  if(_movPaginaInCorso || !cassaCorrente || !S.movimentiParziali) return;
+  _movPaginaInCorso = true;
+  var btn = document.getElementById("mv-piu-btn");
+  if(btn){ btn.disabled = true; btn.textContent = "⏳ Carico…"; }
+  try{
+    var from = S.movCaricati || S.movimenti.length;
+    var r = await _queryMovimenti(from, from + MOV_PAGINA - 1);
+    if(r.error){ toastInfo(msgErrore(r.error)); return; }
+    var raw = r.data || [];
+    S.movCaricati       = from + raw.length;
+    S.movimentiParziali = (raw.length === MOV_PAGINA);
+    var nuovi = raw.map(function(m){
+      m.paganti = m.movimento_paganti || [];
+      m.quote   = m.movimento_quote   || [];
+      return m;
+    }).filter(function(m){ return !_movDelPending[m.id]; });
+    S.movimenti = (S.movimenti || []).concat(nuovi);
+    renderMovimenti();
+    renderSaldi();   // i saldi in vista includono ora anche le pagine caricate
+  }catch(e){
+    if(errDiRete(e)) toastInfo("Sei offline: riprova quando torna la rete.");
+    else { console.error("Carica precedenti fallito:", e); toastInfo("Qualcosa è andato storto. Riprova."); }
+  }finally{
+    _movPaginaInCorso = false;
   }
 }
 

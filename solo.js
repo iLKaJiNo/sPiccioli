@@ -162,7 +162,7 @@ async function salvaVoce(){
     tipo: _voceTipo, importo: imp,
     categoria: cat || null, nota: nota || null, data: data
   });
-  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   chiudiNuovaVoce();
   await caricaSolo();
 }
@@ -175,7 +175,7 @@ async function eliminaVoce(id){
   });
   if(!ok) return;
   var r = await sb.from("solo_voci").delete().eq("id", id);
-  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   await caricaSolo();
 }
 
@@ -227,7 +227,7 @@ async function aggiungiVoceCat(){
     var ordine = (soloCategorie || []).length;   // user_id dal default
     r = await sb.from("solo_categorie").insert({ nome: nome, icona: icona || "📌", ordine: ordine });
   }
-  if(r.error){ soloCatErrore("Errore: " + r.error.message); return; }
+  if(r.error){ soloCatErrore(msgErrore(r.error)); return; }
   await caricaSolo();
   renderSoloCatModal();
   popolaVoceCategoria();
@@ -250,7 +250,7 @@ async function eliminaSoloCat(id){
   });
   if(!ok) return;
   var r = await sb.from("solo_categorie").delete().eq("id", id);
-  if(r.error){ soloCatErrore("Errore: " + r.error.message); return; }
+  if(r.error){ soloCatErrore(msgErrore(r.error)); return; }
   await caricaSolo();
   renderSoloCatModal();
   popolaVoceCategoria();
@@ -266,7 +266,7 @@ async function aggiungiSetComuniSolo(){
   var base = (soloCategorie || []).length;
   var rows = set.map(function(c, i){ return { nome: c.nome, icona: c.icona, ordine: base + i }; });
   var r = await sb.from("solo_categorie").insert(rows);
-  if(r.error){ soloCatErrore("Errore: " + r.error.message); return; }
+  if(r.error){ soloCatErrore(msgErrore(r.error)); return; }
   await caricaSolo();
   renderSoloCatModal();
   popolaVoceCategoria();
@@ -359,7 +359,7 @@ async function confermaChiudiMeseSolo(){
   var ok = await confermaBrand({ titolo: "Chiudere il mese?", testo: testo, cta: "📆 Chiudi" });
   if(!ok) return;
   var r = await sb.rpc("chiudi_mese_solo");
-  if(r.error){ await alertBrand("Errore nella chiusura: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   await caricaSolo();
   renderArchivioSolo();
 }
@@ -369,7 +369,7 @@ async function ripristinaSolo(){
   var ok = await confermaBrand({ titolo: "Ripristinare l'ultimo mese chiuso?", testo: "", cta: "↩︎ Ripristina" });
   if(!ok) return;
   var r = await sb.rpc("ripristina_solo");
-  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  if(r.error){ toastInfo(msgErrore(r.error)); return; }
   await caricaSolo(); toastInfo("Mese ripristinato ♻️");
 }
 
@@ -411,7 +411,7 @@ async function rinominaChiusuraSolo(id){
   });
   if(nuovo === null) return;
   var r = await sb.rpc("rinomina_chiusura_solo", { p_id:id, p_nome:nuovo });
-  if(r.error){ toastInfo("Errore: "+r.error.message); return; }
+  if(r.error){ toastInfo(msgErrore(r.error)); return; }
   c.nome = nuovo.trim() || null;
   renderArchivioSolo();
   apriDettaglioChiusuraSolo(id);

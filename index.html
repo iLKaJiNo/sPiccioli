@@ -56,6 +56,7 @@ if("serviceWorker" in navigator){
   <div class="casse-top">
     <img src="./spiccioli.svg" alt="sPiccioli!">
     <div class="ct-titoli"><h1>Le tue casse</h1><p>Ciao, <span id="casse-nome-utente">…</span></p></div>
+    <button class="btn-tema-utente" onclick="apriAccount()" title="Account" aria-label="Account">👤</button>
     <button class="btn-tema-utente" onclick="apriTemaUtente()" title="Tema" aria-label="Tema">🎨</button>
     <button class="btn-esci" onclick="logout()">Esci</button>
   </div>
@@ -375,6 +376,34 @@ if("serviceWorker" in navigator){
     <h2>😜 Fai uno scherzo</h2>
     <div id="scherzo-body" class="scherzo-grid"></div>
     <div class="m-btns" style="margin-top:16px;"><button class="m-annulla" onclick="chiudiScherzoPicker()">Annulla</button></div>
+  </div>
+</div>
+
+<!-- MODALE — ACCOUNT (👤, auth.js) -->
+<div class="modal-overlay" id="modal-account" onclick="if(event.target===this)chiudiAccount()">
+  <div class="br-modal">
+    <h2>👤 Il tuo account</h2>
+    <div class="m-row"><label>Come ti chiami</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="account-nome" placeholder="Il tuo nome" style="flex:1;"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();salvaNomeAccount();}">
+        <button type="button" class="mb-btn" title="Salva nome" onclick="salvaNomeAccount()">💾</button>
+      </div>
+    </div>
+    <div class="m-row"><label>Nuova password</label>
+      <div style="display:flex;gap:8px;">
+        <input type="password" id="account-pw" placeholder="Almeno 8 caratteri" autocomplete="new-password" style="flex:1;"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();salvaPasswordAccount();}">
+        <button type="button" class="mb-btn" title="Cambia password" onclick="salvaPasswordAccount()">🔒</button>
+      </div>
+    </div>
+    <div class="m-row"><label>🌗 Luminosità</label>
+      <div id="account-lum"></div>
+    </div>
+    <div class="m-row" style="margin-top:6px;">
+      <button type="button" class="mb-danger" style="width:100%;" onclick="eliminaAccount()">🗑️ Elimina account</button>
+    </div>
+    <div class="m-btns" style="margin-top:8px;"><button class="m-conferma" onclick="chiudiAccount()">Chiudi</button></div>
   </div>
 </div>
 

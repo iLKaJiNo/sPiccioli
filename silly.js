@@ -262,7 +262,7 @@ function sillyPioggiaMonete(btn){
 // toggle + tetto (admin, card Impostazioni)
 async function toggleSilly(on){
   var r = await sb.from("casse").update({ silly: on }).eq("id", cassaCorrente.id);
-  if(r.error){ await alertBrand("Errore: "+r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   cassaCorrente.silly = on;
   if(on){ try{ if(!localStorage.getItem("spiccioli_silly_hint")){ localStorage.setItem("spiccioli_silly_hint","1"); await alertBrand("🐷 Silly acceso!\nDà personalità al mondo: emoji a tema, sorprese e il maialino che combina guai.\nNon tocca un centesimo — i conti restano seri."); } }catch(e){} }
   renderCassa(); renderMembri();
@@ -271,7 +271,7 @@ async function salvaTettoSilly(v){
   var n = parseFloat(v);
   if(!n || n < 100){ await alertBrand("Sotto i 100 il maialino muore di fame: minimo 100."); renderMembri(); return; }
   var r = await sb.from("casse").update({ silly_tetto: n }).eq("id", cassaCorrente.id);
-  if(r.error){ await alertBrand("Errore: "+r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   cassaCorrente.silly_tetto = n;
   renderCassa();
 }
@@ -280,23 +280,37 @@ async function salvaTettoSilly(v){
 // ══════════ LOTTO 4-7 · livelli · reazioni · stagioni (client-side, no DB) ══════════
 var _sillyTondaSeen = {};
 var _sillyGreetSeen = null;
+// Livello condiviso: la verità è casse.silly_livello (arriva dal select *).
+// localStorage resta solo come fallback offline / colonna assente.
+function _sillyLivCol(){
+  var v = cassaCorrente && cassaCorrente.silly_livello;
+  if(v === "sopra" || v === "elegante") return v;
+  try{ if(localStorage.getItem("spiccioli_silly_liv") === "sopra") return "sopra"; }catch(e){}
+  return "elegante";
+}
 function sillyLivello(){
   if(!sillyAttivo()) return "off";
-  try{ return localStorage.getItem("spiccioli_silly_liv")==="sopra" ? "sopra" : "elegante"; }catch(e){ return "elegante"; }
+  return _sillyLivCol();
 }
 function _sillyN(elegante, sopra){ return sillyLivello()==="sopra" ? sopra : elegante; }
 function _sillyLivSeg(withOff){
-  var on=!!(cassaCorrente&&cassaCorrente.silly), liv="elegante";
-  try{ if(localStorage.getItem("spiccioli_silly_liv")==="sopra") liv="sopra"; }catch(e){}
+  var on=!!(cassaCorrente&&cassaCorrente.silly), liv=_sillyLivCol();
   var s='<div class="split-seg" style="margin-bottom:14px;">';
   if(withOff) s+='<button class="split-btn '+(!on?"attivo":"")+'" onclick="setSilly(\'off\')">Off</button>';
   s+='<button class="split-btn '+((on&&liv==="elegante")?"attivo":"")+'" onclick="setSilly(\'elegante\')">✨ Elegante</button>';
   s+='<button class="split-btn '+((on&&liv==="sopra")?"attivo":"")+'" title="Sopra le righe" onclick="setSilly(\'sopra\')">🎉 Sopra</button>';
   return s+'</div>';
 }
+// Admin-only: Off = toggle casse.silly; Elegante/Sopra = scrive casse.silly_livello (condiviso).
 async function setSilly(mode){
   if(mode==="off"){ if(cassaCorrente&&cassaCorrente.silly){ await toggleSilly(false); } else { renderMembri(); } return; }
-  try{ localStorage.setItem("spiccioli_silly_liv", mode==="sopra"?"sopra":"elegante"); }catch(e){}
+  var liv = (mode==="sopra") ? "sopra" : "elegante";
+  if(cassaCorrente){
+    var r = await sb.from("casse").update({ silly_livello: liv }).eq("id", cassaCorrente.id);
+    if(r.error){ await alertBrand(msgErrore(r.error)); return; }
+    cassaCorrente.silly_livello = liv;
+  }
+  try{ localStorage.setItem("spiccioli_silly_liv", liv); }catch(e){}   // fallback offline
   if(cassaCorrente&&!cassaCorrente.silly){ await toggleSilly(true); }
   else { renderCassa(); renderMembri(); }
 }

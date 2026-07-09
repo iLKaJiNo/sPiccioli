@@ -287,19 +287,25 @@ function renderMovimenti(){
       +   '<div class="mv-imp">' + importoCon(mov.importo, val) + '</div>' + del
       + '</div>';
   });
+  var _html;
   if(_rows.length <= 4){
-    wrap.innerHTML = _rows.join("");
+    _html = _rows.join("");
   } else {
     var _n = _rows.length - 3;
     var _key = "spiccioli_mov_aperto_" + cassaCorrente.id;
     var _ap = accordionAperto(_key, true);
-    wrap.innerHTML =
+    _html =
       _rows.slice(0,3).join("")
       + '<button id="mv-acc-btn" onclick="accordionToggle(\'mv-acc-box\',\'mv-acc-btn\',\''+_key+'\')" style="'+ACCORDION_BTN_STYLE+'">'
         + (_ap ? "▾ Nascondi le voci precedenti" : ("▸ Mostra le altre "+_n+" voci")) + '</button>'
       + '<div id="mv-acc-box" data-open="'+(_ap?"1":"0")+'" data-count="'+_n+'" style="overflow:hidden;transition:max-height .35s ease;max-height:'+(_ap?"none":"0px")+';">'
         + _rows.slice(3).join("") + '</div>';
   }
+  // A3 · gruppi grandi: bottone in fondo per la pagina successiva (200-399, 400-599…)
+  if(S.movimentiParziali){
+    _html += '<button id="mv-piu-btn" onclick="caricaAltriMovimenti()" style="'+ACCORDION_BTN_STYLE+'">⏳ Carica precedenti</button>';
+  }
+  wrap.innerHTML = _html;
 }
 function etichettaMetodo(m){ return { esatto:"importi", percentuale:"%", quote:"quote" }[m] || m; }
 
@@ -426,12 +432,7 @@ function renderMembri(){
       ) : '');
   html += mbSez("invita", "🔑 Invita", inv, membriCorrente.length < 2);
 
-  if(!admin){
-    var aspU = '<div class="mb-toggle-row"><span>Luminosità<small>Su questo dispositivo · Auto segue il sistema</small></span></div>'
-      + _lumSeg();
-    if(cassaCorrente.silly){ aspU += '<div class="mb-toggle-row"><span>Intensità Silly<small>Solo su questo dispositivo</small></span></div>' + _sillyLivSeg(false); }
-    html += mbSez("aspetto", "🎨 Aspetto", aspU, false);
-  }
+  // La luminosità è ora nell'account (👤, per-utente sincronizzata); il livello Silly è admin-only.
   if(admin){
     // 3. 🎨 Aspetto — tema + silly + tetto
     var asp = '<div class="mb-toggle-row"><span>Tema<small>L\'aspetto della cassa</small></span></div>';
@@ -445,9 +446,7 @@ function renderMembri(){
             + '</button>';
         }).join('')
       + '</div>';
-    asp += '<div class="mb-toggle-row" style="margin-top:12px;"><span>Luminosità<small>Su questo dispositivo · Auto segue il sistema</small></span></div>'
-      + _lumSeg();
-    asp += '<div class="mb-toggle-row"><span>Silly mode<small>Dà personalità al mondo · non tocca i conti</small></span></div>' + _sillyLivSeg(true);
+    asp += '<div class="mb-toggle-row" style="margin-top:12px;"><span>Silly mode<small>Dà personalità al mondo · non tocca i conti · condiviso con la cassa</small></span></div>' + _sillyLivSeg(true);
     if(cassaCorrente.silly){
       var _tetto = parseFloat(cassaCorrente.silly_tetto)||1000;
       var _speso = (typeof _sillyTotaleSpeso==="function") ? _sillyTotaleSpeso() : 0;
@@ -515,7 +514,7 @@ async function confermaRinomina(){
   var nome = document.getElementById("rinomina-input").value.trim();
   if(!nome){ rinominaErrore("Scegli un nome."); return; }
   var r = await sb.rpc("rinomina_membro", { p_membro: _rinominaId, p_nome: nome });
-  if(r.error){ rinominaErrore("Errore: " + r.error.message); return; }
+  if(r.error){ rinominaErrore(msgErrore(r.error)); return; }
   chiudiRinomina();
   await caricaCassa();
   renderMembri();
@@ -531,7 +530,7 @@ async function rimuoviMembro(id){
   });
   if(!ok) return;
   var r = await sb.from("membri").update({ attivo: false }).eq("id", id);
-  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   await caricaCassa();
   renderMembri();
 }
@@ -543,7 +542,7 @@ async function aggiungiFantasma(){
     placeholder:"Nome" });
   if(nome === null) return;
   var r = await sb.rpc("aggiungi_membro_fantasma", { p_cassa_id: cassaCorrente.id, p_nome: nome });
-  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  if(r.error){ toastInfo(msgErrore(r.error)); return; }
   await caricaCassa(); renderCassa(); renderMembri();
   toastInfo("👻 " + escapeHtml(nome.trim()) + " è dei vostri!");
 }
@@ -557,7 +556,7 @@ async function rigeneraCodice(){
   });
   if(!ok) return;
   var r = await sb.rpc("rigenera_codice", { p_cassa: cassaCorrente.id });
-  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   cassaCorrente.codice_invito = r.data;
   renderMembri();
 }
@@ -565,7 +564,7 @@ async function rigeneraCodice(){
 // ── TOGGLE GREZZA (admin) ──
 async function toggleGrezza(on){
   var r = await sb.from("casse").update({ grezza: on }).eq("id", cassaCorrente.id);
-  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   cassaCorrente.grezza = on;
   renderCassa();
 }
@@ -574,7 +573,7 @@ async function toggleGrezza(on){
 async function switchModalita(nuova){
   if(nuova === cassaCorrente.modalita) return;
   var r = await sb.from("casse").update({ modalita: nuova }).eq("id", cassaCorrente.id);
-  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   cassaCorrente.modalita = nuova;
   renderCassa();
 }
@@ -588,7 +587,17 @@ function _lumCorrente(){
   try{ return window.matchMedia("(prefers-color-scheme: dark)").matches ? "scuro" : "chiaro"; }catch(e){ return "chiaro"; }
 }
 function applicaLum(){ try{ if(_lumCorrente()==="scuro") document.body.setAttribute("data-lum","scuro"); else document.body.removeAttribute("data-lum"); }catch(e){} aggiornaThemeColor(); }
-function cambiaLum(l){ try{ localStorage.setItem("spiccioli_lum", (l==="scuro"||l==="chiaro") ? l : "auto"); }catch(e){} applicaLum(); renderMembri(); }
+function cambiaLum(l){
+  l = (l==="scuro"||l==="chiaro") ? l : "auto";
+  try{ localStorage.setItem("spiccioli_lum", l); }catch(e){}
+  applicaLum();
+  // sincronizza sul profilo (per-utente, cross-device); offline resta il localStorage
+  if(typeof profiloUtente !== "undefined" && profiloUtente){
+    profiloUtente.lum = l;
+    try{ sb.from("profili").update({ lum: l }).eq("id", profiloUtente.id).then(null, function(){}); }catch(e){}
+  }
+  if(typeof renderAccountLum === "function") renderAccountLum();
+}
 function _lumSeg(){
   var p = _lumPref();
   return '<div class="split-seg lum-seg" style="margin-bottom:14px;">'
@@ -609,7 +618,7 @@ function stepTetto(d){ var cur = parseFloat((cassaCorrente&&cassaCorrente.silly_
 async function cambiaTema(t){
   if(!cassaCorrente || t === cassaCorrente.tema) return;
   var r = await sb.from("casse").update({ tema: t }).eq("id", cassaCorrente.id);
-  if(r.error){ await alertBrand("Errore nel cambio tema: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   cassaCorrente.tema = t;
   document.body.setAttribute("data-tema", t);
   aggiornaThemeColor();
@@ -636,7 +645,7 @@ function controllaNomeElimina(){
 async function confermaEliminaCassa(){
   if(document.getElementById("elimina-input").value.trim() !== cassaCorrente.nome) return;
   var r = await sb.from("casse").delete().eq("id", cassaCorrente.id);
-  if(r.error){ eliminaErrore("Errore: " + r.error.message); return; }
+  if(r.error){ eliminaErrore(msgErrore(r.error)); return; }
   chiudiEliminaCassa();
   tornaAlleCasse();
 }
@@ -650,7 +659,7 @@ async function terminaGruppo(){
   });
   if(!ok) return;
   var r = await sb.rpc("termina_gruppo", { p_cassa_id: cassaCorrente.id });
-  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  if(r.error){ toastInfo(msgErrore(r.error)); return; }
   cassaCorrente.stato = "terminata";
   var c = CASSE.find(function(x){ return x.id === cassaCorrente.id; }); if(c) c.stato = "terminata";
   renderCassa(); renderMembri(); toastInfo("Gruppo terminato 🏁");
@@ -663,7 +672,7 @@ async function riattivaGruppo(){
   });
   if(!ok) return;
   var r = await sb.rpc("riattiva_gruppo", { p_cassa_id: cassaCorrente.id });
-  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  if(r.error){ toastInfo(msgErrore(r.error)); return; }
   cassaCorrente.stato = "attiva";
   var c = CASSE.find(function(x){ return x.id === cassaCorrente.id; }); if(c) c.stato = "attiva";
   renderCassa(); renderMembri(); toastInfo("Gruppo riattivato ♻️");
@@ -1026,7 +1035,7 @@ async function aggiungiCategoria(){
     var ordine = (categorieCassa || []).length;
     r = await sb.from("categorie").insert({ cassa_id: cassaCorrente.id, nome: nome, icona: icona || "📌", ordine: ordine });
   }
-  if(r.error){ catErrore("Errore: " + r.error.message); return; }
+  if(r.error){ catErrore(msgErrore(r.error)); return; }
   await caricaCassa();
   renderCategorieModal();
   popolaCategoriaSelect();
@@ -1049,7 +1058,7 @@ async function eliminaCategoria(id){
   });
   if(!ok) return;
   var r = await sb.from("categorie").delete().eq("id", id);
-  if(r.error){ catErrore("Errore: " + r.error.message); return; }
+  if(r.error){ catErrore(msgErrore(r.error)); return; }
   await caricaCassa();
   renderCategorieModal();
   popolaCategoriaSelect();
@@ -1067,7 +1076,7 @@ async function aggiungiSetComuni(){
     return { cassa_id: cassaCorrente.id, nome: c.nome, icona: c.icona, ordine: base + i };
   });
   var r = await sb.from("categorie").insert(rows);
-  if(r.error){ catErrore("Errore: " + r.error.message); return; }
+  if(r.error){ catErrore(msgErrore(r.error)); return; }
   await caricaCassa();
   renderCategorieModal();
   popolaCategoriaSelect();
@@ -1206,7 +1215,7 @@ async function confermaChiudiMese(){
   var btn = document.getElementById("chiudi-mese-btn"); if(btn) btn.disabled = true;
   var r = await sb.rpc("chiudi_mese_coppia", { p_cassa_id: cassaCorrente.id });
   if(btn) btn.disabled = false;
-  if(r.error){ await alertBrand("Errore nella chiusura: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   chiudiModalChiudiMese();
   await caricaCassa();
   switchCassaTab("archivio");
@@ -1222,7 +1231,7 @@ async function ripristinaCoppia(){
   });
   if(!ok) return;
   var r = await sb.rpc("ripristina_coppia", { p_cassa_id: cassaCorrente.id });
-  if(r.error){ toastInfo("Errore: " + r.error.message); return; }
+  if(r.error){ toastInfo(msgErrore(r.error)); return; }
   await caricaCassa(); renderCassa(); renderArchivio(); toastInfo("Chiusura ripristinata ♻️");
 }
 
@@ -1276,7 +1285,7 @@ async function rinominaChiusura(id){
   });
   if(nuovo === null) return;
   var r = await sb.rpc("rinomina_chiusura_coppia", { p_id:id, p_nome:nuovo });
-  if(r.error){ toastInfo("Errore: "+r.error.message); return; }
+  if(r.error){ toastInfo(msgErrore(r.error)); return; }
   c.nome = nuovo.trim() || null;
   renderArchivio();
   apriDettaglioChiusura(id);
