@@ -65,6 +65,22 @@ function escapeHtml(s){
   });
 }
 
+// ── MESSAGGI D'ERRORE UMANI ──
+// Traduce l'errore Supabase (PostgREST/PostgreSQL/rete) in una frase leggibile.
+// Usato al posto di "Errore: "+r.error.message nei toast/alert dei call-site .rpc e runAction.
+function msgErrore(e){
+  if(!e) return "Qualcosa è andato storto.";
+  var c = e.code || "", m = e.message || "";
+  if(c === "P0001") return m;                      // messaggi umani delle RPC
+  if(c === "23505") return "Esiste già un elemento identico.";
+  if(c === "23503") return "Operazione non possibile: elemento collegato mancante.";
+  if(c === "42501" || (m && m.indexOf("permission denied") >= 0))
+    return "Non hai i permessi per farlo.";
+  if(m && (m.indexOf("Failed to fetch") >= 0 || m.indexOf("NetworkError") >= 0))
+    return "Sei offline: riprova quando torna la rete.";
+  return "Qualcosa è andato storto. Riprova.";
+}
+
 // ── Accordion / fisarmonica per liste lunghe (helper condivisi) ──
 var ACCORDION_BTN_STYLE = "display:block;width:100%;background:var(--br-bg2);border:1px dashed var(--br-line);border-radius:10px;color:var(--br-dim);font-family:'Nunito',sans-serif;font-weight:700;font-size:.78rem;padding:7px 8px;margin:8px 0;cursor:pointer;";
 function accordionAperto(key, def){

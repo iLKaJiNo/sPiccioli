@@ -129,18 +129,84 @@ function chiudiTemaUtente(){ document.getElementById("modal-tema-utente").classL
 async function cambiaTemaUtente(t){
   if(!profiloUtente || t === profiloUtente.tema) return;
   var r = await sb.from("profili").update({ tema: t }).eq("id", profiloUtente.id);
-  if(r.error){ await alertBrand("Errore nel cambio tema: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   profiloUtente.tema = t;
   document.body.setAttribute("data-tema", t);   // siamo su home → applica subito
   aggiornaThemeColor();
   apriTemaUtente();                              // rinfresca evidenziazione
 }
 
+// ── ACCOUNT (👤 in home): nome, password, luminosità, elimina account ──
+function apriAccount(){
+  var i = document.getElementById("account-nome");
+  if(i) i.value = (profiloUtente && profiloUtente.nome) || "";
+  var p = document.getElementById("account-pw"); if(p) p.value = "";
+  renderAccountLum();
+  document.getElementById("modal-account").classList.add("attivo");
+  setTimeout(function(){ if(i) i.focus(); }, 100);
+}
+function chiudiAccount(){ document.getElementById("modal-account").classList.remove("attivo"); }
+function renderAccountLum(){
+  var el = document.getElementById("account-lum");
+  if(el && typeof _lumSeg === "function") el.innerHTML = _lumSeg();
+}
+async function salvaNomeAccount(){
+  var nome = ((document.getElementById("account-nome") || {}).value || "").trim();
+  if(!nome){ await alertBrand("Scegli un nome."); return; }
+  if(!profiloUtente) return;
+  if(nome === profiloUtente.nome){ toastInfo("Nome già a posto 👍"); return; }
+  var r = await sb.from("profili").update({ nome: nome }).eq("id", profiloUtente.id);
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
+  profiloUtente.nome = nome;
+  var el = document.getElementById("casse-nome-utente");   // aggiorna il saluto in home
+  if(el) el.textContent = profiloUtente.nome || profiloUtente.email;
+  toastInfo("Nome aggiornato ✅");
+}
+async function salvaPasswordAccount(){
+  var pw = (document.getElementById("account-pw") || {}).value || "";
+  if(pw.length < 8){ await alertBrand("Password troppo corta (min. 8 caratteri)."); return; }
+  var r = await sb.auth.updateUser({ password: pw });
+  if(r.error){ toastInfo(msgErrore(r.error)); return; }
+  document.getElementById("account-pw").value = "";
+  toastInfo("Password aggiornata 🔒");
+}
+async function eliminaAccount(){
+  var ok = await confermaBrand({
+    titolo: "Eliminare l'account?",
+    testo: "Nelle casse condivise diventi 👻 e la storia resta. Il tuo Solo e l'accesso spariscono per sempre.",
+    cta: "Continua", danger: true
+  });
+  if(!ok) return;
+  var val = await promptBrand({
+    titolo: "Sei proprio sicuro?",
+    testo: "Scrivi <b>ELIMINA</b> per confermare.",
+    placeholder: "ELIMINA", cta: "🗑️ Elimina per sempre"
+  });
+  if(val === null) return;
+  if((val || "").trim() !== "ELIMINA"){ await alertBrand("Non eliminato: devi scrivere esattamente ELIMINA."); return; }
+  var r = await sb.rpc("elimina_account");
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
+  chiudiAccount();
+  await sb.auth.signOut();
+  location.reload();   // torna alla schermata di accesso
+}
+
 async function caricaProfilo(){
   var u = (await sb.auth.getUser()).data.user;
   if(!u) return;
-  var p = await sb.from("profili").select("nome, tema").eq("id", u.id).maybeSingle();
-  profiloUtente = { id: u.id, email: u.email, nome: (p.data && p.data.nome) || "", tema: (p.data && p.data.tema) || "salvadanaio" };
+  var p = await sb.from("profili").select("nome, tema, lum").eq("id", u.id).maybeSingle();
+  var lum = p.data && p.data.lum;
+  profiloUtente = {
+    id: u.id, email: u.email,
+    nome: (p.data && p.data.nome) || "",
+    tema: (p.data && p.data.tema) || "salvadanaio",
+    lum:  (lum === "chiaro" || lum === "scuro" || lum === "auto") ? lum : "auto"
+  };
+  // Luminosità dal profilo (sincronizzata tra dispositivi); localStorage è il fallback offline.
+  if(lum === "chiaro" || lum === "scuro" || lum === "auto"){
+    try{ localStorage.setItem("spiccioli_lum", lum); }catch(e){}
+    if(typeof applicaLum === "function") applicaLum();
+  }
 }
 
 // ── LE TUE CASSE ──
@@ -219,7 +285,7 @@ async function confermaCreaCassa(){
     p_nome: nome, p_modalita: modalita, p_valuta: "EUR", p_tema: tema, p_nome_membro: nomeMembro, p_tipo: tipo
   });
   btn.disabled = false;
-  if(r.error){ creaErrore("Errore: " + r.error.message); return; }
+  if(r.error){ creaErrore(msgErrore(r.error)); return; }
   document.getElementById("crea-nome").value = "";
   document.getElementById("crea-nome-membro").value = "";
   closeCreaCassa();

@@ -75,7 +75,7 @@ async function confermaManuale(id){
   if(!navigator.onLine){ await alertBrand("Serve una connessione."); return; }
   var fn = _ricScope === "cassa" ? "conferma_ricorrente_cassa" : "conferma_ricorrente_solo";
   var r = await sb.rpc(fn, { p_id: id });
-  if(r.error){ await alertBrand("Errore: " + r.error.message); return; }
+  if(r.error){ await alertBrand(msgErrore(r.error)); return; }
   if(_ricScope === "cassa") await caricaCassa(); else await caricaSolo();
   renderRicorrentiLista();
 }
@@ -169,7 +169,7 @@ async function salvaRicorrente(){
   var r = _ricEditId
     ? await sb.from("ricorrenti").update(row).eq("id", _ricEditId)
     : await sb.from("ricorrenti").insert(row);
-  if(r.error){ ricFormErrore("Errore: " + r.error.message); return; }
+  if(r.error){ ricFormErrore(msgErrore(r.error)); return; }
   chiudiFormRicorrente();
   if(_ricAuto && navigator.onLine){
     try{
@@ -190,7 +190,7 @@ async function eliminaRicorrente(){
   });
   if(!ok) return;
   var r = await sb.from("ricorrenti").delete().eq("id", _ricEditId);
-  if(r.error){ ricFormErrore("Errore: " + r.error.message); return; }
+  if(r.error){ ricFormErrore(msgErrore(r.error)); return; }
   chiudiFormRicorrente();
   if(_ricScope === "cassa") await caricaRicorrentiCassa(); else await caricaRicorrentiSolo();
   renderRicorrentiLista();
