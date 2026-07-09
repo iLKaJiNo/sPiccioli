@@ -200,7 +200,7 @@ function renderReportGruppo(){
   var tot  = movs.reduce(function(a,m){ return a + (parseFloat(m.importo)||0)*(parseFloat(m.tasso_cambio)||1); }, 0);
   var cat  = _datiCategoria();
   var topCat = cat.length ? cat[0] : null;
-  var saldi = calcolaSaldi();
+  var saldi = saldiCorrenti();
   var nomi  = nomiMembri();
 
   var h = '<div class="card report-finale">';

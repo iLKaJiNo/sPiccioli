@@ -213,7 +213,7 @@ function sillyCheck(){
   _sillyCompleanno();
 
   // una-tantum: coriandoli sul passaggio a "in pari"
-  var saldi = calcolaSaldi();
+  var saldi = saldiCorrenti();
   var inPari = membriCorrente.length>0 && membriCorrente.every(function(m){ return Math.abs(saldi[m.id]||0) < 0.005; });
   if(_sillyEraInPari===false && inPari){ sillyCoriandoli(); _sillyLampo(); }
   _sillyEraInPari = inPari;

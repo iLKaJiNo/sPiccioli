@@ -38,7 +38,9 @@ async function apriCassa(id){
 // ── A3 · PAGINAZIONE MOVIMENTI (gruppi grandi) ──
 // Solo tipo='gruppo' limita alla prima pagina (ULTIMI 200): i gruppi accumulano
 // tanti movimenti e non archiviano a mese. La coppia carica tutto (net-balance
-// esatto: vedi nota su calcolaSaldi più sotto e nel REPORT).
+// esatto). Per i gruppi paginati il net-balance client sarebbe incompleto: quando
+// S.movimentiParziali è true, caricaCassa() chiede i saldi esatti al server via
+// RPC saldi_cassa e li salva in S.saldiServer — vedi saldiCorrenti() in utils.js.
 var MOV_PAGINA = 200;
 function _queryMovimenti(from, to){
   var q = sb.from("movimenti")
@@ -52,6 +54,7 @@ function _queryMovimenti(from, to){
 
 async function caricaCassa(){
   dotC("", "Carico…");
+  S.saldiServer = null;   // invalidato ad ogni ricarica: ripopolato più sotto se applicabile
   try{
     var _movLimitata = (cassaCorrente.tipo === "gruppo");
     // Query indipendenti in parallelo: su rete mobile dimezza il tempo di sync.
@@ -101,6 +104,20 @@ async function caricaCassa(){
 
     if(rnote.error) return gestisciErroreCassa(rnote.error);
     S.note = rnote.data || [];
+
+    // A3 · saldi esatti dal server: solo gruppi con movimenti paginati (la pagina
+    // locale non basta per un net-balance corretto). saldiCorrenti() ricade su
+    // calcolaSaldi() se null (errore, non applicabile, o cassa non ancora ricaricata).
+    if(cassaCorrente.tipo === "gruppo" && S.movimentiParziali){
+      try{
+        var rs = await sb.rpc("saldi_cassa", { p_cassa_id: cassaCorrente.id });
+        if(!rs.error && rs.data){
+          var _mappa = {};
+          rs.data.forEach(function(r){ _mappa[r.membro_id] = Math.round((parseFloat(r.saldo)||0)*100)/100; });
+          S.saldiServer = _mappa;
+        }
+      }catch(e){ /* S.saldiServer resta null: fallback a calcolaSaldi() */ }
+    }
 
     dotC("ok", "Sincronizzata");
     aggiornaBadgeCoda();

@@ -168,7 +168,7 @@ function renderCassa(){
 
 // ── SALDI ──
 function renderSaldi(){
-  var saldi  = calcolaSaldi();
+  var saldi  = saldiCorrenti();
   var titolo = document.getElementById("saldi-titolo");
   var wrap   = document.getElementById("saldi-list");
   var extra  = document.getElementById("settle-extra");
@@ -389,7 +389,7 @@ function mbSezToggle(sez){
 
 function renderMembri(){
   var nomi  = nomiMembri();
-  var saldi = calcolaSaldi();
+  var saldi = saldiCorrenti();
   var mioId = (mioMembro() || {}).id;
   var admin = cassaCorrente.ruolo === "admin";
 
