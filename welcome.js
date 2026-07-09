@@ -1,17 +1,17 @@
 // ════════════════════════════════════════════════════════
 //  sPiccioli! — welcome.js
 //  Slide di benvenuto al primo accesso (first-run) + FAQ toggle.
-//  Copy SEGNAPOSTO (testi definitivi al pass finale, Claude Design).
+//  Copy DEFINITIVO (Lotto 9 — Claude Design).
 //  Riusa il guscio .info-overlay per lo stile.
 // ════════════════════════════════════════════════════════
 
 var WELCOME_KEY = "spiccioli_welcome_visto";
 var _welcomeIdx = 0;
 var WELCOME_SLIDES = [
-  { emoji:"🐷", titolo:"Oink! Sono sPiccioli!", testo:"Tengo da conto i tuoi Piccioli: le piccole spese che, messe insieme, fanno le grandi storie." },
+  { emoji:"🐷", titolo:"Oink! Sono sPiccioli!", testo:"Tengo da conto i tuoi Piccioli: le spese di ogni giorno che, messe insieme, raccontano una storia." },
   { emoji:"👥", titolo:"Da solo, in due o in banda", testo:"Il Solo è il tuo bilancio personale. La Coppia chiude i conti ogni mese. Il Gruppo regge fino a 20 scellerati." },
   { emoji:"🧺", titolo:"Lista, note e grafici", testo:"Scrivete la lista della spesa insieme, lasciatevi bigliettini in bacheca e scoprite chi ha pagato più pizze." },
-  { emoji:"✨", titolo:"I numeri sono seri. Noi no.", testo:"Attiva la modalità Silly e la cassa prende vita: io cresco, dormo, festeggio. Pronti? Io ho già fame di Piccioli." }
+  { emoji:"✨", titolo:"I numeri sono seri. Noi no.", testo:"Silly ha tre marce: spento, elegante o sopra le righe. Accendila e io cresco, dormo, festeggio — a modo tuo." }
 ];
 
 function maybeWelcome(){

@@ -120,6 +120,11 @@ function nomiMembri(){
   (membriTutti || []).forEach(function(m){ n[m.id] = nomeDi(m); });
   return n;
 }
+// Lotto 9: marca un nome come "senza account" ovunque appaia in un contesto di saldo/debito
+function fantasmaTag(id){
+  var m = (membriTutti || []).find(function(x){ return x.id === id; });
+  return (m && !m.user_id) ? ' <span class="cassa-badge-fantasma">👻</span>' : '';
+}
 
 // icona della categoria per nome; fallback morbido se la cat è stata eliminata
 function iconaCat(nome){
@@ -192,7 +197,7 @@ function renderSaldi(){
     var cls = s > 0.005 ? "credito" : (s < -0.005 ? "debito" : "pari");
     var lbl = s > 0.005 ? "in credito" : (s < -0.005 ? "in debito" : "in pari");
     var seg = s > 0.005 ? "+" : (s < -0.005 ? "−" : "");
-    return '<div class="saldo-membro"><span class="sm-nome">' + escapeHtml(nomi[m.id]) + (reMese===m.id ? " 👑" : "") + '</span>'
+    return '<div class="saldo-membro"><span class="sm-nome">' + escapeHtml(nomi[m.id]) + (reMese===m.id ? " 👑" : "") + fantasmaTag(m.id) + '</span>'
       + '<span class="sm-val ' + cls + '">' + seg + eur(Math.abs(s)) + '<small>' + lbl + '</small></span></div>';
   }).join("");
 
@@ -214,16 +219,16 @@ function renderGrezza(saldi){
   var debId = a < b ? ids[0] : ids[1];
   var creId = a < b ? ids[1] : ids[0];
   wrap.innerHTML = '<div class="grezza-box">'
-    + '<div class="grezza-frase"><b>' + escapeHtml(nomi[debId]) + '</b> è indietro di <b>' + eur(gap)
-    + '</b> rispetto a <b>' + escapeHtml(nomi[creId]) + '</b></div>'
+    + '<div class="grezza-frase"><b>' + escapeHtml(nomi[debId]) + '</b>' + fantasmaTag(debId) + ' è indietro di <b>' + eur(gap)
+    + '</b> rispetto a <b>' + escapeHtml(nomi[creId]) + '</b>' + fantasmaTag(creId) + '</div>'
     + '<div class="grezza-nota">Modalità grezza: si pareggia spendendo di più, non in contanti.</div>'
     + '</div>';
 }
 function rigaDebito(d){
   var nomi = nomiMembri();
   return '<div class="riga-debito">'
-    +   '<div class="rd-txt"><b>' + escapeHtml(nomi[d.da] || "?") + '</b> deve '
-    +     '<b>' + eur(d.importo) + '</b> a <b>' + escapeHtml(nomi[d.a] || "?") + '</b></div>'
+    +   '<div class="rd-txt"><b>' + escapeHtml(nomi[d.da] || "?") + '</b>' + fantasmaTag(d.da) + ' deve '
+    +     '<b>' + eur(d.importo) + '</b> a <b>' + escapeHtml(nomi[d.a] || "?") + '</b>' + fantasmaTag(d.a) + '</div>'
     +   '<button class="btn-salda" onclick="apriSettle(\'' + d.da + '\',\'' + d.a + '\',' + d.importo + ')">Salda</button>'
     + '</div>';
 }
@@ -233,7 +238,8 @@ function renderPaganteSelect(){
   var mio = mioMembro();
   sel.innerHTML = membriCorrente.map(function(m){
     var s = (mio && m.id === mio.id) ? " selected" : "";
-    return '<option value="' + m.id + '"' + s + '>' + escapeHtml(nomeDi(m)) + '</option>';
+    var g = m.user_id ? "" : " 👻";
+    return '<option value="' + m.id + '"' + s + '>' + escapeHtml(nomeDi(m)) + g + '</option>';
   }).join("");
 }
 
@@ -404,14 +410,20 @@ function renderMembri(){
   // 1. Card membri — sempre aperta
   var html = '<div class="card"><div class="card-titolo">Membri (' + membriCorrente.length + ')</div>' + righe + '</div>';
 
-  // 2. 🔑 Invita — aperta di default finché si è in meno di due
-  var inv = '<div class="codice-big">' + escapeHtml(cassaCorrente.codice_invito) + '</div>'
+  // 2. 🔑 Invita — aperta di default finché si è in meno di due (Lotto 9: due domande naive)
+  var inv = '<div class="invita-domanda">Ce l\'ha, il telefono?</div>'
+    + '<div class="codice-big">' + escapeHtml(cassaCorrente.codice_invito) + '</div>'
     + '<div style="display:flex;gap:8px;align-items:center;">'
     + '<button class="mb-azione-btn" style="flex:1;" onclick="copiaCodiceInvito()">📋 Copia</button>'
     + '<button class="mb-azione-btn" style="flex:1;" onclick="condividiCodiceInvito()">📤 Condividi</button>'
     + (admin ? '<button class="mb-btn" onclick="rigeneraCodice()" title="Rigenera codice">🔄</button>' : '')
     + '</div>'
-    + (admin ? '<button class="btn-ghost btn-mini" style="margin-top:10px;" onclick="aggiungiFantasma()">➕ Aggiungi senza account</button>' : '');
+    + (admin ? (
+        '<div class="invita-divider"><span>oppure</span></div>'
+      + '<div class="invita-domanda">Non ce l\'ha? Aggiungilo tu.</div>'
+      + '<div class="invita-nota">Le spese gliele segnate voi. Lui/lei non entra mai qui dentro.</div>'
+      + '<button class="btn-ghost btn-mini" style="margin-top:8px;" onclick="aggiungiFantasma()">👻 Aggiungi senza telefono</button>'
+      ) : '');
   html += mbSez("invita", "🔑 Invita", inv, membriCorrente.length < 2);
 
   if(!admin){
