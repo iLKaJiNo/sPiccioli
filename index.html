@@ -347,6 +347,16 @@ if("serviceWorker" in navigator){
     <p>Inserisci il codice che ti ha dato chi gestisce la cassa.</p>
     <div class="m-row"><label>🔑 Codice cassa</label><input type="text" id="unisci-codice" class="m-codice" placeholder="ABC123" maxlength="6" onkeydown="if(event.key==='Enter')confermaUnisci()"></div>
     <div class="m-row"><label>🙂 Il tuo nome in questa cassa</label><input type="text" id="unisci-nome-membro" placeholder="Lascia vuoto per usare il tuo nome"></div>
+    <div class="m-row">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <input type="checkbox" id="unisci-fantasma-check" style="width:auto;height:auto;" onchange="toggleUnisciFantasma(this.checked)">
+        👻 Ero già nella cassa senza account
+      </label>
+    </div>
+    <div class="m-row" id="unisci-fantasma-row" style="display:none;">
+      <label>Il nome con cui ti hanno aggiunto</label>
+      <input type="text" id="unisci-fantasma-nome" placeholder="Es. Marco">
+    </div>
     <div class="modal-error" id="unisci-error"></div>
     <div class="m-btns">
       <button class="m-annulla" onclick="closeUnisci()">Annulla</button>
