@@ -138,6 +138,9 @@ async function caricaAltriMovimenti(){
     else { console.error("Carica precedenti fallito:", e); toastInfo("Qualcosa è andato storto. Riprova."); }
   }finally{
     _movPaginaInCorso = false;
+    // se il bottone è ancora lì (errore, o pagina non finita) riportalo cliccabile
+    var b = document.getElementById("mv-piu-btn");
+    if(b){ b.disabled = false; b.textContent = "⏳ Carica precedenti"; }
   }
 }
 
