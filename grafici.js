@@ -130,7 +130,7 @@ function _drawDonut(canvas, slices, tot){
   canvas.style.width = size+"px"; canvas.style.height = size+"px";
   ctx.scale(dpr, dpr);
   var cx=size/2, cy=size/2, r=size/2-4, ang=-Math.PI/2;
-  var css = getComputedStyle(document.documentElement);
+  var css = getComputedStyle(document.body);
   var cardBg = (css.getPropertyValue("--br-card")||"#fff").trim();
   slices.forEach(function(s){
     if(!s.val) return;
@@ -167,7 +167,7 @@ function _drawBarre(canvas, dati){
   canvas.width = W*dpr; canvas.height = H*dpr;
   canvas.style.width = W+"px"; canvas.style.height = H+"px";
   ctx.scale(dpr, dpr);
-  var css = getComputedStyle(document.documentElement);
+  var css = getComputedStyle(document.body);
   var accent = (css.getPropertyValue("--th-accent")||"#E8833A").trim();
   var dim = (css.getPropertyValue("--br-dim")||"#999").trim();
   var max = Math.max.apply(null, dati.map(function(d){ return d.val; }).concat([1]));
