@@ -7,7 +7,43 @@
 // ════════════════════════════════════════════════════════
 
 var _graficoVista = "chi";   // "chi" | "categoria" | "storico"
-var GRAFICO_PALETTE = ["#E8833A","#4C9F70","#5B8DEF","#E0526E","#B57BE0","#E3B23C","#4FB0AE","#9C6B4A","#7A86B6","#D98CA0"];
+// Lotto 9: palette derivata dai token del tema (non più fissa) — leggibile su chiaro e scuro
+function _hexToHsl(hex){
+  var h = (hex||"#4DD0FF").replace("#","");
+  if(h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  var r=parseInt(h.substr(0,2),16)/255, g=parseInt(h.substr(2,2),16)/255, b=parseInt(h.substr(4,2),16)/255;
+  var max=Math.max(r,g,b), min=Math.min(r,g,b), hh=0, ss=0, ll=(max+min)/2;
+  if(max!==min){
+    var d=max-min; ss = ll>0.5 ? d/(2-max-min) : d/(max+min);
+    if(max===r) hh=(g-b)/d+(g<b?6:0); else if(max===g) hh=(b-r)/d+2; else hh=(r-g)/d+4;
+    hh*=60;
+  }
+  return { h:hh, s:ss*100, l:ll*100 };
+}
+function _hslToHex(h,s,l){
+  h=((h%360)+360)%360; s=Math.max(0,Math.min(100,s))/100; l=Math.max(0,Math.min(100,l))/100;
+  var c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2, r=0,g=0,b=0;
+  if(h<60){r=c;g=x;b=0;} else if(h<120){r=x;g=c;b=0;} else if(h<180){r=0;g=c;b=x;}
+  else if(h<240){r=0;g=x;b=c;} else if(h<300){r=x;g=0;b=c;} else {r=c;g=0;b=x;}
+  function to255(v){ return Math.round((v+m)*255); }
+  function toHex(v){ var s2=v.toString(16); return s2.length===1?"0"+s2:s2; }
+  return "#"+toHex(to255(r))+toHex(to255(g))+toHex(to255(b));
+}
+function _graficoPalette(n){
+  var css = getComputedStyle(document.body);
+  var a1 = (css.getPropertyValue("--th-accent")||"").trim() || "#4DD0FF";
+  var a2 = (css.getPropertyValue("--th-accent2")||"").trim() || "#FFC24D";
+  var a3 = (css.getPropertyValue("--th-accent-dark")||"").trim() || a1;
+  var anchors = [a1, a2, a3], out = [], base = _hexToHsl(a1);
+  for(var i=0;i<n;i++){
+    if(i < anchors.length){ out.push(anchors[i]); continue; }
+    var hue = (base.h + i*137.508) % 360;
+    var sBand = Math.max(45, Math.min(72, base.s));
+    var lBand = (i % 2 === 0) ? 46 : 58;
+    out.push(_hslToHex(hue, sBand, lBand));
+  }
+  return out;
+}
 
 function _baseCur(){ return (cassaCorrente && cassaCorrente.valuta_base) || "EUR"; }
 function _movValide(){
@@ -73,8 +109,9 @@ function _renderDonut(body, dati){
   if(!dati.length || tot <= 0){ body.innerHTML = '<div class="grafico-vuoto">Nessuna spesa in questo periodo.</div>'; return; }
   body.innerHTML = '<div class="grafico-donut-wrap"><canvas id="grafico-canvas"></canvas></div><div id="grafico-legenda" class="grafico-legenda"></div>';
   var lh = "";
+  var _pal = _graficoPalette(dati.length);
   dati.forEach(function(d, i){
-    d.color = GRAFICO_PALETTE[i % GRAFICO_PALETTE.length];
+    d.color = _pal[i];
     var perc = Math.round(d.val/tot*100);
     lh += '<div class="gr-leg-item"><span class="gr-leg-dot" style="background:'+d.color+'"></span>'
         + '<span class="gr-leg-nome">'+escapeHtml(d.label)+'</span>'
@@ -93,15 +130,18 @@ function _drawDonut(canvas, slices, tot){
   canvas.style.width = size+"px"; canvas.style.height = size+"px";
   ctx.scale(dpr, dpr);
   var cx=size/2, cy=size/2, r=size/2-4, ang=-Math.PI/2;
+  var css = getComputedStyle(document.documentElement);
+  var cardBg = (css.getPropertyValue("--br-card")||"#fff").trim();
   slices.forEach(function(s){
     if(!s.val) return;
     var fetta = (s.val/tot)*Math.PI*2;
     ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,ang,ang+fetta); ctx.closePath();
-    ctx.fillStyle = s.color; ctx.fill(); ang += fetta;
+    ctx.fillStyle = s.color; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = cardBg; ctx.stroke();
+    ang += fetta;
   });
-  var css = getComputedStyle(document.documentElement);
   ctx.beginPath(); ctx.arc(cx,cy,r*0.56,0,Math.PI*2);
-  ctx.fillStyle = (css.getPropertyValue("--br-card")||"#fff").trim();
+  ctx.fillStyle = cardBg;
   ctx.fill();
 }
 
