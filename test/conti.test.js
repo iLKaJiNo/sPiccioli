@@ -113,6 +113,28 @@ test('i membri rimossi non compaiono nei saldi', function(){
   assert.strictEqual(s.a, -5);
 });
 
+// ── saldiCorrenti (punto unico di verità: server se presente) ──
+console.log('\nsaldiCorrenti');
+test('senza saldi server: ricade su calcolaSaldi', function(){
+  membriCorrente = [{ id: 'a' }, { id: 'b' }];
+  S.saldiServer = null;
+  S.movimenti = [
+    { tasso_cambio: 1, paganti: [{ membro_id: 'a', importo: 20 }],
+      quote: [{ membro_id: 'a', importo: 10 }, { membro_id: 'b', importo: 10 }] }
+  ];
+  assert.deepStrictEqual(saldiCorrenti(), { a: 10, b: -10 });
+});
+test('con saldi server: usa quelli, ignora calcolaSaldi', function(){
+  membriCorrente = [{ id: 'a' }, { id: 'b' }];
+  S.saldiServer = { a: 7, b: -7 };
+  S.movimenti = [
+    { tasso_cambio: 1, paganti: [{ membro_id: 'a', importo: 20 }],
+      quote: [{ membro_id: 'a', importo: 10 }, { membro_id: 'b', importo: 10 }] }
+  ];
+  assert.deepStrictEqual(saldiCorrenti(), { a: 7, b: -7 });
+  S.saldiServer = null;   // non contaminare i test seguenti
+});
+
 // ── simplificaDebiti ──
 console.log('\nsimplificaDebiti');
 test('caso base: un creditore, due debitori', function(){

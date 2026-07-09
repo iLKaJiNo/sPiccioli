@@ -14,7 +14,7 @@ var CASSE = [];
 var cassaCorrente = null;
 var membriTutti = [];       // tutti i membri (anche rimossi) — per i nomi nello storico
 var membriCorrente = [];    // membri ATTIVI — per saldi, form, conteggi
-var S = { movimenti: [] };
+var S = { movimenti: [], saldiServer: null };   // saldiServer: mappa membro_id→saldo dalla RPC saldi_cassa (solo gruppo, movimenti paginati); null = non applicabile/non ancora caricata
 var _movDelPending = {};    // id movimento → eliminazione in attesa di undo (il realtime non deve farla riapparire)
 
 // ── SCHERMATE ──────────────────────────────────────────
@@ -323,6 +323,12 @@ function calcolaSaldi(){
   });
   Object.keys(saldi).forEach(function(k){ saldi[k] = Math.round(saldi[k]*100)/100; });
   return saldi;
+}
+// Punto unico di verità per i saldi mostrati (Conti / chi-deve-a-chi / settle / badge in-pari):
+// usa i saldi esatti del server (S.saldiServer, popolati da caricaCassa per i gruppi con
+// movimenti paginati) quando presenti, altrimenti ricade sul calcolo client calcolaSaldi().
+function saldiCorrenti(){
+  return S.saldiServer || calcolaSaldi();
 }
 function dividiEquo(importo, n){
   var cent  = Math.round(importo * 100);
